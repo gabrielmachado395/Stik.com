@@ -1,0 +1,1361 @@
+/* --- Estilos Globais e Resets --- */
+html {
+    scroll-behavior: smooth;
+    height: 100%;
+    margin: 0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --text-color-light: #f0f0f0;
+    --text-color-dark: #333;
+    --bg-color-dark: #000;
+    --bg-color-light: #fff;
+    --accent-color: #8b0000;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color-light);
+    background-color: var(--bg-color-dark);
+    transition: background-color 0.4s ease, color 0.4s ease;
+    height: 100%;
+    margin: 0;
+}
+
+body.light-mode {
+    color: var(--text-color-dark);
+    background-color: var(--bg-color-light);
+}
+
+body.light-mode a {
+    color: var(--text-color-dark);
+}
+
+body.light-mode a:hover {
+    color: var(--accent-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    text-align: center;
+}
+
+a {
+    text-decoration: none;
+    color: var(--text-color-light);
+}
+
+a:hover {
+    color: var(--accent-color);
+}
+
+button {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: inherit;
+}
+
+/* --- Estilos do Cabeçalho Superior (Header) --- */
+.top-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: transparent;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    transition: transform 0.5s ease-out, background-color 0.5s ease;
+}
+
+.top-header.is-hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+}
+
+.top-header.is-visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.top-header.scrolled {
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.menu-toggle {
+    font-size: 1.5em;
+}
+
+.header-logo img {
+    max-width: 100%;
+    height: 40px;
+    width: auto;
+    display: block;
+}
+
+.icon-btn {
+    font-size: 1.3em;
+}
+
+/* --- Estilos da Sidebar --- */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    min-height: 100vh;
+    background-color: #111;
+    z-index: 1100;
+    padding: 30px;
+    transition: left 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.close-sidebar {
+    font-size: 2em;
+}
+
+.sidebar-nav {
+    list-style: none;
+    flex-grow: 1;
+}
+
+.sidebar-nav li {
+    border-bottom: 1px solid #333;
+    position: relative; /* Ponto de referência para submenus */
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: 15px 0;
+    font-size: 1.1em;
+    transition: color 0.3s ease;
+}
+
+.sidebar-nav a:hover {
+    color: var(--accent-color);
+}
+
+.has-submenu .sidebar-link,
+.has-submenu-hover .sidebar-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* --- Estilos para os Submenus (2º e 3º Nível) --- */
+.submenu,
+.submenu-aninhado,
+.submenu-terceiro-nivel {
+    list-style: none;
+    max-height: 0; /* Esconde o submenu com transição */
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out;
+}
+
+.submenu.active,
+.submenu-aninhado.active,
+.submenu-terceiro-nivel.active {
+    max-height: 500px;
+    overflow-y: auto;
+
+}
+
+/* Rotação dos ícones de chevron */
+.fa-rotate-90 {
+    transform: rotate(90deg);
+    transition: transform 0.3s ease;
+}
+
+.fa-rotate-180 {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1050;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+
+/* --- Seção de Vídeo em Tela Cheia --- */
+.video-hero-section {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bg-color-dark);
+}
+
+.video-hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#institutionalVideo {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1; /* Para garantir que fique abaixo do conteúdo da overlay */
+}
+
+/* Estilos para a área de hover do cabeçalho */
+#header-hover-area {
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px; /* Altura da área de interação, ajuste conforme o necessário */
+    z-index: 1001; /* Fica acima do header para capturar o evento */
+
+}
+
+
+/* Estilos para o cabeçalho principal */
+#mainHeader {
+    z-index: 1000; /* Fica abaixo da área de hover por padrão */
+    /* ... outros estilos ... */
+}
+
+/* Quando o header fica visível, ele deve ter um z-index maior */
+#mainHeader.is-visible {
+    z-index: 1002; /* Fica acima da área de hover para ser clicável */
+}
+
+.top-header {
+    z-index: 1000;
+}
+
+/* --- Seções Gerais (Animação de Scroll) --- */
+section {
+    min-height: 50vh;
+    padding: 60px 20px;
+}
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.animate-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Novo Carrossel de Banner --- */
+.banner-carousel {
+    padding: 0 20px;
+    margin: 40px auto;
+    height: 500px;
+    max-width: 1400px;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--bg-color-dark);
+    z-index: 900;
+}
+
+.carousel-container {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+    min-width: 100%;
+    height: 400px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.carousel-item img {
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    min-width: 100%;
+    flex-shrink: 0;
+    display: block;
+}
+
+.carousel-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.carousel-dot {
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.carousel-dot.active {
+    background-color: var(--accent-color);
+}
+
+/* --- Seção de Destaques de Produtos --- */
+.product-highlights {
+    max-width: 100%;
+    padding: 80px 20px;
+    background-color: var(--bg-color-dark);
+}
+
+.product-highlights h2 {
+    margin-bottom: 80px;
+    font-size: 3em;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.highlights-grid {
+    display: grid;
+    grid-template-areas:
+        "top-left center top-right"
+        "bottom-left center bottom-right";
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: stretch;
+}
+
+.highlight-item {
+    background-color: #1a1a1a;
+    color: #fff;
+    text-align: center;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.highlight-item img {
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.highlight-item span {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.3em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.small-top-left { grid-area: top-left; height: 380px; }
+.large-center { grid-area: center; height: 790px; }
+.small-top-right { grid-area: top-right; height: 380px; }
+.small-bottom-left { grid-area: bottom-left; height: 380px; }
+.small-bottom-right { grid-area: bottom-right; height: 380px; }
+
+/* --- Seção do Catálogo (Carrossel) --- */
+.catalogo-section {
+    padding: 80px 20px;
+    background-color: var(--bg-color-dark);
+}
+
+.catalogo-section h2 {
+    margin-bottom: 80px;
+    font-size: 3em;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.catalogo-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.catalogo-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    gap: 30px;
+    padding: 20px 0;
+    margin: 0 auto;
+}
+
+.catalogo-grid::-webkit-scrollbar { display: none; }
+.catalogo-grid { -ms-overflow-style: none; scrollbar-width: none; }
+
+.catalogo-grid.active {
+    cursor: grabbing;
+}
+
+/* Seção da Página do Produto */
+.product-page {
+    background-color: #000;
+    color: #fff;
+    padding: 80px 50px;
+    min-height: 100vh;
+}
+
+.product-container {
+    display: flex;
+    gap: 50px;
+    align-items: flex-start;
+}
+
+/* Coluna da Esquerda: Imagem e Miniaturas */
+.product-image-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#main-product-image {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.product-thumbnails {
+    margin-top: 20px;
+}
+
+.variation-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.variation-thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+    object-fit: cover;
+}
+
+.variation-thumbnail:hover {
+    border-color: #fff;
+}
+
+/* Coluna da Direita: Detalhes do Produto */
+.product-details-section {
+    flex: 1;
+}
+
+.product-name {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.product-category {
+    font-size: 1.2rem;
+    color: #aaa;
+    margin-bottom: 30px;
+}
+
+.product-info-collapse {
+    border-bottom: 1px solid #333;
+    padding: 20px 0;
+}
+
+.collapse-toggle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Estilos de responsividade */
+@media (max-width: 768px) {
+    .product-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .product-details-section {
+        margin-top: 30px;
+    }
+}
+
+.produto-card {
+    flex: 0 0 auto;
+    width: 260px;
+    background-color: #000;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    text-align: left;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.produto-card img {
+    max-width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 0;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.produto-card h3 {
+    margin: 0;
+    font-size: 1.3em;
+    color: #fff;
+    text-align: left;
+    padding: 0 10px;
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: none;
+    padding: 18px;
+    font-size: 1.8em;
+    cursor: pointer;
+    z-index: 50;
+    transition: background-color 0.3s ease;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-btn:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.prev-btn {
+    left: -15px;
+}
+
+.next-btn {
+    right: -15px;
+}
+
+/* --- Estilos do Rodapé --- */
+.main-footer {
+    background-color: var(--bg-color-dark);
+    padding: 80px 0px 0;
+    color: var(--text-color-light);
+}
+
+.footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 40px;
+    gap: 20px;
+}
+
+.footer-logo {
+    flex-grow: 1;
+    max-width: 100px;
+}
+
+.footer-logo img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: flex-end;
+    gap: 50px;
+}
+
+.footer-links h4 {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links a {
+    color: var(--text-color-light);
+    font-size: 0.9em;
+    line-height: 1.8;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--accent-color);
+}
+
+.footer-bottom {
+    background-color: #111;
+    padding: 20px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #222;
+    max-width: 100%;
+    margin-top: 0;
+}
+
+.footer-bottom p {
+    font-size: 0.8em;
+    color: #555;
+    white-space: nowrap;
+}
+
+.bottom-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.bottom-icons img {
+    max-width: 100%;
+    width: 25px;
+    height: auto;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.bottom-icons img:hover {
+    opacity: 1;
+}
+
+
+/* Estilos para o menu lateral em telas menores */
+.submenu,
+.submenu-aninhado,
+.submenu-terceiro-nivel {
+    position: relative; /* Volta para a posição normal */
+    left: 0;
+
+.submenu.active::before,
+.submenu-aninhado.active::before,
+.submenu-terceiro-nivel.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0; /* Posição à esquerda do submenu */
+    width: 3px; /* Largura da barra */
+    height: 100%; /* Ocupa a altura total do submenu */
+    background-color: var(--accent-color); /* Cor de destaque (vermelho da STIK) */
+    opacity: 1;
+    transition: opacity 0.4s ease;
+}
+
+/* Esconde o separador por padrão */
+.submenu::before,
+.submenu-aninhado::before,
+.submenu-terceiro-nivel::before {
+    content: '';
+    opacity: 0;
+}
+}
+.submenu-aninhado,
+.submenu-terceiro-nivel {
+    padding-left: 20px;
+}
+
+/* --- Seção da Newsletter --- */
+.newsletter-section {
+    position: relative;
+    width: 100%;
+    height: 400px; /* Altura da seção */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Esconde o que estiver fora da área visível */
+    margin: 0 auto;
+}
+
+/* --- Carrossel de Fundo --- */
+.carousel-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Fica no fundo */
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+}
+
+.carousel-track {
+    display: flex;
+    width: 200%; /* Largura total de todas as imagens */
+    height: 100%;
+    animation: slide-infinite 60s linear infinite; /* A chave para a animação */
+}
+
+.carousel-track img {
+    max-width: 100%;
+    width: 100%; /* Cada imagem ocupa 1/2 da largura do track (200% / 2) */
+    height: 100%;
+    object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
+}
+
+/* --- Conteúdo da Newsletter (Por Cima) --- */
+.newsletter-content {
+    position: relative;
+    z-index: 2; /* Fica acima do carrossel */
+    text-align: center;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente para legibilidade */
+    backdrop-filter: blur(5px); /* Efeito de desfoque */
+    padding: 40px;
+    border-radius: 10px;
+}
+
+.newsletter-content h2,
+.newsletter-content p {
+    margin-bottom: 10px;
+}
+
+.newsletter-content form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.newsletter-content input {
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.newsletter-content button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--accent-color); /* Usando a sua cor de destaque */
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- Animação CSS de Carrossel Infinito --- */
+@keyframes slide-infinite {
+    from {
+        transform: translateX(0); /* Começa no início */
+    }
+    to {
+        transform: translateX(-50%); /* Termina na metade (pois duplicamos as imagens) */
+    }
+}
+
+
+/* Para navegadores WebKit (Chrome, Safari, Edge, etc.) */
+.sidebar::-webkit-scrollbar,
+.submenu::-webkit-scrollbar,
+.submenu-aninhado::-webkit-scrollbar,
+.submenu-terceiro-nivel::-webkit-scrollbar {
+    display: none;
+}
+
+/* Para navegadores baseados em IE/Edge */
+.sidebar,
+.submenu,
+.submenu-aninhado,
+.submenu-terceiro-nivel {
+    -ms-overflow-style: none;
+}
+
+/* Para Firefox */
+.sidebar,
+.submenu,
+.submenu-aninhado,
+.submenu-terceiro-nivel {
+    scrollbar-width: none;
+}
+
+/* Blog Page Styles */
+.blog-main, .create-main {
+    padding-top: 100px;
+    padding-bottom: 80px;
+}
+
+.page-title {
+    font-size: 3rem;
+    margin-bottom: 50px;
+}
+
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.article-card {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.article-card:hover {
+    transform: translateY(-5px);
+}
+
+.article-card img {
+    max-width: 100%;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.article-card-content {
+    padding: 20px;
+}
+
+.article-card h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.article-card p {
+    font-size: 1em;
+    color: #ccc;
+    text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.create-btn, .submit-btn {
+    display: block;
+    width: 250px;
+    margin: 50px auto 0;
+    padding: 15px 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #fff;
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.create-btn:hover, .submit-btn:hover {
+    background-color: #a01010;
+}
+
+/* Form Styles */
+.article-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #222;
+    color: #fff;
+}
+
+/* Trix Editor Custom Styles */
+.trix-content {
+    background-color: #222;
+    color: #fff;
+    min-height: 400px;
+    border: 1px solid #555;
+    padding: 15px;
+    border-radius: 5px;
+}
+.trix-toolbar {
+    background-color: #1a1a1a !important;
+    border-bottom: 1px solid #555;
+}
+.trix-button--icon {
+    background-color: #fff !important;
+}
+
+/* --- Estilos da Página Institucional --- */
+
+.institutional-page {
+    padding-top: 100px; /* Espaço para o cabeçalho fixo */
+    /* padding-bottom: 80px; */
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-light);
+}
+
+.title-section {
+    font-size: 3em;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 50px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.institucional-section {
+    padding: 60px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.institucional-content {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.institucional-content.institucional-reverse {
+    flex-direction: column-reverse;
+}
+
+.text-block {
+    flex: 1;
+    font-size: 1.1em;
+    line-height: 1.8;
+}
+
+.image-block {
+    flex: 1;
+}
+
+.image-block img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.values-block {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.values-block h3 {
+    font-size: 1.5em;
+    font-weight: 500;
+    font-style: italic;
+    color: #fff;
+    line-height: 1.6;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.diferenciais-section {
+    background-color: #1a1a1a;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.diferenciais-grid {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.diferencial-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    max-width: 200px;
+}
+
+.diferencial-item img {
+    max-width: 100%;
+    width: 80px;
+    height: 80px;
+}
+
+.diferencial-item h4 {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.diferencial-item p {
+    font-size: 1em;
+    color: #aaa;
+}
+
+
+@media (max-width: 992px) {
+    .highlights-grid {
+        grid-template-areas:
+            "top-left"
+            "center"
+            "top-right"
+            "bottom-left"
+            "bottom-right";
+            grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        gap: 20px;
+    }
+
+    /* Reduz a altura dos itens em telas menores para não ocuparem muito espaço */
+    .highlight-item {
+        height: auto !important;
+    }
+
+    /* Ajusta o tamanho da fonte do título */
+    .product-highlights h2 {
+        font-size: 2em;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Ajusta o espaçamento do cabeçalho em telas menores */
+    .top-header {
+        padding: 15px 20px;
+    }
+
+    /* Reduz o espaçamento entre os ícones */
+    .header-left, .header-right {
+        gap: 15px;
+    }
+
+    .catalogo-section h2 {
+        font-size: 2em;
+    }
+
+    .catalogo-wrapper {
+        padding: 0 10px;
+    }
+
+    /* Opcional: Esconde os botões de navegação em telas pequenas */
+    .carousel-btn {
+        display: none;
+    }
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-logo {
+        margin-bottom: 20px;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 30px;
+        align-items: center;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* .video-hero-section {
+        height: 30vh;
+    }
+
+    #institutionalVideo {
+        display: block; Garante que o vídeo seja exibido
+        position: absolute; Mantenha isso para o posicionamento
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; Faz com que o vídeo preencha o contêiner, cortando o que não cabe
+    } */
+
+}
+
+
+/* --- Estilos do Modo Claro (Light Mode) --- */
+
+/* Estilos de cor base */
+body.light-mode {
+    color: var(--text-color-dark);
+    background-color: var(--bg-color-light);
+}
+
+/* Links */
+body.light-mode a {
+    color: var(--text-color-dark);
+}
+
+body.light-mode a:hover {
+    color: var(--accent-color);
+}
+
+/* Header */
+body.light-mode .top-header.scrolled {
+    background-color: rgba(255, 255, 255, 0.9); /* Fundo branco semi-transparente */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .top-header .icon-btn {
+    color: var(--text-color-dark);
+}
+
+/* Sidebar (menu lateral) */
+body.light-mode .sidebar {
+    background-color: #f8f8f8;
+    color: var(--text-color-dark);
+}
+
+body.light-mode .sidebar-nav li {
+    border-bottom-color: #ddd;
+}
+
+body.light-mode .sidebar-nav a {
+    color: var(--text-color-dark);
+}
+
+body.light-mode .submenu,
+body.light-mode .submenu-aninhado,
+body.light-mode .submenu-terceiro-nivel {
+    background-color: #f0f0f0;
+}
+
+/* Footer (Rodapé) */
+body.light-mode .main-footer {
+    background-color: #f8f8f8;
+    color: var(--text-color-dark);
+}
+
+body.light-mode .footer-links a {
+    color: var(--text-color-dark);
+}
+
+body.light-mode .footer-bottom {
+    background-color: #e8e8e8;
+    border-top-color: #ccc;
+}
+
+body.light-mode .footer-bottom p {
+    color: #666;
+}
+
+/* Cards de produtos e destaques */
+body.light-mode .product-highlights span ,
+body.light-mode .product-highlights {
+    background-color: var(--bg-color-light);
+}
+
+body.light-mode .product-page {
+    background-color:#fff;
+    color: #000;
+}
+body.light-mode .highlight-item {
+    background-color: #f0f0f0;
+    color: var(--text-color-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .catalogo-section {
+    background-color: var(--bg-color-light);
+}
+
+body.light-mode .produto-card {
+    background-color: #f0f0f0;
+    color: var(--text-color-dark);
+}
+
+body.light-mode .produto-card h3 {
+    color: var(--text-color-dark);
+}
+
+/* Seção do Catálogo */
+body.light-mode .catalogo-section h2,
+body.light-mode .product-highlights h2 {
+    color: var(--text-color-dark);
+}
+
+/* Botões do carrossel */
+body.light-mode .carousel-btn {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .carousel-btn:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+/* Seção de Newsletter */
+body.light-mode .newsletter-section {
+    background-color: var(--bg-color-light);
+}
+
+body.light-mode .newsletter-content {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    color: var(--text-color-dark);
+}
+
+body.light-mode .newsletter-content input {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-color-dark);
+}
+
+/* Páginas de blog e institucionais */
+body.light-mode .institutional-page,
+body.light-mode .institutional-page h3,
+body.light-mode .blog-main,
+body.light-mode .create-main {
+    background-color: var(--bg-color-light);
+    color: var(--text-color-dark);
+}
+
+body.light-mode .diferenciais-section {
+    background-color: #f0f0f0;
+    color: var(--text-color-dark);
+}
+
+body.light-mode .diferencial-item p {
+    color: #555;
+}
+
+body.light-mode .article-card {
+    background-color: #f5f5f5;
+    color: var(--text-color-dark);
+}
+
+body.light-mode .article-card h2 {
+    color: var(--text-color-dark);
+}
+
+body.light-mode .article-card p {
+    color: #777;
+}
+
+body.light-mode .form-group input {
+    background-color: #f5f5f5;
+    color: var(--text-color-dark);
+    border-color: #ccc;
+}
+
+body.light-mode .trix-content {
+    background-color: #f5f5f5;
+    color: var(--text-color-dark);
+    border-color: #ccc;
+}
+
+body.light-mode .trix-toolbar {
+    background-color: #e8e8e8 !important;
+    border-bottom-color: #ccc;
+}

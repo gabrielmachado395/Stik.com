@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stik Elásticos</title>
+    <link rel="stylesheet" href="stylesheet/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="index-page">
+    <div id="header-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="overlay"></div>
+
+    
+    <main>
+        <section class="video-hero-section">
+            <div class="video-container">
+                <video autoplay muted loop id="institutionalVideo">
+                    <source src="img/original video.mp4" type="video/mp4" media="(min-width: 769px)">
+                    <source src="img/Férias no Mediterrâneo - Feito com Clipchamp (1).mp4" type="video/mp4" media="(max-width: 768px)">
+                </video>
+            </div>
+            <div id="header-hover-area"></div>
+    
+        </section>
+        
+        <!-- <section class="banner-carousel-wrapper animate-on-scroll">
+            <div class="carousel-container">
+                <div class="carousel-track" id="mainBannerTrack">
+                    </div>
+                <div class="carousel-dots" id="banner-dots"></div>
+            </div>
+        </section> -->
+    
+        <section class="product-highlights animate-on-scroll">
+            <h2>PRODUTOS</h2>
+            <div class="highlights-grid">
+                <div class="highlight-item small-top-left">
+                    <img src="img\arranjo-de-lingerie-feminina-natureza-morta-1024x683.jpg" alt="Rendas">
+                    <span>RENDAS</span>
+                </div>
+                <div class="highlight-item large-center">
+                    <img src="img/tumb-blog-01.jpg" alt="Destaque Geral">
+                </div>
+                <div class="highlight-item small-top-right">
+                    <img src="img/thumb-blog-09-1024x683.jpg" alt="Elasticos">
+                    <span>ELÁSTICOS</span>
+                </div>
+                <div class="highlight-item small-bottom-left">
+                    <img src="img/IMG_9257-Editar-1024x683.jpg" alt="Alças">
+                    <span>ALÇAS</span>
+                </div>
+                <div class="highlight-item small-bottom-right">
+                    <img src="img/thumb-blog-17-1.jpg" alt="Bem-Vindo Outono">
+                </div>
+            </div>
+        </section>
+
+        <section class="catalogo-section animate-on-scroll">
+            <h2>CATÁLOGO</h2>
+            <div class="catalogo-wrapper">
+                <button id="prevBtn" class="carousel-btn prev-btn" aria-label="Anterior">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div id="lista-produtos" class="catalogo-grid">
+                    </div>
+                <button id="nextBtn" class="carousel-btn next-btn" aria-label="Próximo">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+        <div id="catalogo-placeholder"></div>
+    </main>
+    
+    <div id="footer-placeholder"></div>
+
+    <script src="stylesheet/script.js"></script>
+    <!-- <script>
+        fetch("header.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("header-placeholder").innerHTML = data;
+                console.log("header carregou")
+                debugger;
+            })
+            .catch(error => console.error("Erro ao carregar o header:", error));
+    </script> -->
+
+</body>
+</html>
