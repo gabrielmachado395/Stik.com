@@ -1020,6 +1020,7 @@ section {
     display: flex;
     align-items: center;
     gap: 40px;
+    flex-direction: column;
 }
 
 .institucional-content.institucional-reverse {
@@ -1316,7 +1317,9 @@ body.light-mode .newsletter-content input {
 body.light-mode .institutional-page,
 body.light-mode .institutional-page h3,
 body.light-mode .blog-main,
-body.light-mode .create-main {
+body.light-mode .create-main,
+body.light-mode .contact-form input,
+body.light-mode .contact-form textarea{
     background-color: var(--bg-color-light);
     color: var(--text-color-dark);
 }
@@ -1358,4 +1361,172 @@ body.light-mode .trix-content {
 body.light-mode .trix-toolbar {
     background-color: #e8e8e8 !important;
     border-bottom-color: #ccc;
+}
+
+/* --- Estilos para Conteúdos Internos (FAQ, Política, etc.) --- */
+
+.main-content {
+    padding-top: 120px; /* Espaço para o cabeçalho fixo */
+    padding-bottom: 80px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+}
+
+.main-content .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.page-title {
+    font-size: 3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 40px;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* --- Seção de FAQ --- */
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.faq-item {
+    background-color: var(--secondary-background);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.faq-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.faq-item h3 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.faq-item p {
+    line-height: 1.6;
+}
+
+/* --- Seções de Política e Termos --- */
+.privacy-section,
+.terms-section,
+.contact-section {
+    padding: 40px 0;
+}
+
+.privacy-section h2,
+.terms-section h2,
+.contact-section h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.privacy-section p,
+.terms-section p {
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.privacy-section ul {
+    margin-left: 25px;
+    margin-bottom: 20px;
+}
+
+.privacy-section li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* --- Seção de Contato --- */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-bottom: 40px;
+    align-items: center;
+}
+
+.contact-item h4, 
+.contact-item p {
+    font-size: 1.4rem;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.contact-form-container {
+    background-color: var(--secondary-background);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contact-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-color-light);
+    color: var(--text-color);
+}
+
+.contact-form textarea {
+    resize: vertical;
+}
+
+.cta-button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background-color: var(--accent-color);
+    color: var(--button-text-color);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: var(--accent-color-hover);
+}
+
+/* --- Estilos para o Modo Claro (light-mode) --- */
+body.light-mode {
+    --background-color: #f0f0f0;
+    --text-color: #333333;
+    --secondary-background: #ffffff;
+    --primary-color: #7a1f28; /* Cor principal alterada para combinar */
+    --accent-color: #a33340;
+    --accent-color-hover: #b44451;
+    --border-color: #cccccc;
+    --input-background: #f8f8f8;
+}
+
+/* Ajuste de cores para os botões e links no modo claro */
+body.light-mode .icon-btn {
+    color: #333333;
 }

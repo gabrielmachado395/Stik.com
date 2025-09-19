@@ -443,17 +443,42 @@ function inicializarAnimateOnScroll() {
     elementosAnimar.forEach(elemento => observer.observe(elemento));
 }
 
+function inicializarPaginaFaq() {
+    console.log("Página FAQ inicializada.");
+    // Lógica específica para a página FAQ, se houver. Por enquanto, não há.
+}
+
+function inicializarPaginaPolitica() {
+    console.log("Página de Política de Privacidade inicializada.");
+    // Lógica específica para a página de Política de Privacidade.
+}
+
+function inicializarPaginaTermos() {
+    console.log("Página de Termos de Uso inicializada.");
+    // Lógica específica para a página de Termos de Uso.
+}
+
+function inicializarPaginaFaleConosco() {
+    console.log("Página Fale Conosco inicializada.");
+    // Lógica específica para a página Fale Conosco, como validação de formulário.
+}
+
 // Função principal de inicialização da página
 async function inicializarPagina() {
-    const isIndexPage = window.location.pathname.includes('index.html');
-    const isProductPage = window.location.pathname.includes('produto.html');
-    const isBlogPage = window.location.pathname.includes('blog.html');
-    const isCreateArticlePage = window.location.pathname.includes('create-article.html');
-
     // Carregar componentes fixos
     await carregarComponente('header-placeholder', 'header.html');
     await carregarComponente('sidebar-placeholder', 'sidebar.html');
     await carregarComponente('footer-placeholder', 'footer.html');
+
+    const isIndexPage = window.location.pathname.includes('index.html');
+    const isProductPage = window.location.pathname.includes('produto.html');
+    const isBlogPage = window.location.pathname.includes('blog.html');
+    const isCreateArticlePage = window.location.pathname.includes('create-article.html');
+    const isFaqPage = window.location.pathname.includes('faq.html');
+    const isPoliticaPage = window.location.pathname.includes('politica_de_privacidade.html');
+    const isTermosPage = window.location.pathname.includes('termos_de_uso.html');
+    const isFaleConoscoPage = window.location.pathname.includes('fale_conosco.html');
+
 
     // Inicializar lógica de componentes globais
     inicializarMenu();
@@ -490,6 +515,14 @@ async function inicializarPagina() {
         }
     } else if (isCreateArticlePage) {
         setupArticleForm();
+    } else if (isFaqPage) {
+        inicializarPaginaFaq();
+    } else if (isPoliticaPage) {
+        inicializarPaginaPolitica();
+    } else if (isTermosPage) {
+        inicializarPaginaTermos();
+    } else if (isFaleConoscoPage) {
+        inicializarPaginaFaleConosco();
     }
 
     // Ações para o link institucional na sidebar (agora que ela está carregada)
@@ -500,7 +533,7 @@ async function inicializarPagina() {
             carregarComponente('main-content-placeholder', 'institucional.html');
         });
     }
-
+    
     // Inicializar animações em qualquer página
     inicializarAnimateOnScroll();
     
