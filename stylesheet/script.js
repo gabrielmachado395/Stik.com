@@ -2,50 +2,121 @@
 const produtos = [
     {
         id: 1,
-        nome: "Base",
+        nome: "Carícia",
+        categoria: "Base",
         imagem: "./img/Base/caricia-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
     },
     {
         id: 2,
-        nome: "Elásticos Crus",
+        nome: "Canoa",
+        categoria: "Elásticos Crus",
         imagem: "./img/Elastícos Crus/canoa-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
     },
     {
         id: 3,
-        nome: "Modeladores",
+        nome: "Cinta",
+        categoria: "Modeladores",
         imagem: "./img/Modeladores/cinta-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
     },
     {
         id: 4,
-        nome: "Personalizados",
+        nome: "Atena",
+        categoria: "Personalizados",
         imagem: "./img/Personalizados/alcaatena-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
     },
     {
         id: 5,
-        nome: "Premium",
+        nome: "Belly",
+        categoria: "Premium",
         imagem: "./img/Premium/belly-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
     },
     {
         id: 6,
-        nome: "Rendas",
+        nome: "Ana",
+        categoria: "Rendas",
         imagem: "./img/Renda/ana-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
     },
     {
         id: 7,
-        nome: "Alças",
+        nome: "Magno",
+        categoria: "Alças",
         imagem: "./img/Alças/magno-stik.png",
+        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        material: "Elástico",
+    },
+    {
+        id: 8,
+        nome: "Flor",
+        categoria: "Lançamento de Elástico",
+        imagem: "img/flor-stik.png",
+        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        material: "Elástico",
+    },
+    {
+        id: 9,
+        nome: "Grécia",
+        categoria: "Lançamento de Alça",
+        imagem: "img/grecia-stik.png",
+        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        material: "Elástico",
+    },
+    {
+        id: 10,
+        nome: "Diana",
+        categoria: "Lançamento de Base",
+        imagem: "img/diana-stik.png",
+        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        material: "Elástico",
+    },
+    {
+        id: 11,
+        nome: "Ágda",
+        categoria: "Viés",
+        imagem: "img/agda-stik.png",
+        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        material: "Elástico",
+    },
+    {
+        id: 12,
+        nome: "Atlas",
+        categoria: "Com Arco",
+        imagem: "img/atlas-stik.png",
+        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        material: "Elástico",
+    },
+    {
+        id: 13,
+        nome: "Eros",
+        categoria: "Lançamento de Viés",
+        imagem: "img/eros-stik.png",
+        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        material: "Elástico",
+    },
+    {
+        id: 14,
+        nome: "Chll",
+        categoria: "Premium",
+        imagem: "img/chll-stik.png",
+        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        material: "Elástico",
+    },
+    {
+        id: 15,
+        nome: "Ana",
+        categoria: "Rendas",
+        imagem: "img/ana-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
     },
@@ -202,8 +273,8 @@ function criarProdutoCard(produto) {
     produtoCard.href = `produto.html?id=${produto.id}`;
     
     produtoCard.innerHTML = `
-        <img src="${produto.imagem}" alt="${produto.nome}">
-        <h3>${produto.nome}</h3>
+        <img src="${produto.imagem}" alt="${produto.categoria}">
+        <h3>${produto.categoria}</h3>
     `;
     return produtoCard;
 }
@@ -390,6 +461,7 @@ function carregarDetalhesDoProduto() {
         // document.querySelector('.product-category').textContent = produto.categoria;
         document.querySelector('.product-description').textContent = produto.descricao;
         document.querySelector('.product-material').textContent = produto.material;
+        document.querySelector('.product-categoria').textContent = produto.categoria;
 
         const variationOptions = document.querySelector('.variation-options');
         if (variationOptions) {
