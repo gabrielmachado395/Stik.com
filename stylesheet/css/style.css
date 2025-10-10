@@ -12,12 +12,33 @@ html {
 }
 
 :root {
+    /* Modo Dark */
     --text-color-light: #f0f0f0;
-    --text-color-dark: #333;
-    --bg-color-dark: #000;
-    --bg-color-light: #fff;
-    --accent-color: #8b0000;
-    --secondary-background: #111;
+    --bg-color-dark: #12161d;
+    --accent-color: #912121;
+    --secondary-background: #31363F;
+    --sidebar-width: 300px;
+}
+
+main,
+.main-content,
+.article-detail-page,
+#footer-placeholder,
+#catalogo-placeholder {
+    transition: margin-left 0.4s ease, transform 0.4s ease;
+    margin-left: 0;
+}
+
+.top-header {
+    transition: transform 0.4 ease;
+}
+
+
+/* On desktop we don't want the overlay to darken the page (overlay only for mobile) */
+@media (min-width: 769px) {
+  .overlay {
+    display: none !important;
+  }
 }
 
 body {
@@ -29,18 +50,6 @@ body {
     margin: 0;
 }
 
-body.light-mode {
-    color: var(--text-color-dark);
-    background-color: var(--bg-color-light);
-}
-
-body.light-mode a {
-    color: var(--text-color-dark);
-}
-
-body.light-mode a:hover {
-    color: var(--accent-color);
-}
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: bold;
@@ -62,6 +71,7 @@ button {
     border: none;
     color: inherit;
 }
+
 
 /* --- Estilos do Cabeçalho Superior (Header) --- */
 .top-header {
@@ -91,7 +101,7 @@ button {
 }
 
 .top-header.scrolled {
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: #31363fad;
     backdrop-filter: blur(5px);
 }
 
@@ -116,6 +126,27 @@ button {
     font-size: 1.3em;
 }
 
+/* Estilos para a área de hover do cabeçalho */
+#header-hover-area {
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px; /* Altura da área de interação, ajuste conforme o necessário */
+    z-index: 1001; /* Fica acima do header para capturar o evento */
+
+}
+
+
+/* Quando o header fica visível, ele deve ter um z-index maior */
+#mainHeader.is-visible {
+    z-index: 1002; /* Fica acima da área de hover para ser clicável */
+}
+
+.top-header {
+    z-index: 1000;
+}
+
 /* --- Estilos da Sidebar --- */
 .sidebar {
     position: fixed;
@@ -123,7 +154,7 @@ button {
     left: -300px;
     width: 300px;
     min-height: 100vh;
-    background-color: #111;
+    background-color: var(--secondary-background);
     z-index: 1100;
     padding: 30px;
     transition: left 0.4s ease;
@@ -153,7 +184,7 @@ button {
 }
 
 .sidebar-nav li {
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #535353;
     position: relative; /* Ponto de referência para submenus */
 }
 
@@ -219,6 +250,20 @@ button {
     display: block;
 }
 
+body.sidebar-open main,
+body.sidebar-open .main-content,
+body.sidebar-open #footer-placeholder,
+body.sidebar-open #catalogo-placeholder,
+body.sidebar-open .article-detail-page,
+body.sidebar-open .blog-main {
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.4s ease;
+}
+
+body.sidebar-open .top-header .main-header{
+    transform: translateX(var(--sidebar-width))
+}
+
 
 /* --- Seção de Vídeo em Tela Cheia --- */
 .video-hero-section {
@@ -262,32 +307,6 @@ button {
     z-index: 1; /* Para garantir que fique abaixo do conteúdo da overlay */
 }
 
-/* Estilos para a área de hover do cabeçalho */
-#header-hover-area {
-    position:absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 80px; /* Altura da área de interação, ajuste conforme o necessário */
-    z-index: 1001; /* Fica acima do header para capturar o evento */
-
-}
-
-
-/* Estilos para o cabeçalho principal */
-#mainHeader {
-    z-index: 1000; /* Fica abaixo da área de hover por padrão */
-    /* ... outros estilos ... */
-}
-
-/* Quando o header fica visível, ele deve ter um z-index maior */
-#mainHeader.is-visible {
-    z-index: 1002; /* Fica acima da área de hover para ser clicável */
-}
-
-.top-header {
-    z-index: 1000;
-}
 
 /* --- Seções Gerais (Animação de Scroll) --- */
 section {
@@ -334,8 +353,8 @@ section {
 }
 
 .highlight-item {
-    background-color: #1a1a1a;
-    color: #fff;
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-light);
     text-align: center;
     border-radius: 12px;
     display: flex;
@@ -360,7 +379,7 @@ section {
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: #31363fad;
     padding: 10px 20px;
     border-radius: 8px;
     font-weight: bold;
@@ -368,6 +387,12 @@ section {
     text-transform: uppercase;
     white-space: nowrap;
 }
+/* 
+body.light-mode .highlight-item span {
+    background-color: var(--secondary-bg-color-light);
+    color: var(--bg-color-light);
+} */
+
 
 .small-top-left { grid-area: top-left; height: 380px; }
 .large-center { grid-area: center; height: 790px; }
@@ -399,11 +424,15 @@ section {
 .catalogo-grid {
     display: flex;
     overflow-x: auto;
+    /* Adiciona o comportamento de encaixe para uma rolagem suave e precisa */
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     gap: 30px;
     padding: 20px 0;
     margin: 0 auto;
+}
+.catalogo-grid > * {
+    scroll-snap-align: center;
 }
 
 .catalogo-grid::-webkit-scrollbar { display: none; }
@@ -415,8 +444,8 @@ section {
 
 /* Seção da Página do Produto */
 .product-page {
-    background-color: #000;
-    color: #fff;
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-light);
     padding: 80px 50px;
     min-height: 100vh;
 }
@@ -439,7 +468,7 @@ section {
     width: 100%;
     max-width: 600px;
     height: auto;
-    border-radius: 10px;
+    border-radius: 80px;
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
 
@@ -514,8 +543,8 @@ section {
 .produto-card {
     flex: 0 0 auto;
     width: 260px;
-    background-color: #000;
-    border-radius: 0;
+    background-color: var(--secondary-background);
+    border-radius: 10px;
     box-shadow: none;
     padding: 0;
     text-align: left;
@@ -536,7 +565,7 @@ section {
 .produto-card h3 {
     margin: 0;
     font-size: 1.3em;
-    color: #fff;
+    color: var(--bg-color-light);
     text-align: left;
     padding: 0 10px;
 }
@@ -629,7 +658,7 @@ section {
 }
 
 .footer-bottom {
-    background-color: #111;
+    background-color: var(--secondary-background);
     padding: 20px 20px;
     display: flex;
     justify-content: space-between;
@@ -641,7 +670,7 @@ section {
 
 .footer-bottom p {
     font-size: 0.8em;
-    color: #555;
+    color: var(--text-color-light);
     white-space: nowrap;
 }
 
@@ -710,6 +739,19 @@ section {
     margin: 0 auto;
 }
 
+/* --- Conteúdo da Newsletter (Por Cima) --- */
+.newsletter-content {
+    position: absolute;
+    z-index: 2; /* Fica acima do carrossel */
+    text-align: center;
+    color: var(--text-color-light);
+    background-color: #31363fad;
+; /* Fundo semi-transparente para legibilidade */
+    backdrop-filter: blur(5px); /* Efeito de desfoque */
+    padding: 40px;
+    border-radius: 10px;
+
+}
 /* --- Carrossel de Fundo --- */
 .carousel-bg {
     position: absolute;
@@ -737,17 +779,6 @@ section {
     object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
 }
 
-/* --- Conteúdo da Newsletter (Por Cima) --- */
-.newsletter-content {
-    position: absolute;
-    z-index: 2; /* Fica acima do carrossel */
-    text-align: center;
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente para legibilidade */
-    backdrop-filter: blur(5px); /* Efeito de desfoque */
-    padding: 40px;
-    border-radius: 10px;
-}
 
 .newsletter-content h2,
 .newsletter-content p {
@@ -773,7 +804,7 @@ section {
     border: none;
     border-radius: 5px;
     background-color: var(--accent-color); /* Usando a sua cor de destaque */
-    color: #fff;
+    color: var(--text-color-light);
     font-weight: bold;
     cursor: pointer;
 }
@@ -816,7 +847,7 @@ section {
 /* Blog Page Styles */
 .blog-main, .create-main {
     padding-top: 100px;
-    padding-bottom: 80px;
+    padding-bottom: 100px;
 }
 
 .page-title {
@@ -831,7 +862,7 @@ section {
 }
 
 .article-card {
-    background-color: #1a1a1a;
+    background-color: var(--bg-color-dark);
     border-radius: 8px;
     overflow: hidden;
     transition: transform 0.3s ease;
@@ -860,10 +891,9 @@ section {
 
 .article-card p {
     font-size: 1em;
-    color: #ccc;
+    color: var(--text-color-light);
     text-align: left;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -875,7 +905,7 @@ section {
     padding: 15px 20px;
     font-size: 1.2em;
     font-weight: bold;
-    color: #fff;
+    color: var(--text-color-light);
     background-color: var(--accent-color);
     border: none;
     border-radius: 5px;
@@ -908,14 +938,176 @@ section {
     font-size: 1em;
     border: 1px solid #555;
     border-radius: 5px;
-    background-color: #222;
+    background-color: var(--secondary-background);
     color: #fff;
 }
 
+/* Container que envolve todos os artigos */
+.artigos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 3 colunas em telas grandes */
+    gap: 30px;
+    padding: 40px 0;
+    margin: 0 auto;
+    max-width: 1200px; /* Limita a largura do container */
+}
+
+/* Estilo para cada cartão de artigo */
+.blog-post {
+    background-color: var(--primary-bg-color); /* Fundo branco ou claro */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+}
+
+/* Imagem de Destaque */
+.post-thumb {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.post-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Garante que a imagem preencha o espaço */
+    transition: transform 0.5s ease;
+}
+
+.blog-post:hover .post-thumb img {
+    transform: scale(1.05);
+}
+
+/* Metadados (Autor e Data) */
+.post-meta {
+    padding: 15px 20px 0;
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+}
+
+.post-meta span {
+    margin-right: 15px;
+}
+
+/* Título */
+.post-title {
+    padding: 10px 20px;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.post-title a {
+    color: var(--text-color-dark);
+    text-decoration: none;
+}
+
+/* Resumo (Excerpt) */
+.post-excerpt {
+    padding: 0 20px 15px;
+    color: var(--secondary-text-color);
+    flex-grow: 1; /* Garante que o resumo empurre o "Read more" para baixo */
+}
+
+/* Link "Read more" */
+.read-more {
+    display: inline-block;
+    padding: 0 20px 20px;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Container Principal da Página de Artigo */
+.article-detail-page {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: var(--primary-bg-color);
+}
+
+/* Título e Metadados do Artigo */
+.article-header {
+    text-align: center;
+    /* margin-bottom: 100px; */
+}
+
+#article-title {
+    font-size: 2.5em;
+    color: var(--text-color-dark);
+    margin-bottom: 10px;
+}
+
+#article-meta {
+    font-size: 0.9em;
+    color: var(--text-color-dark);
+}
+
+/* Imagem de Destaque */
+.article-image-container {
+    width: 100%;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* pequenas melhorias: suavizar imagens do artigo ao carregar */
+.article-image-container img {
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    will-change: opacity, transform;
+}
+
+#article-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Conteúdo do Artigo */
+.article-content {
+    line-height: 1.8;
+    color: var(--text-color-dark);
+    font-size: 1.05em;
+}
+
+.article-content h2 {
+    margin-top: 25px;
+    font-size: 1.6em;
+    color: var(--accent-color);
+}
+
+.article-content p {
+    margin-bottom: 15px;
+}
+
+.article-content strong {
+    font-weight: bold;
+    color: var(--text-color-dark);
+}
+
+/* Estilos de Lista (UL/OL) */
+.article-content ul,
+.article-content ol {
+    margin: 15px 0 15px 20px;
+    padding-left: 20px;
+}
+
+.article-content li {
+    margin-bottom: 8px;
+}
 /* Trix Editor Custom Styles */
 .trix-content {
-    background-color: #222;
-    color: #fff;
+    background-color: var(--secondary-background);
+    color: var(--text-color-light);
     min-height: 400px;
     border: 1px solid #555;
     padding: 15px;
@@ -926,7 +1118,7 @@ section {
     border-bottom: 1px solid #555;
 }
 .trix-button--icon {
-    background-color: #fff !important;
+    background-color: var(--text-color-light) !important;
 }
 
 /* --- Estilos da Página Institucional --- */
@@ -937,6 +1129,7 @@ section {
     background-color: var(--bg-color-dark);
     color: var(--text-color-light);
 }
+
 
 .title-section {
     font-size: 3em;
@@ -951,6 +1144,10 @@ section {
     padding: 60px 20px;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+body.light-mode .institutional-page {
+    background-color: var(--secondary-bg-color-light);
 }
 
 .institucional-content {
@@ -998,7 +1195,7 @@ section {
 }
 
 .diferenciais-section {
-    background-color: #1a1a1a;
+    background-color: var(--bg-color-dark);
     padding: 80px 20px;
     text-align: center;
 }
@@ -1036,6 +1233,149 @@ section {
     color: #aaa;
 }
 
+/* --- Estilos para a funcionalidade de pesquisa --- */
+/* Ajusta o posicionamento do search-container */
+.search-container {
+    position: relative;
+}
+
+/* Esconde o search-box por padrão */
+.search-box {
+    position: absolute;
+    top: 100%; /* Posiciona abaixo do ícone */
+    right: 0;
+    margin-top: 10px;
+    width: 0; /* Largura inicial, o que cria o efeito de "fechar" */
+    opacity: 0;
+    visibility: hidden;
+    transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    
+    /* Removido: height: 40px; */
+    /* Removido: overflow: hidden; */
+    background-color: var(--secondary-background); /* Use a cor do tema */
+    /* background-color: var(--tertiary-bg-color-light); Use a cor do tema */
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+}
+
+/* Estiliza o campo de input */
+.search-box input {
+    /* Use padding e height para simular a altura do search-box */
+    height: 40px; 
+    width: calc(100% - 40px);
+    border: none;
+    background: none;
+    padding: 0 10px;
+    font-size: 16px;
+    color: var(--text-color-light);
+    outline: none;
+}
+
+body.light-mode .search-box input {
+    color: var(--text-color-dark);
+}
+
+/* Estiliza o botão de pesquisa */
+.search-box .search-btn {
+    width: 30px;
+    height: 100%;
+    border: none;
+    background: none;
+    color: var(--text-color-dark);
+    cursor: pointer;
+}
+
+.search-box .search-btn:hover {
+    color: var(--accent-color);
+}
+
+/* Estilos para a lista de resultados da pesquisa */
+.search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--secondary-background);
+    /* background-color: var(--tertiary-bg-color-light); */
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+body.light-mode .search-results-dropdown,
+body.light-mode .search-box {
+    background-color: var(--tertiary-bg-color-light);
+}
+
+/* Estilo para cada item na lista */
+.search-results-dropdown a {
+    display: flex; /* Altera para um contêiner flexível */
+    align-items: center; /* Centraliza verticalmente a imagem e o texto */
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--text-color-light);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+/* Estilo para a imagem do produto dentro do item de resultado */
+.search-results-dropdown a img {
+    width: 40px; /* Define uma largura fixa para a imagem */
+    height: 40px; /* Define uma altura fixa para a imagem */
+    object-fit: contain; /* Garante que a imagem se ajuste sem distorcer */
+    margin-right: 15px; /* Adiciona um espaço à direita da imagem */
+    border-radius: 5px; /* Adiciona bordas arredondadas à imagem */
+}
+
+/* Estilo para o span de texto do resultado */
+.search-results-dropdown a span {
+    flex-grow: 1; /* Permite que o texto ocupe o espaço restante */
+    white-space: nowrap; /* Impede que o texto quebre linha */
+    overflow: hidden; /* Esconde o texto que transborda */
+    text-overflow: ellipsis; /* Adiciona "..." no final se o texto for muito longo */
+}
+
+/* Estilo para o texto pequeno da categoria */
+.search-results-dropdown a span small {
+    display: block; /* Garante que a categoria fique em uma nova linha */
+    color: var(--text-color-light); /* Uma cor mais sutil para a categoria */
+    font-size: 0.8em;
+}
+body.light-mode .search-results-dropdown a span small{
+    color: var(--text-color-dark);
+}
+/* Estado de hover */
+.search-results-dropdown a:hover {
+    background-color: var(--secondary-bg-color);
+}
+
+.search-results-dropdown a:last-child {
+    border-bottom: none;
+}
+
+/* Estado de "aberto" do search-box */
+.search-box.is-active {
+    width: 550px;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Regra para exibir os resultados */
+.search-box.has-results .search-results-dropdown {
+    opacity: 1;
+    visibility: visible;
+}
 
 @media (max-width: 992px) {
     .highlights-grid {
@@ -1066,12 +1406,15 @@ section {
     .top-header {
         padding: 15px 20px;
     }
-
+    
     /* Reduz o espaçamento entre os ícones */
     .header-left, .header-right {
         gap: 15px;
     }
 
+    .catalogo-grid {
+        scroll-behavior: auto;
+    }
     .catalogo-section h2 {
         font-size: 2em;
     }
@@ -1079,7 +1422,7 @@ section {
     .catalogo-wrapper {
         padding: 0 10px;
     }
-
+    
     /* Opcional: Esconde os botões de navegação em telas pequenas */
     .carousel-btn {
         display: none;
@@ -1153,6 +1496,7 @@ section {
         border-radius: 0 0 12px 12px; /* Arredonda as bordas apenas na parte inferior */
     }
 
+
     /* .video-hero-section {
         height: 30vh;
     }
@@ -1169,184 +1513,6 @@ section {
 
 }
 
-
-/* --- Estilos do Modo Claro (Light Mode) --- */
-
-/* Estilos de cor base */
-body.light-mode {
-    color: var(--text-color-dark);
-    background-color: var(--bg-color-light);
-}
-
-/* Links */
-body.light-mode a {
-    color: var(--text-color-dark);
-}
-
-body.light-mode a:hover {
-    color: var(--accent-color);
-}
-
-/* Header */
-body.light-mode .top-header.scrolled {
-    background-color: rgba(255, 255, 255, 0.9); /* Fundo branco semi-transparente */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-body.light-mode .top-header .icon-btn {
-    color: var(--text-color-dark);
-}
-
-/* Sidebar (menu lateral) */
-body.light-mode .sidebar {
-    background-color: #f8f8f8;
-    color: var(--text-color-dark);
-}
-
-body.light-mode .sidebar-nav li {
-    border-bottom-color: #ddd;
-}
-
-body.light-mode .sidebar-nav a {
-    color: var(--text-color-dark);
-}
-
-body.light-mode .submenu,
-body.light-mode .submenu-aninhado,
-body.light-mode .submenu-terceiro-nivel {
-    background-color: #f0f0f0;
-}
-
-/* Footer (Rodapé) */
-body.light-mode .main-footer {
-    background-color: #f8f8f8;
-    color: var(--text-color-dark);
-}
-
-body.light-mode .footer-links a {
-    color: var(--text-color-dark);
-}
-
-body.light-mode .footer-bottom {
-    background-color: #e8e8e8;
-    border-top-color: #ccc;
-}
-
-body.light-mode .footer-bottom p {
-    color: #666;
-}
-
-/* Cards de produtos e destaques */
-body.light-mode .product-highlights span ,
-body.light-mode .product-highlights {
-    background-color: var(--bg-color-light);
-}
-
-body.light-mode .product-page {
-    background-color:#fff;
-    color: #000;
-}
-body.light-mode .highlight-item {
-    background-color: #f0f0f0;
-    color: var(--text-color-dark);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-body.light-mode .catalogo-section {
-    background-color: var(--bg-color-light);
-}
-
-body.light-mode .produto-card {
-    background-color: #f0f0f0;
-    color: var(--text-color-dark);
-}
-
-body.light-mode .produto-card h3 {
-    color: var(--text-color-dark);
-}
-
-/* Seção do Catálogo */
-body.light-mode .catalogo-section h2,
-body.light-mode .product-highlights h2 {
-    color: var(--text-color-dark);
-}
-
-/* Botões do carrossel */
-body.light-mode .carousel-btn {
-    background-color: rgba(255, 255, 255, 0.8);
-    color: #333;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-body.light-mode .carousel-btn:hover {
-    background-color: rgba(255, 255, 255, 1);
-}
-
-/* Seção de Newsletter */
-body.light-mode .newsletter-section {
-    background-color: var(--bg-color-light);
-}
-
-body.light-mode .newsletter-content {
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(5px);
-    color: var(--text-color-dark);
-}
-
-body.light-mode .newsletter-content input {
-    background-color: rgba(0, 0, 0, 0.1);
-    color: var(--text-color-dark);
-}
-
-/* Páginas de blog e institucionais */
-body.light-mode .institutional-page,
-body.light-mode .institutional-page h3,
-body.light-mode .blog-main,
-body.light-mode .create-main,
-body.light-mode .contact-form input,
-body.light-mode .contact-form textarea{
-    background-color: var(--bg-color-light);
-    color: var(--text-color-dark);
-}
-
-body.light-mode .diferenciais-section {
-    background-color: #f0f0f0;
-    color: var(--text-color-dark);
-}
-
-body.light-mode .diferencial-item p {
-    color: #555;
-}
-
-body.light-mode .article-card {
-    background-color: #f5f5f5;
-    color: var(--text-color-dark);
-}
-
-body.light-mode .article-card h2 {
-    color: var(--text-color-dark);
-}
-
-body.light-mode .article-card p {
-    color: #777;
-}
-
-body.light-mode .form-group input {
-    background-color: #f5f5f5;
-    color: var(--text-color-dark);
-    border-color: #ccc;
-}
-
-body.light-mode .trix-content {
-    background-color: #f5f5f5;
-    color: var(--text-color-dark);
-    border-color: #ccc;
-}
-
-body.light-mode .trix-toolbar {
-    background-color: #e8e8e8 !important;
-    border-bottom-color: #ccc;
-}
 
 /* --- Estilos para Conteúdos Internos (FAQ, Política, etc.) --- */
 
@@ -1369,12 +1535,24 @@ body.light-mode .trix-toolbar {
     font-weight: 700;
     text-align: center;
     margin-bottom: 40px;
-    color: var(--primary-color);
+    color: var(--text-color-light);
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
 /* --- Seção de FAQ --- */
+.faq-section {
+    margin-top: 70px ;
+    background-color: var(--bg-color-dark);
+}
+body.light-mode .faq-section {
+    background-color: var(--secondary-bg-color-light);
+}
+body.light-mode .faq-section .page-title,
+body.light-mode .faq-section h3{
+    color: var(--text-color-dark)
+}
+
 .faq-list {
     display: flex;
     flex-direction: column;
@@ -1396,7 +1574,7 @@ body.light-mode .trix-toolbar {
 
 .faq-item h3 {
     font-size: 1.5rem;
-    color: var(--primary-color);
+    color: var(--text-color-light);
     margin-bottom: 10px;
 }
 
@@ -1415,7 +1593,7 @@ body.light-mode .trix-toolbar {
 .terms-section h2,
 .contact-section h2 {
     font-size: 2rem;
-    color: var(--primary-color);
+    color: var(--text-color-light);
     margin-top: 30px;
     margin-bottom: 15px;
 }
@@ -1448,7 +1626,14 @@ body.light-mode .trix-toolbar {
 .contact-item h4, 
 .contact-item p {
     font-size: 1.4rem;
-    color: var(--primary-color);
+    color: var(--text-color-light);
+    margin-bottom: 5px;
+}
+
+body.light-mode .contact-item h4, 
+body.light-mode .contact-item p {
+    font-size: 1.4rem;
+    color: var(--text-color-dark);
     margin-bottom: 5px;
 }
 
@@ -1472,8 +1657,7 @@ body.light-mode .trix-toolbar {
     margin-bottom: 20px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    background-color: #1a1a1a;
-    color: var(--text-color);
+    color: var(--text-color-light);
 }
 
 .contact-form textarea {
@@ -1495,23 +1679,187 @@ body.light-mode .trix-toolbar {
     transition: background-color 0.3s ease;
 }
 
+body.light-mode .cta-button {
+    color: var(--secondary-bg-color-light);
+}
+
 .cta-button:hover {
     background-color: var(--accent-color-hover);
 }
 
-/* --- Estilos para o Modo Claro (light-mode) --- */
+/* --- Estilos do Modo Claro (Light Mode) --- */
 body.light-mode {
-    --background-color: #f0f0f0;
-    --text-color: #333333;
-    --secondary-background: #ffffff;
-    --primary-color: #7a1f28; /* Cor principal alterada para combinar */
-    --accent-color: #a33340;
-    --accent-color-hover: #b44451;
-    --border-color: #cccccc;
-    --input-background: #f8f8f8;
+    /* Paleta de Cores */
+    --text-color-dark: #4e4e4e;
+    --bg-color-light: #F8FAFC;
+    --secondary-bg-color-light: #D9EAFD;
+    --tertiary-bg-color-light: #BCCCDC;
+    
+    /* Cores de Destaque (Mantidas da paleta original) */
+    --accent-color: #8b0000;
+    --accent-color-hover: #a33340;
+
+    background-color: var(--secondary-bg-color-light);
+    color: var(--text-color-dark);
 }
 
-/* Ajuste de cores para os botões e links no modo claro */
-body.light-mode .icon-btn {
-    color: #333333;
+/* Links e Botões */
+body.light-mode a,
+body.light-mode .top-header .icon-btn {
+    color: var(--text-color-dark);
+}
+
+body.light-mode a:hover {
+    color: var(--accent-color);
+}
+
+/* Header */
+body.light-mode .top-header.scrolled {
+    background-color: #bcccdcb4; /* Usa a cor do fundo com transparência */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar (menu lateral) */
+body.light-mode .sidebar {
+    background-color: var(--tertiary-bg-color-light);
+    color: var(--text-color-dark);
+}
+
+body.light-mode .sidebar-nav li {
+    border-bottom-color: var(--secondary-bg-color-light);
+}
+
+body.light-mode .submenu,
+body.light-mode .submenu-aninhado,
+body.light-mode .submenu-terceiro-nivel {
+    background-color: var(--tertiary-bg-color-light);
+}
+
+/* Footer (Rodapé) */
+body.light-mode .main-footer {
+    background-color: var(--secondary-bg-color-light);
+    color: var(--text-color-dark);
+}
+
+body.light-mode .footer-bottom {
+    background-color: var(--tertiary-bg-color-light);
+    border-top-color: var(--text-color-dark);
+    border-top: 1px solid #bfc8db;
+}
+
+body.light-mode .footer-bottom p {
+    color: var(--text-color-dark);
+    opacity: 0.8; /* Diminui um pouco a opacidade para um tom mais suave */
+}
+
+/* Seções e Cards de Produtos */
+body.light-mode .product-highlights,
+body.light-mode .catalogo-section,
+body.light-mode .newsletter-section {
+    background-color: var(--secondary-bg-color-light);
+}
+
+body.light-mode .create-main .page-title {
+    color: var(--text-color-dark);
+}
+
+
+body.light-mode .main-content {
+    background-color: var(--secondary-bg-color-light);
+}
+
+body.light-mode .main-content h1, 
+body.light-mode .main-content h2{
+    color: var(--text-color-dark);
+}
+
+body.light-mode .catalogo-section {
+    background-color: var(--secondary-bg-color-light);
+}
+
+body.light-mode .main-footer{
+    border-top: 1px solid #e2ebff;
+}
+
+body.light-mode .product-highlights h2,
+body.light-mode .catalogo-section h2,
+body.light-mode .produto-card h3 {
+    color: var(--text-color-dark);
+}
+
+body.light-mode .product-highlights span{
+    background-color: #bcccdcb2;
+    color: var(--text-color-dark);
+}
+
+body.light-mode .highlight-item,
+body.light-mode .produto-card,
+body.light-mode .article-card,
+body.light-mode .faq-item {
+    background-color: var(--tertiary-bg-color-light);
+    color: var(--text-color-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+body.light-mode .produto-card h3{
+    color: var(--text-color-dark);
+}
+
+/* Páginas e Formulários */
+body.light-mode .product-page {
+    background-color: var(--secondary-bg-color-light);
+    color: var(--text-color-dark);
+}
+
+body.light-mode .institutional-page,
+body.light-mode .blog-main,
+body.light-mode .create-main,
+body.light-mode .diferenciais-section {
+    background-color: var(--secondary-bg-color-light);
+    color: var(--text-color-dark);
+}
+body.light-mode .contact-form-container{
+    background-color: var(--tertiary-bg-color-light);
+    color: var(--text-color-dark);
+}
+
+body.light-mode .contact-section{
+    background-color: var(--secondary-bg-color-light);
+}
+
+body.light-mode .institutional-page h3,
+body.light-mode .institutional-page p{
+    color: var(--text-color-dark);
+}
+
+body.light-mode .newsletter-content {
+    background-color: #bcccdc96;
+    backdrop-filter: blur(5px);
+    color: var(--text-color-dark);
+}
+
+body.light-mode .newsletter-content input,
+body.light-mode .form-group input,
+body.light-mode .contact-form input,
+body.light-mode .contact-form textarea {
+    background-color: var(--bg-color-light);
+    color: var(--text-color-dark);
+    border: 1px solid var(--tertiary-bg-color-light);
+}
+
+body.light-mode .trix-content {
+    background-color: var(--bg-color-light);
+    color: var(--text-color-dark);
+    border-color: var(--tertiary-bg-color-light);
+}
+
+body.light-mode .trix-toolbar {
+    background-color: var(--tertiary-bg-color-light) !important;
+    border-bottom-color: var(--text-color-dark);
+}
+
+/* Botões do carrossel */
+body.light-mode .carousel-btn {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: var(--text-color-dark);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
