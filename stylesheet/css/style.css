@@ -1448,6 +1448,32 @@ body.light-mode .search-results-dropdown a span small{
         gap: 15px;
     }
 
+    .search-box.is-active {
+        width: 300px; /* Ocupa toda a largura disponível */
+    }
+
+    .sidebar {
+        left: -200px;
+        width: 200px; /* Largura reduzida para telas menores */
+    }
+    .sidebar-nav a{
+        display: block;
+    }
+    body.sidebar-open main,
+    body.sidebar-open .main-content,
+    body.sidebar-open #footer-placeholder,
+    body.sidebar-open #catalogo-placeholder,
+    body.sidebar-open .article-detail-page,
+    body.sidebar-open .blog-main {
+        margin-left: 200px;
+        transition: margin-left 0.4s ease;
+    }
+
+    body.sidebar-open .top-header .main-header{
+        transform: translateX(200px)
+    }
+
+
     .newsletter-content {
         position: absolute; /* AQUI: Mude para absoluto */
         bottom: 0; /* AQUI: Posiciona no fundo */
