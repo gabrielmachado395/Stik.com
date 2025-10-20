@@ -11,10 +11,11 @@
 
     <div class="newsletter-content" id="newsletter">
         <h2>BAIXE NOSSO CATÁLOGO</h2>
-        <form action="#" method="POST">
-            <input type="email" placeholder="Seu e-mail..." required>
-            <button type="submit">Inscrever-se</button>
+        <form id="catalog-form" action="#" method="POST">
+            <input id="catalog-email" type="email" placeholder="Seu e-mail..." required>
+            <button id="catalog-submit" type="submit">Inscrever-se</button>
         </form>
+        <div id="catalog-feedback" role="status" aria-live="polite" style="margin-top:12px; color:#fff;"></div>
     </div>
 </section>
 <script src="stylesheet/script.js"></script>

@@ -757,8 +757,65 @@ function inicializarNewsletterCarousel() {
         .then(html => {
             placeholder.innerHTML = html; 
             inicializarAnimateOnScroll();
+            // re-bind do form do catálogo quando o HTML for injetado
+            bindCatalogForm();
         })
         .catch(error => console.error('Erro ao carregar catálogo:', error));
+}
+
+// Bind do formulário que envia o catálogo via backend
+function bindCatalogForm() {
+    const form = document.getElementById('catalog-form');
+    const input = document.getElementById('catalog-email');
+    const feedback = document.getElementById('catalog-feedback');
+    if (!form || !input || !feedback) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = input.value.trim();
+        feedback.style.color = '#fff';
+        if (!email) {
+            feedback.textContent = 'Por favor digite um e-mail válido.';
+            return;
+        }
+
+        feedback.textContent = 'Enviando catálogo...';
+        try {
+            // tenta obter token reCAPTCHA se o widget estiver disponível
+            let recaptchaToken = null;
+            if (window.grecaptcha && window.RECAPTCHA_SITE_KEY) {
+                try {
+                    recaptchaToken = await window.grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action: 'send_catalog' });
+                } catch (err) {
+                    console.warn('Falha ao executar grecaptcha:', err);
+                }
+            }
+
+            const payload = { email };
+            if (recaptchaToken) payload.recaptchaToken = recaptchaToken;
+
+            const res = await fetch('/api/send-catalog', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                feedback.style.color = '#b3ffd9';
+                feedback.textContent = data.message || 'Catálogo enviado! Verifique seu e-mail.';
+                input.value = '';
+            } else {
+                const err = await res.json().catch(()=>({ message: 'Erro desconhecido' }));
+                feedback.style.color = '#ffd1d1';
+                feedback.textContent = err.message || 'Falha ao enviar. Tente novamente mais tarde.';
+            }
+        } catch (error) {
+            console.error('Erro ao chamar API local:', error);
+            feedback.style.color = '#ffd1d1';
+            feedback.textContent = 'Erro de conexão. Tente novamente.';
+        }
+    });
 }
 
 function inicializarAnimateOnScroll() {
@@ -890,6 +947,7 @@ async function inicializarPagina() {
     deferInit(() => {
         inicializarNewsletterCarousel();
         inicializarModoClaro();
+        initRecaptcha();
     });
         
     
@@ -969,5 +1027,50 @@ async function inicializarPagina() {
     
     inicializarAnimateOnScroll();
 }
+
+// Inicializa reCAPTCHA v3 se a site key estiver disponível via /api/config
+async function initRecaptcha() {
+    try {
+        const res = await fetch('/api/config');
+        const cfg = await res.json();
+        if (cfg && cfg.recaptchaSiteKey) {
+            window.RECAPTCHA_SITE_KEY = cfg.recaptchaSiteKey;
+            // injeta o script do Google reCAPTCHA v3
+            const script = document.createElement('script');
+            script.src = `https://www.google.com/recaptcha/api.js?render=${cfg.recaptchaSiteKey}`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+            // garante que grecaptcha esteja pronto: chamamos grecaptcha.ready antes de usar
+            script.addEventListener('load', () => {
+                console.log('reCAPTCHA script carregado');
+            });
+        }
+    } catch (err) {
+        console.warn('Não foi possível inicializar reCAPTCHA:', err);
+    }
+}
+
+(function handleNewsletterSidebarLinks() {
+  document.addEventListener('click', function (e) {
+    const link = e.target.closest('a[href="#newsletter"]');
+    if (!link) return;
+
+    e.preventDefault();
+
+    const target = document.getElementById('newsletter');
+    if (target) {
+      // rolar suavemente até a seção existente e atualizar o hash sem pular
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      try {
+        history.replaceState(null, '', '#newsletter');
+      } catch (err) { /* ignore */ }
+    } else {
+      // não existe na página atual -> redireciona para index.html#newsletter
+      // ajuste o caminho se seu index estiver em outra rota
+      window.location.href = 'index.html#newsletter';
+    }
+  }, false);
+})();
 
 document.addEventListener('DOMContentLoaded', inicializarPagina);
