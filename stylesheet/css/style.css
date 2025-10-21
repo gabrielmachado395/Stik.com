@@ -5,6 +5,13 @@ html {
     margin: 0;
 }
 
+/* Se quiser controlar a velocidade (apenas em alguns browsers modernos com scroll-snap) */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -1683,7 +1690,7 @@ body.light-mode .contact-item p {
     margin-bottom: 20px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    color: var(--text-color-light);
+
 }
 
 .contact-form textarea {

@@ -51,7 +51,7 @@ const produtos = [
     {
         id: 7,
         nome: "Magno",
-        categoria: "Alças",
+        categoria: "Elástico",
         imagem: "./img/Alças/magno-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
@@ -1028,6 +1028,100 @@ async function inicializarPagina() {
     inicializarAnimateOnScroll();
 }
 
+
+async function getRecaptchaToken(action = 'contact', timeout = 6000) {
+  if (!window.RECAPTCHA_SITE_KEY) return null;
+  const start = Date.now();
+  while (!window.grecaptcha) {
+    if (Date.now() - start > timeout) return null;
+    await new Promise(r => setTimeout(r, 150));
+  }
+  try {
+    await new Promise(resolve => window.grecaptcha.ready(resolve));
+    const token = await window.grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action });
+    return token || null;
+  } catch (err) {
+    console.warn('getRecaptchaToken falhou:', err);
+    return null;
+  }
+}
+
+// Bind para o formulário "Fale Conosco"
+function bindContactForm() {
+  const form = document.querySelector('.contact-form');
+  if (!form) return;
+
+  // cria feedback se não houver
+  let feedback = document.getElementById('contact-feedback');
+  if (!feedback) {
+    feedback = document.createElement('div');
+    feedback.id = 'contact-feedback';
+    feedback.style.marginTop = '10px';
+    form.appendChild(feedback);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nameInput = form.querySelector('#name');
+    const emailInput = form.querySelector('#email');
+    const messageInput = form.querySelector('#message');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    const message = messageInput ? messageInput.value.trim() : '';
+
+    feedback.style.color = '';
+    if (!name || !email || !message) {
+      feedback.textContent = 'Por favor preencha nome, e-mail e mensagem.';
+      feedback.style.color = 'red';
+      return;
+    }
+
+    feedback.textContent = 'Enviando mensagem...';
+
+    try {
+      // tenta obter token reCAPTCHA se disponível
+      let recaptchaToken = null;
+      if (window.RECAPTCHA_SITE_KEY) {
+        recaptchaToken = await getRecaptchaToken('contact', 6000);
+        if (!recaptchaToken) console.warn('recaptchaToken não obtido para contact');
+      }
+
+      const payload = { name, email, message };
+      if (recaptchaToken) payload.recaptchaToken = recaptchaToken;
+
+      const res = await fetch('/api/send-contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        feedback.style.color = '#b3ffd9';
+        feedback.textContent = data.message || 'Mensagem enviada com sucesso.';
+        form.reset();
+      } else {
+        feedback.style.color = '#ffd1d1';
+        feedback.textContent = data.message || 'Erro ao enviar. Tente novamente mais tarde.';
+        console.warn('send-contact erro:', res.status, data);
+      }
+    } catch (err) {
+      console.error('Erro ao chamar /api/send-contact:', err);
+      feedback.style.color = '#ffd1d1';
+      feedback.textContent = 'Erro de conexão. Tente novamente.';
+    }
+  });
+}
+
+// chama bindContactForm quando inicializa a página de "Fale Conosco"
+function inicializarPaginaFaleConosco() {
+  console.log("Página Fale Conosco inicializada.");
+  bindContactForm();
+}
+
+
 // Inicializa reCAPTCHA v3 se a site key estiver disponível via /api/config
 async function initRecaptcha() {
     try {
@@ -1073,4 +1167,161 @@ async function initRecaptcha() {
   }, false);
 })();
 
-document.addEventListener('DOMContentLoaded', inicializarPagina);
+
+// ...existing code...
+
+/**
+ * Scroll suave avançado: mantém a velocidade inicial do scroll,
+ * mas suaviza a desaceleração no final, para uma sensação mais natural.
+ * Chame esta função para rolar até targetY (em px) com duração e easing customizados.
+ */
+function scrollToTargetEasingCustom(targetY, duration = 200, easing = 'easeInOutCubic') {
+    const startY = window.scrollY;
+    const distance = targetY - startY;
+    const startTime = performance.now();
+
+    const easings = {
+        linear: t => t,
+        easeInCubic: t => t * t * t,
+        easeOutCubic: t => 1 - Math.pow(1 - t, 3),
+        easeInOutCubic: t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+    };
+
+    const easeFn = easings[easing] || easings.easeInOutCubic;
+
+    function animate(now) {
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / duration);
+        const eased = easeFn(t);
+        window.scrollTo(0, startY + distance * eased);
+        if (t < 1) {
+            requestAnimationFrame(animate);
+        }
+    }
+    requestAnimationFrame(animate);
+}
+
+// Aplica o scroll suave em todos os links âncora internos (ex: <a href="#secao">)
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarPagina();
+
+    document.querySelectorAll('a[href^="#"]:not([href="#"])').forEach(link => {
+        link.addEventListener('click', function (e) {
+            const targetId = this.getAttribute('href').slice(1);
+            const target = document.getElementById(targetId);
+            if (target) {
+                e.preventDefault();
+                // Calcula a posição do topo do elemento
+                const rect = target.getBoundingClientRect();
+                const targetY = rect.top + window.scrollY;
+                scrollToTargetEasingCustom(targetY, 200, 'easeInOutCubic');
+                // Atualiza o hash na URL sem pular
+                history.replaceState(null, '', `#${targetId}`);
+            }
+        });
+    });
+});
+
+// ...existing code...
+
+// ---------- Funções de cookies e geolocalização (adicionadas) ----------
+
+function setCookie(name, value, days = 30) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+}
+
+function getCookie(name) {
+    return document.cookie.split('; ').reduce((r, v) => {
+        const parts = v.split('=');
+        return parts[0] === name ? decodeURIComponent(parts.slice(1).join('=')) : r;
+    }, null);
+}
+
+async function reverseGeocode(lat, lon) {
+    try {
+        // Use Nominatim (OpenStreetMap) para reverse geocoding sem chave
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&addressdetails=1`;
+        const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR', 'User-Agent': 'StikSite/1.0 (contact@stik.com)' } });
+        if (!res.ok) throw new Error('status ' + res.status);
+        const data = await res.json();
+        const city = data.address.city || data.address.town || data.address.village || data.address.county || null;
+        const state = data.address.state || data.address.region || null;
+        return { city, state, raw: data };
+    } catch (err) {
+        console.warn('reverseGeocode falhou:', err);
+        return { city: null, state: null, raw: null };
+    }
+}
+
+async function collectLocation() {
+    // retorna {lat, lon, city, state}
+    // primeiro tenta cookies/localStorage
+    const cached = getCookie('stik_location');
+    if (cached) {
+        try { return JSON.parse(cached); } catch(e) { /* ignore */ }
+    }
+
+    // tenta geolocation do browser
+    if (!('geolocation' in navigator)) {
+        return { lat: null, lon: null, city: null, state: null };
+    }
+
+    return new Promise((resolve) => {
+        const timer = setTimeout(() => {
+            // timeout -> retorna vazio
+            resolve({ lat: null, lon: null, city: null, state: null });
+        }, 10000);
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            clearTimeout(timer);
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            const geo = await reverseGeocode(lat, lon);
+            const payload = { lat, lon, city: geo.city, state: geo.state };
+            try { setCookie('stik_location', JSON.stringify(payload), 7); } catch(e) { /* ignore */ }
+            resolve(payload);
+        }, (err) => {
+            clearTimeout(timer);
+            console.warn('geolocation error:', err);
+            resolve({ lat: null, lon: null, city: null, state: null });
+        }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
+    });
+}
+
+async function sendLocationToServer({ lat, lon, city, state }, toEmail) {
+    try {
+        const payload = { lat, lon, city, state };
+        if (toEmail) payload.to = toEmail;
+        const res = await fetch('/api/send-location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok) {
+            console.warn('send-location falhou:', res.status, data);
+            return { ok: false, status: res.status, data };
+        }
+        return { ok: true, status: res.status, data };
+    } catch (err) {
+        console.error('Erro ao enviar localização ao servidor:', err);
+        return { ok: false, error: err };
+    }
+}
+
+/**
+ * collectAndSendLocation(toEmail)
+ * - pede permissão de geolocalização, faz reverse-geocode, salva cookie e envia ao servidor
+ * - toEmail é opcional e sobrescreve o destinatário configurado no servidor
+ */
+async function collectAndSendLocation(toEmail) {
+    const loc = await collectLocation();
+    const result = await sendLocationToServer(loc, toEmail);
+    return { loc, result };
+}
+
+// expõe a função globalmente para uso em console ou botões
+window.collectAndSendLocation = collectAndSendLocation;
+
+// ---------- Fim das funções de localização ----------
