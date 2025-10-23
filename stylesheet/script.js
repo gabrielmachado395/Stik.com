@@ -51,7 +51,7 @@ const produtos = [
     {
         id: 7,
         nome: "Magno",
-        categoria: "Elástico",
+        categoria: "Alça",
         imagem: "./img/Alças/magno-stik.png",
         descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         material: "Elástico",
@@ -418,10 +418,14 @@ function inicializarPesquisa() {
     // Toggle abre/fecha caixa de pesquisa
     searchToggle.addEventListener('click', (e) => {
         e.preventDefault();
+        const header = document.getElementById('mainHeader') || document.querySelector('.top-header');
+        const opening = !searchBox.classList.contains('is-active');
         searchBox.classList.toggle('is-active');
-        if (searchBox.classList.contains('is-active')) {
+        if (opening) {
+            if (header) header.classList.add('search-open');
             searchInput.focus();
         } else {
+            if (header) header.classList.remove('search-open');
             limparPesquisa();
         }
     });
@@ -472,7 +476,9 @@ function inicializarPesquisa() {
     // Fecha a pesquisa ao clicar fora
     document.addEventListener('click', (e) => {
         if (!searchBox.contains(e.target) && !searchToggle.contains(e.target)) {
+            const header = document.getElementById('mainHeader') || document.querySelector('.top-header');
             searchBox.classList.remove('is-active');
+            if (header) header.classList.remove('search-open');
             limparPesquisa();
         }
     });
@@ -481,6 +487,8 @@ function inicializarPesquisa() {
         searchResultsList.innerHTML = '';
         searchInput.value = '';
         searchBox.classList.remove('has-results');
+        const header = document.getElementById('mainHeader') || document.querySelector('.top-header');
+        if (header) header.classList.remove('search-open');
     }
 }
 
@@ -568,6 +576,90 @@ function initBannerCarousel() {
     
     setupDraggableCarousel(mainBannerTrack);
 }
+
+// --- Micro interactions: parallax, staggered reveal and subtle tilt ---
+function initMicroInteractions() {
+    // parallax on hero (based on mouse move) - subtle
+    const hero = document.querySelector('.video-hero-section');
+    if (hero) {
+        hero.classList.add('video-hero-inner');
+        hero.addEventListener('mousemove', (e) => {
+            const rect = hero.getBoundingClientRect();
+            const px = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 .. 0.5
+            const py = (e.clientY - rect.top) / rect.height - 0.5;
+            const layers = hero.querySelectorAll('img, video');
+            layers.forEach(el => {
+                const depth = 10; // a bit stronger
+                const tx = px * depth;
+                const ty = py * depth;
+                el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.02)`;
+            });
+        });
+        hero.addEventListener('mouseleave', () => {
+            hero.querySelectorAll('img, video').forEach(el => el.style.transform = 'translate3d(0,0,0) scale(1)');
+        });
+    }
+
+    // staggered reveal for highlight items on scroll (small delay between them)
+    const highlights = document.querySelectorAll('.highlight-item');
+    if (highlights.length) {
+        highlights.forEach((item, idx) => {
+            item.classList.add('staggered');
+            // when in viewport, add class 'in' with a delay
+            const io = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => item.classList.add('in'), idx * 110);
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.18 });
+            io.observe(item);
+        });
+    }
+
+    // subtle tilt on produto cards
+    const produtoCards = document.querySelectorAll('.produto-card, .article-card');
+    produtoCards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            const dx = (e.clientX - cx) / rect.width;
+            const dy = (e.clientY - cy) / rect.height;
+            const rotX = (dy * 8).toFixed(2);
+            const rotY = (-dx * 8).toFixed(2);
+            card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(8px)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+        });
+    });
+
+    // newsletter carousel images parallax
+    const carousel = document.querySelector('.carousel-bg .carousel-track');
+    if (carousel) {
+        carousel.addEventListener('mousemove', (e) => {
+            const rect = carousel.getBoundingClientRect();
+            const px = (e.clientX - rect.left) / rect.width - 0.5;
+            const py = (e.clientY - rect.top) / rect.height - 0.5;
+            carousel.querySelectorAll('img').forEach((img, idx) => {
+                const depth = 8 + (idx % 3); // small variance
+                const tx = px * depth;
+                const ty = py * depth * 0.6;
+                img.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.03)`;
+                img.style.filter = `brightness(${1 - Math.abs(px) * 0.08})`;
+            });
+        });
+        carousel.addEventListener('mouseleave', () => {
+            carousel.querySelectorAll('img').forEach(img => {
+                img.style.transform = '';
+                img.style.filter = '';
+            });
+        });
+    }
+}
+
 
 function createNewArticle() {
     window.location.href = 'create-article.html';
@@ -773,9 +865,15 @@ function bindCatalogForm() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = input.value.trim();
+        const consentCheckbox = document.getElementById('catalog-consent');
+        const consent = !!(consentCheckbox && consentCheckbox.checked);
         feedback.style.color = '#fff';
         if (!email) {
             feedback.textContent = 'Por favor digite um e-mail válido.';
+            return;
+        }
+        if (!consent) {
+            feedback.textContent = 'Por favor aceite receber comunicações marcando a caixa de consentimento.';
             return;
         }
 
@@ -791,7 +889,7 @@ function bindCatalogForm() {
                 }
             }
 
-            const payload = { email };
+            const payload = { email, consent };
             if (recaptchaToken) payload.recaptchaToken = recaptchaToken;
 
             const res = await fetch('/api/send-catalog', {
@@ -1202,10 +1300,13 @@ function scrollToTargetEasingCustom(targetY, duration = 200, easing = 'easeInOut
 }
 
 // Aplica o scroll suave em todos os links âncora internos (ex: <a href="#secao">)
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarPagina();
+document.addEventListener('DOMContentLoaded', async () => {
+    await inicializarPagina();
 
-    document.querySelectorAll('a[href^="#"]:not([href="#"])').forEach(link => {
+    // ativa micro-interações depois que a página foi inicializada
+    try { initMicroInteractions(); } catch (e) { console.warn('initMicroInteractions falhou:', e); }
+
+    document.querySelectorAll("a[href^='#']:not([href='#'])").forEach(link => {
         link.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href').slice(1);
             const target = document.getElementById(targetId);
