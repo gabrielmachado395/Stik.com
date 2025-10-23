@@ -118,6 +118,14 @@ button {
     gap: 25px;
 }
 
+/* Estado/animacao do header quando a busca abre (sem mexer no conteúdo da página) */
+.top-header .header-right { transition: transform 260ms cubic-bezier(.2,.9,.2,1); will-change: transform; }
+.top-header.search-open { --searchbox-width: 360px; }
+.top-header.search-open .header-right { transform: translateX(calc(-1 * var(--searchbox-width) - 12px)); }
+
+/* foco visual na caixa de busca quando aberta */
+.top-header.search-open .search-box { box-shadow: 0 14px 36px rgba(0,0,0,0.6); transform: translateY(-50%) translateX(0) scale(1.01); }
+
 .menu-toggle {
     font-size: 1.5em;
 }
@@ -370,6 +378,8 @@ section {
     align-items: center;
     position: relative;
     overflow: hidden;
+    will-change: transform, box-shadow;
+    transition: transform 0.45s cubic-bezier(.2,.9,.2,1), box-shadow 0.45s ease;
 }
 
 .highlight-item img {
@@ -379,6 +389,7 @@ section {
     display: block;
     object-fit: cover;
     border-radius: 4px;
+    transition: transform 0.6s cubic-bezier(.2,.9,.2,1);
 }
 
 .highlight-item span {
@@ -748,6 +759,7 @@ body.light-mode .highlight-item span {
 
 /* --- Conteúdo da Newsletter (Por Cima) --- */
 .newsletter-content {
+    display: block;
     position: absolute;
     z-index: 2; /* Fica acima do carrossel */
     text-align: center;
@@ -759,6 +771,7 @@ body.light-mode .highlight-item span {
     border-radius: 10px;
 
 }
+
 /* --- Carrossel de Fundo --- */
 .carousel-bg {
     position: absolute;
@@ -1036,9 +1049,10 @@ body.light-mode .highlight-item span {
 /* Container Principal da Página de Artigo */
 .article-detail-page {
     max-width: 1200px;
-    margin: 30px auto;
+    margin: 30px 0;
     padding: 20px;
     background-color: var(--primary-bg-color);
+    
 }
 
 /* Título e Metadados do Artigo */
@@ -1058,25 +1072,61 @@ body.light-mode .highlight-item span {
     color: var(--text-color-dark);
 }
 
-/* Imagem de Destaque */
-.article-image-container {
-    width: 100%;
-    margin: 20px 0;
+.article-card {
+    background-color: var(--bg-color-dark);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
 }
 
-/* pequenas melhorias: suavizar imagens do artigo ao carregar */
+/* REMOVIDA altura fixa e forçado resize automático */
+.article-card img {
+    width: 100%;
+    height: auto;              /* permite adaptar a altura ao conteúdo */
+    max-height: 420px;         /* opcional: evita imagens extremamente altas */
+    object-fit: cover;         /* mantém o crop equilibrado quando necessário */
+    display: block;
+    border-radius: 0;
+    transition: transform 0.5s ease, filter 0.4s ease;
+}
+
+/* Ajuste para miniaturas de post (lista de artigos) */
+.post-thumb {
+    width: 100%;
+    height: auto;              /* deixa o container adaptar-se à imagem */
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    display: block;
+}
+
+.post-thumb img {
+    width: 100%;
+    height: auto;              /* remove height:100% que forçava distorção */
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+/* Container de imagem da página de artigo (detail) */
+.article-image-container {
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;          /* garante que a imagem não vaze e remove bordas brancas */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.432);
+    width: 100%;
+    display: block;            /* garante comportamento consistente em mobile */
+    
+}
+
+#article-image,
 .article-image-container img {
-    transition: opacity 0.28s ease, transform 0.28s ease;
-    will-change: opacity, transform;
-}
-
-#article-image {
     width: 100%;
     height: auto;
     display: block;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
 /* Conteúdo do Artigo */
@@ -1244,29 +1294,32 @@ body.light-mode .institutional-page {
 /* Ajusta o posicionamento do search-container */
 .search-container {
     position: relative;
+    display: inline-flex;
+    align-items: center;
 }
 
-/* Esconde o search-box por padrão */
+/* Esconde o search-box por padrão (abre lateralmente à direita do botão) */
 .search-box {
     position: absolute;
-    top: 100%; /* Posiciona abaixo do ícone */
-    right: 0;
-    margin-top: 10px;
-    width: 0; /* Largura inicial, o que cria o efeito de "fechar" */
+    left: 100%; /* abre à direita do ícone */
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 12px;
+    width: 0; /* Largura inicial (fechada) */
+    max-width: 90vw;
     opacity: 0;
     visibility: hidden;
-    transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-    
-    /* Removido: height: 40px; */
-    /* Removido: overflow: hidden; */
-    background-color: var(--secondary-background); /* Use a cor do tema */
-    /* background-color: var(--tertiary-bg-color-light); Use a cor do tema */
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: width 320ms cubic-bezier(.2,.9,.2,1), opacity 240ms ease, visibility 240ms ease, transform 240ms ease;
+    background-color: var(--secondary-background);
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 5px;
+    padding: 6px 8px;
+    overflow: visible !important;
+    z-index: 1600;
+    white-space: nowrap;
 }
 
 /* Estiliza o campo de input */
@@ -1305,19 +1358,18 @@ body.light-mode .search-box input {
     position: absolute;
     top: 100%;
     left: 0;
-    width: 100%;
+    width: 100%; /* acompanha a largura da search-box */
     background-color: var(--secondary-background);
-    /* background-color: var(--tertiary-bg-color-light); */
     border: 1px solid var(--border-color);
     border-top: none;
-    border-radius: 0 0 5px 5px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    max-height: 200px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+    z-index: 1200; /* acima do header */
+    max-height: clamp(180px, 48vh, 420px);
     overflow-y: auto;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    transition: opacity 0.24s ease, visibility 0.24s ease;
 }
 
 body.light-mode .search-results-dropdown,
@@ -1325,40 +1377,49 @@ body.light-mode .search-box {
     background-color: var(--tertiary-bg-color-light);
 }
 
-/* Estilo para cada item na lista */
-.search-results-dropdown a {
-    display: flex; /* Altera para um contêiner flexível */
-    align-items: center; /* Centraliza verticalmente a imagem e o texto */
-    padding: 10px 15px;
+/* itens do resultado */
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: inherit;
     text-decoration: none;
-    color: var(--text-color-light);
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.2s ease;
+    border-radius: 6px;
+}
+.search-result-item:hover {
+    background: rgba(255,255,255,0.03);
+}
+.search-result-item img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+.search-result-item span {
+    display: block;
+    line-height: 1.1;
+    font-size: 0.95rem;
+}
+.search-result-item small {
+    display: block;
+    font-size: 0.80rem;
+    color: rgba(255,255,255,0.66);
 }
 
-/* Estilo para a imagem do produto dentro do item de resultado */
-.search-results-dropdown a img {
-    width: 40px; /* Define uma largura fixa para a imagem */
-    height: 40px; /* Define uma altura fixa para a imagem */
-    object-fit: contain; /* Garante que a imagem se ajuste sem distorcer */
-    margin-right: 15px; /* Adiciona um espaço à direita da imagem */
-    border-radius: 5px; /* Adiciona bordas arredondadas à imagem */
+/* mensagem "nenhum resultado" */
+.no-results-msg {
+    padding: 12px;
+    color: rgba(255,255,255,0.7);
 }
 
-/* Estilo para o span de texto do resultado */
-.search-results-dropdown a span {
-    flex-grow: 1; /* Permite que o texto ocupe o espaço restante */
-    white-space: nowrap; /* Impede que o texto quebre linha */
-    overflow: hidden; /* Esconde o texto que transborda */
-    text-overflow: ellipsis; /* Adiciona "..." no final se o texto for muito longo */
+/* se você usa classe has-results para controlar visibilidade, garanta que seja exibido */
+.search-box:not(.has-results) .search-results-dropdown {
+    /* esconda quando não houver resultados (opcional) */
+    display: none;
 }
 
-/* Estilo para o texto pequeno da categoria */
-.search-results-dropdown a span small {
-    display: block; /* Garante que a categoria fique em uma nova linha */
-    color: var(--text-color-light); /* Uma cor mais sutil para a categoria */
-    font-size: 0.8em;
-}
 body.light-mode .search-results-dropdown a span small{
     color: var(--text-color-dark);
 }
@@ -1373,9 +1434,10 @@ body.light-mode .search-results-dropdown a span small{
 
 /* Estado de "aberto" do search-box */
 .search-box.is-active {
-    width: 550px;
+    width: var(--searchbox-width, 360px); /* largura quando aberta no desktop */
     opacity: 1;
     visibility: visible;
+    transform: translateY(-50%) translateX(0);
 }
 
 /* Regra para exibir os resultados */
@@ -1406,6 +1468,27 @@ body.light-mode .search-results-dropdown a span small{
     .product-highlights h2 {
         font-size: 2em;
     }
+
+    /* animações reduzidas para telas médias (<= 992px) */
+    .highlight-item {
+        transition: transform 0.38s ease, box-shadow 0.38s ease;
+    }
+    .highlight-item:hover, .highlight-item:active {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 0 8px 22px rgba(0,0,0,0.32);
+    }
+    .highlight-item:hover img, .highlight-item:active img {
+        transform: scale(1.03) translateY(-2px);
+    }
+
+    .cta-button:hover, .cta-button:active {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.28);
+    }
+
+    a::after { transition: width 180ms ease; }
+    /* garante que os itens com stagger ainda apareçam suavemente */
+    .staggered { transition-duration: 420ms; }
 }
 
 @media (max-width: 768px) {
@@ -1455,23 +1538,41 @@ body.light-mode .search-results-dropdown a span small{
         gap: 15px;
     }
 
-    .search-box.is-active {
-        width: 300px; /* Ocupa toda a largura disponível */
+    .search-box {
+        left: auto;
+        right: 0; /* em telas pequenas abre abaixo/direita do ícone como antes */
+        top: 100%;
+        transform: none;
+        margin-left: 0;
     }
+    .search-box.is-active {
+        width: min(90vw, 340px); /* Ocupa largura adequada no mobile */
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Dropdown de resultados no mobile */
+    .search-results-dropdown {
+        max-height: 56vh;
+        border-radius: 0 0 10px 10px;
+    }
+    .search-results-dropdown a { padding: 12px 14px; }
+    .search-results-dropdown a img { width: 36px; height: 36px; }
 
     .sidebar {
         left: -200px;
         width: 200px; /* Largura reduzida para telas menores */
+        
     }
-    .sidebar-nav a{
+    /* .sidebar-nav a{
         display: block;
-    }
+    } */
     body.sidebar-open main,
     body.sidebar-open .main-content,
     body.sidebar-open #footer-placeholder,
     body.sidebar-open #catalogo-placeholder,
     body.sidebar-open .article-detail-page,
-    body.sidebar-open .blog-main {
+    body.sidebar-open .blog-main{
         margin-left: 200px;
         transition: margin-left 0.4s ease;
     }
@@ -1544,6 +1645,33 @@ body.light-mode .search-results-dropdown a span small{
         object-fit: cover; Faz com que o vídeo preencha o contêiner, cortando o que não cabe
     } */
 
+    .faq-section h1 {
+        font-size:xx-large;
+    }
+
+    .privacy-section h1 {
+        font-size: 40px;
+    }
+    .article-image-container {
+        height: fit-content;   
+    }
+
+}
+
+/* Regras para telas pequenas (<= 768px) - animações muito sutis e sem tilt/parallax */
+@media (max-width: 768px) {
+    .highlight-item:hover, .highlight-item:active {
+        transform: translateY(-2px) scale(1.005);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+    .highlight-item img { transition: transform 0.4s ease; }
+    .highlight-item:active img { transform: scale(1.02); }
+
+    /* underline mais discreto no mobile */
+    a::after { bottom: -2px; height: 1.6px; transition: width 160ms ease; }
+
+    /* desativa tilt/parallax no mobile por desempenho/UX */
+    .produto-card[style], .article-card[style] { transform: none !important; }
 }
 
 
@@ -1578,6 +1706,7 @@ body.light-mode .search-results-dropdown a span small{
     margin-top: 70px ;
     background-color: var(--bg-color-dark);
 }
+
 body.light-mode .faq-section {
     background-color: var(--secondary-bg-color-light);
 }
@@ -1594,7 +1723,7 @@ body.light-mode .faq-section h3{
 
 .faq-item {
     background-color: var(--secondary-background);
-    padding: 25px;
+    padding: 25px 0;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1635,7 +1764,9 @@ body.light-mode .faq-section h3{
 .terms-section p {
     line-height: 1.7;
     margin-bottom: 20px;
+
 }
+
 
 .privacy-section ul {
     margin-left: 25px;
@@ -1661,6 +1792,7 @@ body.light-mode .faq-section h3{
     font-size: 1.4rem;
     color: var(--text-color-light);
     margin-bottom: 5px;
+    align-items: center;
 }
 
 body.light-mode .contact-item h4, 
@@ -1896,3 +2028,63 @@ body.light-mode .carousel-btn {
     color: var(--text-color-dark);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
+/* micro interactions on hover for highlight items */
+.highlight-item:hover {
+    transform: translateY(-8px) scale(1.04);
+    box-shadow: 0 14px 38px rgba(0,0,0,0.55);
+}
+.highlight-item:hover img {
+    transform: scale(1.09) translateY(-6px);
+}
+
+/* subtle button pulse for call to actions */
+.cta-button {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.cta-button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.42);
+}
+
+/* Newsletter: make carousel images respond gracefully and stronger */
+.carousel-track img {
+    transition: transform 0.8s cubic-bezier(.2,.9,.2,1), filter 0.5s ease;
+    will-change: transform, filter;
+}
+
+.newsletter-content button, #catalog-submit {
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+.newsletter-content button:hover, #catalog-submit:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    background-color: #a32323; /* slightly stronger accent on hover */
+}
+
+/* small animated underline for links */
+a {
+    position: relative;
+}
+a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    height: 2px;
+    width: 0;
+    background: var(--accent-color);
+    transition: width 220ms cubic-bezier(.2,.9,.2,1);
+}
+a:hover::after {
+    width: 100%;
+}
+
+/* hero slight parallax layer */
+.video-hero-section { overflow: hidden; }
+.video-hero-inner { position: relative; z-index: 1; }
+.hero-parallax { transform: translateZ(0); transition: transform 0.2s linear; }
+
+/* staggered reveal helper */
+.staggered { opacity: 0; transform: translateY(18px); transition: opacity 520ms ease, transform 520ms ease; }
+.staggered.in { opacity: 1; transform: translateY(0); }
