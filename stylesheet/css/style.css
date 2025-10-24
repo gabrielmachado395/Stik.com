@@ -56,6 +56,9 @@ body {
     height: 100%;
     margin: 0;
 }
+body.sidebar-open {
+    overflow: hidden;
+}
 
 
 h1, h2, h3, h4, h5, h6 {
@@ -166,8 +169,8 @@ button {
 .sidebar {
     position: fixed;
     top: 0;
-    left: -300px;
-    width: 300px;
+    left: calc(-1 * var(--sidebar-width)); /* Usa a variável */
+    width: var(--sidebar-width); /* Usa a variável */
     min-height: 100vh;
     background-color: var(--secondary-background);
     z-index: 1100;
@@ -175,7 +178,7 @@ button {
     transition: left 0.4s ease;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
+    overflow-y: auto; /* Garante que a própria sidebar possa rolar se o conteúdo for grande */
 }
 
 .sidebar.active {
@@ -757,15 +760,31 @@ body.light-mode .highlight-item span {
     margin: 0 auto;
 }
 
+/* ADICIONADO: Estilos para o consentimento do catálogo/newsletter */
+.consent-label {
+    display: flex;
+    align-items: flex-start; /* Alinha o checkbox com o topo do texto */
+    gap: 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.consent-label input[type="checkbox"] {
+    margin-top: 3px; /* Pequeno ajuste para alinhar visualmente com o texto */
+    flex-shrink: 0; /* Impede que o checkbox encolha */
+}
 /* --- Conteúdo da Newsletter (Por Cima) --- */
 .newsletter-content {
+    width: 30%;
+    overflow: auto;
     display: block;
     position: absolute;
     z-index: 2; /* Fica acima do carrossel */
     text-align: center;
     color: var(--text-color-light);
     background-color: #31363fad;
-; /* Fundo semi-transparente para legibilidade */
+ /* Fundo semi-transparente para legibilidade */
     backdrop-filter: blur(5px); /* Efeito de desfoque */
     padding: 40px;
     border-radius: 10px;
@@ -818,6 +837,7 @@ body.light-mode .highlight-item span {
     border-radius: 5px;
     background-color: rgba(255, 255, 255, 0.8);
 }
+
 
 .newsletter-content button {
     padding: 12px 20px;
@@ -1049,7 +1069,7 @@ body.light-mode .highlight-item span {
 /* Container Principal da Página de Artigo */
 .article-detail-page {
     max-width: 1200px;
-    margin: 30px 0;
+    margin: 30px auto;
     padding: 20px;
     background-color: var(--primary-bg-color);
     
@@ -1111,12 +1131,11 @@ body.light-mode .highlight-item span {
 .article-image-container {
     flex-direction: column;
     align-items: center;
-    margin: 20px 0;
     border-radius: 8px;
     overflow: hidden;          /* garante que a imagem não vaze e remove bordas brancas */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.432);
     width: 100%;
-    display: block;            /* garante comportamento consistente em mobile */
+    display: block;
     
 }
 
@@ -1129,11 +1148,14 @@ body.light-mode .highlight-item span {
     border-radius: 8px;
 }
 
+
+
 /* Conteúdo do Artigo */
 .article-content {
     line-height: 1.8;
     color: var(--text-color-dark);
     font-size: 1.05em;
+
 }
 
 .article-content h2 {
@@ -1211,11 +1233,53 @@ body.light-mode .institutional-page {
     display: flex;
     align-items: center;
     gap: 40px;
+    /* Empilha por padrão (mobile-first). Em telas maiores vira duas colunas */
     flex-direction: column;
+    width: 100%;
 }
 
 .institucional-content.institucional-reverse {
     flex-direction: column-reverse;
+}
+
+/* Em telas médias/grandes exibimos conteúdo em duas colunas (texto + imagem lado a lado) */
+@media (min-width: 992px) {
+    .institucional-content {
+        flex-direction: row;
+        align-items: center; /* alinha verticalmente ao centro */
+        gap: 48px;
+    }
+
+    .institucional-content.institucional-reverse {
+        flex-direction: row-reverse;
+    }
+
+    .text-block,
+    .image-block {
+        /* Cada coluna ocupa metade do espaço, respeitando espaçamentos */
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .text-block {
+        text-align: left; /* alinhamento típico para leitura em colunas */
+        padding: 0 10px;
+    }
+
+    .image-block {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .image-block img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 12px; /* leve arredondamento */
+        /* box-shadow: 0 6px 18px rgba(0,0,0,0.35); */
+    }
 }
 
 .text-block {
@@ -1233,7 +1297,7 @@ body.light-mode .institutional-page {
     width: 100%;
     height: auto;
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); */
 }
 
 .values-block {
@@ -1249,6 +1313,93 @@ body.light-mode .institutional-page {
     line-height: 1.6;
     max-width: 900px;
     margin: 0 auto;
+}
+
+/* ===== Galeria de 4 imagens abaixo dos ícones ===== */
+.gallery-section {
+    padding: 40px auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: transparent;
+}
+.gallery-grid {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+.gallery-item {
+    flex: 1 1 calc((100% - 3*24px) / 4);
+    max-width: calc((1600px - 3*24px) / 4);
+    min-width: 180px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.gallery-item img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    display: block;
+}
+
+/* Responsividade: empilha em telas pequenas */
+@media (max-width: 900px) {
+    .gallery-item {
+        flex: 1 1 45%;
+        max-width: 45%;
+    }
+}
+@media (max-width: 480px) {
+    .gallery-item {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+/* ===== Seção institucional empilhada (texto acima, imagem abaixo, destaque maior) ===== */
+.institucional-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+.stacked-text {
+    max-width: 900px;
+    font-size: 1.05em;
+    line-height: 1.8;
+    color: inherit;
+    padding: 0 10px;
+}
+.stacked-image {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.stacked-image img {
+    width: 100%;
+    /* max-width: 820px; destaque maior */
+    height: auto;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+    display: block;
+}
+
+/* Pequenas adaptações em mobile para manter legibilidade */
+@media (max-width: 768px) {
+    .stacked-image img {
+        height: auto;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+    .stacked-text { padding: 0 20px; }
 }
 
 .diferenciais-section {
@@ -1496,6 +1647,12 @@ body.light-mode .search-results-dropdown a span small{
     .top-header {
         padding: 15px 20px;
     }
+
+    .top-header.search-open .header-right {
+        transform: none !important;
+    }
+
+    .search
     
     /* Reduz o espaçamento entre os ícones */
     .header-left, .header-right {
@@ -1546,42 +1703,29 @@ body.light-mode .search-results-dropdown a span small{
         margin-left: 0;
     }
     .search-box.is-active {
-        width: min(90vw, 340px); /* Ocupa largura adequada no mobile */
+        width: min(60vw, 340px); /* Ocupa largura adequada no mobile */
         opacity: 1;
         visibility: visible;
     }
 
     /* Dropdown de resultados no mobile */
     .search-results-dropdown {
+        right: 0px;
+        left: auto;
+        width: var(min(0vw, 340px));
         max-height: 56vh;
-        border-radius: 0 0 10px 10px;
     }
     .search-results-dropdown a { padding: 12px 14px; }
     .search-results-dropdown a img { width: 36px; height: 36px; }
 
-    .sidebar {
-        left: -200px;
-        width: 200px; /* Largura reduzida para telas menores */
-        
-    }
-    /* .sidebar-nav a{
-        display: block;
-    } */
-    body.sidebar-open main,
-    body.sidebar-open .main-content,
-    body.sidebar-open #footer-placeholder,
-    body.sidebar-open #catalogo-placeholder,
-    body.sidebar-open .article-detail-page,
-    body.sidebar-open .blog-main{
-        margin-left: 200px;
-        transition: margin-left 0.4s ease;
+    :root {
+        --sidebar-width: 280px;
     }
 
-    body.sidebar-open .top-header .main-header{
-        transform: translateX(200px)
+    .sidebar.active {
+        height: 100%;
+        width: 50%;
     }
-
-
     .newsletter-content {
         position: absolute; /* AQUI: Mude para absoluto */
         bottom: 0; /* AQUI: Posiciona no fundo */
@@ -1652,8 +1796,21 @@ body.light-mode .search-results-dropdown a span small{
     .privacy-section h1 {
         font-size: 40px;
     }
+    section.article-image-container,
     .article-image-container {
-        height: fit-content;   
+        min-height: 0;
+        padding: 40px 20px; /* Adiciona um respiro vertical, ajuste se necessário */
+        /* FIM DA ADIÇÃO */
+        flex-direction: column;
+        align-items: center;
+        
+    }
+    .article-image-container img,
+    #article-image {
+        display: block;
+        border-radius: 8px;
+        object-fit: cover;
+        height: auto;
     }
 
 }
@@ -1852,6 +2009,7 @@ body.light-mode .cta-button {
     background-color: var(--accent-color-hover);
 }
 
+
 /* --- Estilos do Modo Claro (Light Mode) --- */
 body.light-mode {
     /* Paleta de Cores */
@@ -2001,6 +2159,25 @@ body.light-mode .newsletter-content {
     backdrop-filter: blur(5px);
     color: var(--text-color-dark);
 }
+
+body.light-mode .newsletter-content h2,
+body.light-mode .newsletter-content span {
+    color: var(--text-color-dark);
+    font-weight: 600;
+    
+    
+}
+
+.newsletter-content a {
+    color: var(--text-color-light);
+    text-decoration: underline;
+}
+
+body.light-mode .newsletter-content a {
+    color: var(--text-color-dark)
+
+}
+
 
 body.light-mode .newsletter-content input,
 body.light-mode .form-group input,
