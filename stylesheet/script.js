@@ -1,11 +1,12 @@
 // Dados
+
 const produtos = [
     {
         id: 1,
         nome: "Carícia",
         categoria: "Base",
         imagem: "./img/Base/caricia-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Base macia e maleável, pensada para conforto em peças íntimas e lingerie. Oferece boa elasticidade sem perder a forma, acabamento limpo e costura fácil, ideal para aplicações que exigem toque suave sobre a pele.",
         material: "Elástico",
     },
     {
@@ -13,7 +14,7 @@ const produtos = [
         nome: "Canoa",
         categoria: "Elásticos Crus",
         imagem: "./img/Elastícos Crus/canoa-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Elástico cru de alta resistência, com superfície levemente áspera que facilita aderência em costuras industriais. Perfeito para projetos onde se requer durabilidade e estabilidade dimensional sem acabamento tingido.",
         material: "Elástico",
     },
     {
@@ -21,7 +22,7 @@ const produtos = [
         nome: "Cinta",
         categoria: "Modeladores",
         imagem: "./img/Modeladores/cinta-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Elástico para modeladores com compressão controlada que modela a silhueta sem perder conforto. Boa recuperação elástica e resistência ao uso, indicado para peças com ajuste mais firme e sustentação localizada.",
         material: "Políester", 
     },
     {
@@ -29,7 +30,7 @@ const produtos = [
         nome: "Atena",
         categoria: "Personalizados",
         imagem: "./img/Personalizados/alcaatena-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Solução personalizada com acabamento premium — ideal para alças e detalhes que pedem diferencial estético. Pode ser produzida em cores e larguras sob demanda, mantendo resistência e toque refinado.",
         material: "Elástico",
     },
     {
@@ -37,7 +38,7 @@ const produtos = [
         nome: "Belly",
         categoria: "Premium",
         imagem: "./img/Premium/belly-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Elástico premium com toque acetinado e resistência superior ao desgaste. Desenvolvido para peças de alta-costura e coleções premium que exigem aparência sofisticada e desempenho consistente no tempo.",
         material: "Elástico",
     },
     {
@@ -45,7 +46,7 @@ const produtos = [
         nome: "Ana",
         categoria: "Rendas",
         imagem: "./img/Renda/ana-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Renda delicada com boa estabilidade dimensional, ideal para aplicação em lingerie e detalhes decorativos. Possui acabamento que facilita a costura e mantém a elegância mesmo após lavagens repetidas.",
         material: "Elástico",
     },
     {
@@ -53,7 +54,7 @@ const produtos = [
         nome: "Magno",
         categoria: "Alça",
         imagem: "./img/Alças/magno-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Alça robusta e confortável, projetada para suportar tensão sem deformar. Acabamento reforçado nas bordas e superfície agradável ao contato, indicada para peças com maior exigência de sustentação.",
         material: "Elástico",
     },
     {
@@ -61,7 +62,7 @@ const produtos = [
         nome: "Flor",
         categoria: "Lançamento de Elástico",
         imagem: "img/flor-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Lançamento com excelente elasticidade — combina apelo estético com funcionalidade. Versátil para aplicações em moda íntima, esportiva e acessórios decorativos.",
         material: "Elástico",
     },
     {
@@ -69,7 +70,7 @@ const produtos = [
         nome: "Grécia",
         categoria: "Lançamento de Alça",
         imagem: "img/grecia-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Nova alça com desenho clássico e construção reforçada, ideal para peças de vestuário que exigem segurança e estilo. Mantém a forma mesmo após uso prolongado e apresenta acabamento elegante.",
         material: "Elástico",
     },
     {
@@ -77,7 +78,7 @@ const produtos = [
         nome: "Diana",
         categoria: "Lançamento de Base",
         imagem: "img/diana-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Base estruturada de lançamento que oferece suporte e leve compressão, sem comprometer o conforto. Excelente para confecção de peças que precisam de estabilidade na área do cós ou do busto.",
         material: "Elástico",
     },
     {
@@ -85,7 +86,7 @@ const produtos = [
         nome: "Ágda",
         categoria: "Viés",
         imagem: "img/agda-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Viés flexível e resistente, ideal para acabamento de bordas e reforço de costuras. Boa maleabilidade facilita o trabalho em curvas e contornos, garantindo acabamento profissional.",
         material: "Elástico",
     },
     {
@@ -93,7 +94,7 @@ const produtos = [
         nome: "Atlas",
         categoria: "Com Arco",
         imagem: "img/atlas-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Elástico com arco de sustentação integrado, projetado para fornecer estrutura adicional em peças como corsets e modeladores. Combina firmeza e conforto, permitindo modelagem sem perda da estética.",
         material: "Elástico",
     },
     {
@@ -101,7 +102,7 @@ const produtos = [
         nome: "Eros",
         categoria: "Lançamento de Viés",
         imagem: "img/eros-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Viés de lançamento com toque refinado e excelente conformidade em costura manual ou industrial. Ideal para aplicações que exigem acabamento discreto e resistência a atrito.",
         material: "Elástico",
     },
     {
@@ -109,7 +110,7 @@ const produtos = [
         nome: "Chll",
         categoria: "Premium",
         imagem: "img/chll-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Linha premium com visual contemporâneo e desempenho elevado — resistência à deformação e ótimo caimento. Indicado para coleções que priorizam durabilidade e aparência sofisticada.",
         material: "Elástico",
     },
     {
@@ -117,7 +118,7 @@ const produtos = [
         nome: "Ana",
         categoria: "Rendas",
         imagem: "img/ana-stik.png",
-        descricao: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        descricao: "Versão alternativa da renda 'Ana' com padronagem levemente distinta; mantém suavidade e facilidade de aplicação. Perfeita para detalhes finos em lingerie e peças femininas delicadas.",
         material: "Elástico",
     },
 ];
