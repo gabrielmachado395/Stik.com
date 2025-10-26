@@ -34,6 +34,7 @@ main,
 #catalogo-placeholder {
     transition: margin-left 0.4s ease, transform 0.4s ease;
     margin-left: 0;
+    
 }
 
 .top-header {
@@ -277,6 +278,8 @@ body.sidebar-open .blog-main {
     margin-left: var(--sidebar-width);
     transition: margin-left 0.4s ease;
 }
+
+
 
 body.sidebar-open .top-header .main-header{
     transform: translateX(var(--sidebar-width))
@@ -1068,10 +1071,14 @@ body.light-mode .highlight-item span {
 
 /* Container Principal da Página de Artigo */
 .article-detail-page {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 20px;
-    background-color: var(--primary-bg-color);
+    display: absolute;
+    padding-top: 120px; /* Espaço para o cabeçalho fixo */
+    padding-bottom: 80px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    padding: 200px;
+    
     
 }
 
@@ -1796,6 +1803,9 @@ body.light-mode .search-results-dropdown a span small{
     .privacy-section h1 {
         font-size: 40px;
     }
+    .article-detail-page {
+        padding: 100px 20px 60px; /* Ajusta o padding para telas menores */
+    }
     section.article-image-container,
     .article-image-container {
         min-height: 0;
@@ -1876,6 +1886,12 @@ body.light-mode .faq-section h3{
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding: 100px;
+}
+@media (max-width: 768px) {
+    .faq-list {
+        padding: 40px 20px;
+    }
 }
 
 .faq-item {
