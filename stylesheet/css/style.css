@@ -172,6 +172,7 @@ button {
     top: 0;
     left: calc(-1 * var(--sidebar-width)); /* Usa a variável */
     width: var(--sidebar-width); /* Usa a variável */
+    height: auto;
     min-height: 100vh;
     background-color: var(--secondary-background);
     z-index: 1100;
