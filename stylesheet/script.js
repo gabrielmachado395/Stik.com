@@ -1,20 +1,11 @@
 // Dados
-
 const produtos = [
-    {
-        id: 1,
-        nome: "Carícia",
-        categoria: "Base",
-        imagem: "./img/Base/caricia-stik.png",
-        descricao: "Base macia e maleável, pensada para conforto em peças íntimas e lingerie. Oferece boa elasticidade sem perder a forma, acabamento limpo e costura fácil, ideal para aplicações que exigem toque suave sobre a pele.",
-        material: "Elástico",
-    },
     {
         id: 2,
         nome: "Canoa",
         categoria: "Elásticos Crus",
-        imagem: "./img/Elastícos Crus/canoa-stik.png",
-        descricao: "Elástico cru de alta resistência, com superfície levemente áspera que facilita aderência em costuras industriais. Perfeito para projetos onde se requer durabilidade e estabilidade dimensional sem acabamento tingido.",
+        imagem: "img - Copia/Elásticos Crus/canoa-stik.png",
+        descricao: "Desbloqueie o potencial máximo da sua linha de produção. O Canoa é o nosso elástico cru de altíssima resistência, projetado para durar. Sua superfície, propositalmente levemente áspera, proporciona uma aderência superior no processo de costura industrial, garantindo que o acabamento seja firme e profissional. Ele oferece máxima durabilidade e estabilidade dimensional, sendo a base ideal e robusta para projetos exigentes, onde a qualidade técnica e a autenticidade do material em estado natural são prioridade.",
         material: "Elástico",
     },
     {
@@ -22,15 +13,15 @@ const produtos = [
         nome: "Cinta",
         categoria: "Modeladores",
         imagem: "./img/Modeladores/cinta-stik.png",
-        descricao: "Elástico para modeladores com compressão controlada que modela a silhueta sem perder conforto. Boa recuperação elástica e resistência ao uso, indicado para peças com ajuste mais firme e sustentação localizada.",
-        material: "Políester", 
+        descricao: "Crie peças que modelam com conforto e segurança. O elástico Cinta foi desenvolvido especificamente para modeladores, oferecendo uma compressão controlada que esculpe a silhueta sem sacrificar o bem-estar do usuário. Sua excelente recuperação elástica e alta resistência ao uso contínuo garantem que a peça não perca a forma. É a escolha definitiva para roupas que buscam um ajuste firme, sustentação localizada e um toque sofisticado de alto padrão, assegurando que o produto final seja valorizado pela performance.",
+        material: "Políester",
     },
     {
         id: 4,
-        nome: "Atena",
+        nome: "Alca Atena",
         categoria: "Personalizados",
         imagem: "./img/Personalizados/alcaatena-stik.png",
-        descricao: "Solução personalizada com acabamento premium — ideal para alças e detalhes que pedem diferencial estético. Pode ser produzida em cores e larguras sob demanda, mantendo resistência e toque refinado.",
+        descricao: "Dê vida à sua marca e a eleve a um novo patamar de exclusividade. Alça Atena é a solução de acabamento premium totalmente personalizada para atender o seu design. Por ser sob demanda, pode ser desenvolvida em uma ampla variedade de cores e larguras. Este produto não apenas oferece alta resistência e um toque extremamente refinado, mas também se torna um diferencial estético poderoso, capaz de capturar olhares e agregar valor inestimável à sua coleção.",
         material: "Elástico",
     },
     {
@@ -38,15 +29,15 @@ const produtos = [
         nome: "Belly",
         categoria: "Premium",
         imagem: "./img/Premium/belly-stik.png",
-        descricao: "Elástico premium com toque acetinado e resistência superior ao desgaste. Desenvolvido para peças de alta-costura e coleções premium que exigem aparência sofisticada e desempenho consistente no tempo.",
+        descricao: "Sinta o luxo em cada detalhe. O Belly é a materialização do elástico premium, destacando-se por seu toque acetinado e uma resistência incomparável ao desgaste diário. Essencial para peças de alta-costura, coleções exclusivas e linhas de luxo, ele entrega não apenas uma aparência sofisticada e visualmente rica, mas também um desempenho elástico consistente e uma durabilidade notável, confirmando a alta qualidade da sua produção.",
         material: "Elástico",
     },
     {
         id: 6,
         nome: "Ana",
         categoria: "Rendas",
-        imagem: "./img/Renda/ana-stik.png",
-        descricao: "Renda delicada com boa estabilidade dimensional, ideal para aplicação em lingerie e detalhes decorativos. Possui acabamento que facilita a costura e mantém a elegância mesmo após lavagens repetidas.",
+        imagem: "img - Copia/Rendas/ana-stik.png",
+        descricao: "Inspire delicadeza e garanta a longevidade da sua lingerie. A renda Ana possui alta estabilidade dimensional e um acabamento técnico que facilita o processo de costura em escala industrial. Ela garante que a elegância, o charme e o design da sua peça permaneçam inalterados, mesmo após diversas lavagens. É o produto ideal para quem busca combinar a beleza e a sensibilidade da renda com a funcionalidade e a durabilidade exigidas pelo mercado.",
         material: "Elástico",
     },
     {
@@ -54,75 +45,498 @@ const produtos = [
         nome: "Magno",
         categoria: "Alça",
         imagem: "./img/Alças/magno-stik.png",
-        descricao: "Alça robusta e confortável, projetada para suportar tensão sem deformar. Acabamento reforçado nas bordas e superfície agradável ao contato, indicada para peças com maior exigência de sustentação.",
-        material: "Elástico",
-    },
-    {
-        id: 8,
-        nome: "Flor",
-        categoria: "Lançamento de Elástico",
-        imagem: "img/flor-stik.png",
-        descricao: "Lançamento com excelente elasticidade — combina apelo estético com funcionalidade. Versátil para aplicações em moda íntima, esportiva e acessórios decorativos.",
-        material: "Elástico",
-    },
-    {
-        id: 9,
-        nome: "Grécia",
-        categoria: "Lançamento de Alça",
-        imagem: "img/grecia-stik.png",
-        descricao: "Nova alça com desenho clássico e construção reforçada, ideal para peças de vestuário que exigem segurança e estilo. Mantém a forma mesmo após uso prolongado e apresenta acabamento elegante.",
-        material: "Elástico",
-    },
-    {
-        id: 10,
-        nome: "Diana",
-        categoria: "Lançamento de Base",
-        imagem: "img/diana-stik.png",
-        descricao: "Base estruturada de lançamento que oferece suporte e leve compressão, sem comprometer o conforto. Excelente para confecção de peças que precisam de estabilidade na área do cós ou do busto.",
+        descricao: "Desenvolva peças que oferecem segurança e suporte inabaláveis. Magno é uma alça robusta e extremamente confortável, especialmente formulada para suportar grandes tensões e pesos sem ceder ou perder sua forma original. Com bordas reforçadas e um toque agradável, é a escolha definitiva para peças que exigem máxima sustentação, como sutiãs de tamanhos maiores ou vestuário técnico, sem abrir mão do conforto prolongado para o usuário.",
         material: "Elástico",
     },
     {
         id: 11,
-        nome: "Ágda",
+        nome: "Agda",
         categoria: "Viés",
         imagem: "img/agda-stik.png",
-        descricao: "Viés flexível e resistente, ideal para acabamento de bordas e reforço de costuras. Boa maleabilidade facilita o trabalho em curvas e contornos, garantindo acabamento profissional.",
+        descricao: "Obtenha acabamentos profissionais e impecáveis com o viés Agda. Este produto é flexível e resistente, ideal para ser aplicado em bordas e reforços de costuras. Sua maleabilidade superior facilita o trabalho em curvas e contornos complexos, sendo um aliado na produção. Garante um resultado final elegante, duradouro e com aquele toque profissional que é crucial para elevar a percepção de qualidade do seu vestuário.",
         material: "Elástico",
     },
     {
         id: 12,
         nome: "Atlas",
-        categoria: "Com Arco",
+        categoria: "Viés Com Arco",
         imagem: "img/atlas-stik.png",
-        descricao: "Elástico com arco de sustentação integrado, projetado para fornecer estrutura adicional em peças como corsets e modeladores. Combina firmeza e conforto, permitindo modelagem sem perda da estética.",
-        material: "Elástico",
-    },
-    {
-        id: 13,
-        nome: "Eros",
-        categoria: "Lançamento de Viés",
-        imagem: "img/eros-stik.png",
-        descricao: "Viés de lançamento com toque refinado e excelente conformidade em costura manual ou industrial. Ideal para aplicações que exigem acabamento discreto e resistência a atrito.",
+        descricao: "Inove o design dos seus modeladores com suporte técnico superior. Atlas é o nosso elástico que já possui o arco integrado, sendo projetado para dar uma estrutura extra e localizada a corsets e modeladores. Ele consegue unir a firmeza necessária para a modelagem perfeita com o conforto essencial. Ideal para peças que exigem suporte técnico, garante que a forma e o visual refinado da roupa sejam mantidos.",
         material: "Elástico",
     },
     {
         id: 14,
-        nome: "Chll",
+        nome: "Chill",
         categoria: "Premium",
         imagem: "img/chll-stik.png",
-        descricao: "Linha premium com visual contemporâneo e desempenho elevado — resistência à deformação e ótimo caimento. Indicado para coleções que priorizam durabilidade e aparência sofisticada.",
+        descricao: "Crie coleções com um visual moderno e um desempenho de elite. O Chill é parte da nossa linha premium, destacando-se pela resistência à deformação e um caimento impecável. É o material ideal para marcas que buscam peças com estilo contemporâneo e durabilidade. Ele garante que a sofisticação e o design permaneçam intactos, reforçando a qualidade e o alto padrão dos seus produtos.",
         material: "Elástico",
+    },
+
+    /* --- Itens adicionados automaticamente a partir de img - Copia (Revisados) --- */
+    // Alças
+    {
+        id: 16,
+        nome: "Dayane",
+        categoria: "Alças",
+        imagem: "img - Copia/Alças/dayane-stik.png",
+        descricao: "Proporcione segurança e leveza para o uso diário. Dayane é a alça desenvolvida com elasticidade perfeitamente balanceada, pensada para o máximo conforto e suporte seguro em cada movimento do corpo. É o material ideal para sutiãs e vestuário que necessitam de um suporte confiável e discreto, sem comprometer a leveza e a sensação de bem-estar ao longo do dia.",
+        material: "Elástico"
     },
     {
-        id: 15,
-        nome: "Ana",
-        categoria: "Rendas",
-        imagem: "img/ana-stik.png",
-        descricao: "Versão alternativa da renda 'Ana' com padronagem levemente distinta; mantém suavidade e facilidade de aplicação. Perfeita para detalhes finos em lingerie e peças femininas delicadas.",
-        material: "Elástico",
+        id: 17,
+        nome: "Iris",
+        categoria: "Alças",
+        imagem: "img - Copia/Alças/Iris-stik.png",
+        descricao: "A durabilidade que suas peças íntimas merecem, garantindo um ciclo de vida estendido. Iris é a alça macia e altamente resistente ao desgaste, perfeita para lingeries de uso contínuo. Sua construção permite uma fixação eficiente em reguladores, o que garante um ajuste preciso, duradouro e confortável, acompanhando a forma do corpo em todos os momentos.",
+        material: "Elástico"
     },
-];
+{
+        id: 19,
+        nome: "Mirela",
+        categoria: "Alças",
+        imagem: "img - Copia/Alças/mirela-stik.png",
+        descricao: "Adicione um toque de requinte e suavidade em suas coleções. Mirela é a alça com acabamento acetinado e toque excepcionalmente delicado, sendo a escolha ideal para lingeries e vestuário que se enquadram na categoria premium.Ela une um visual incrivelmente refinado e elegante com um desempenho elástico funcional e superior, elevando o valor percebido das suas criações no mercado de luxo.",
+        material: "Elástico"
+    },
+    {
+        id: 20,
+        nome: "Nadia",
+        categoria: "Alças",
+        imagem: "img - Copia/Alças/nadia-stik.png",
+        descricao: "Busque máxima versatilidade e confiança para diversos designs. Nadia é a alça que se destaca por ser altamente durável e versátil, pronta para ser aplicada desde moda íntima de base até acessórios de vestuário que exigem mais resistência. Sua construção robusta garante a combinação perfeita entre resistência e flexibilidade, adaptando-se a diferentes estilos e necessidades de costura com facilidade.",
+        material: "Elástico"
+    },
 
+    // Bases
+    {
+        id: 21,
+        nome: "Caricia",
+        categoria: "Bases",
+        imagem: "img - Copia/Bases/caricia-stik.png",
+        descricao: "Confeccione bases com conforto e maleabilidade. Carícia é a base macia ideal para cós e acabamentos, graças ao seu toque suave e excelente capacidade de recuperação elástica. Ela é a garantia de conforto absoluto para peças que estão em contato direto com a pele, proporcionando uma experiência agradável e de bem-estar a cada uso, sem perder a capacidade de ajuste.",
+        material: "Elástico"
+    },
+    {
+        id: 22,
+        nome: "Cintra",
+        categoria: "Bases",
+        imagem: "img - Copia/Bases/cintra-stik.png",
+        descricao: "Estrutura e suporte sem a sensação de rigidez. Cintra é a base com estabilidade dimensional superior, o que a torna perfeita para estruturar cós e bustos de forma eficaz. Oferece o suporte técnico necessário com uma flexibilidade ideal, garantindo peças que são seguras, confortáveis e com um caimento que se mantém impecável ao longo do tempo.",
+        material: "Elástico"
+    },
+    {
+        id: 23,
+        nome: "Diana",
+        categoria: "Bases",
+        imagem: "img - Copia/Bases/diana-stik (1).png",
+        descricao: "Encontre o equilíbrio perfeito entre compressão e liberdade. Diana oferece um suporte balanceado e uma recuperação elástica excepcional, tornando-a a escolha ideal para peças que precisam de uma leve compressão e estabilidade duradoura. Sua composição assegura que a forma e o conforto da roupa sejam mantidos, mesmo após ser usada e lavada repetidas vezes.",
+        material: "Elástico"
+    },
+    {
+        id: 24,
+        nome: "Lady",
+        categoria: "Bases",
+        imagem: "img - Copia/Bases/lady-stik.png",
+        descricao: "Sofisticação e performance garantidas para suas coleções de alto padrão. Lady é a base com acabamento premium, toque extremamente agradável e alta resistência ao estiramento. É desenvolvida para coleções de luxo, oferecendo conforto prolongado, durabilidade superior e elevando instantaneamente o nível de sofisticação de cada peça produzida.",
+        material: "Elástico"
+    },
+    {
+        id: 25,
+        nome: "Leno",
+        categoria: "Bases",
+        imagem: "img - Copia/Bases/leno-stik.png",
+        descricao: "Obtenha a firmeza e a flexibilidade ideais para o seu design. Leno é a base robusta para peças que exigem firmeza e flexibilidade controlada. É a solução perfeita para cós e barras que precisam manter a forma e a estrutura mesmo sob uso e tensão intensa, garantindo qualidade técnica e resistência em cada aplicação.",
+        material: "Elástico"
+    },
+    {
+        id: 26,
+        nome: "Nayane",
+        categoria: "Bases",
+        imagem: "img - Copia/Bases/nayane-stik.png",
+        descricao: "Consistência de alta performance para a sua produção. Nayane é a base que garante um padrão consistente em todas as tiragens, com acabamento impecável. Sua composição técnica garante durabilidade e mantém a integridade estrutural da peça após diversas lavagens, sendo um material confiável que valoriza cada detalhe final.",
+        material: "Elástico"
+    },
+
+    // Elásticos Crus
+    {
+        id: 27,
+        nome: "Beta",
+        categoria: "Elásticos Crus",
+        imagem: "img - Copia/Elásticos Crus/beta-stik (1).png",
+        descricao: "O ponto de partida para a qualidade e robustez. Beta é o elástico cru projetado para máxima durabilidade e estabilidade na sua forma mais pura. É a matéria-prima ideal para ser utilizada em processos industriais que demandam material extremamente resistente, sem tingimento, e com um desempenho técnico superior garantido em todas as etapas da sua linha de produção.",
+        material: "Elástico"
+    },
+    {
+        id: 30,
+        nome: "Flor",
+        categoria: "Elásticos Crus",
+        imagem: "img - Copia/Elásticos Crus/flor-stik (2).png",
+        descricao: "Flexibilidade essencial para inovar em seus designs. Flor é o elástico cru versátil, que se destaca pela sua excelente capacidade de recuperação elástica. É indicado para múltiplas aplicações onde a flexibilidade é o fator crucial, garantindo um desempenho de base sólido e adaptável antes de receber o tingimento ou acabamento final.",
+        material: "Elástico"
+    },
+    {
+        id: 31,
+        nome: "Fortim",
+        categoria: "Elásticos Crus",
+        imagem: "img - Copia/Elásticos Crus/fortim-stik.png",
+        descricao: "A base da sua resistência estrutural. Fortim é o elástico cru de altíssima robustez, desenvolvido para ser aplicado em peças que exigem máxima firmeza e resistência à tensão. Ele é a garantia de durabilidade e fornece uma estrutura sólida para o vestuário que será submetido a um uso intenso e prolongado.",
+        material: "Elástico"
+    },
+    {
+        id: 32,
+        nome: "Iracema",
+        categoria: "Elásticos Crus",
+        imagem: "img - Copia/Elásticos Crus/iracema-stik.png",
+        descricao: "O preparo perfeito para receber a cor. Iracema é o elástico cru que entrega um desempenho consistente e é a base ideal para produtos que precisam de estabilidade e estão prontos para entrar em processos de coloração. Ele mantém a qualidade e a elasticidade essenciais antes de receber o toque final e se transformar em um produto acabado.",
+        material: "Elástico"
+    },
+    {
+        id: 33,
+        nome: "Jeri",
+        categoria: "Elásticos Crus",
+        imagem: "img - Copia/Elásticos Crus/jeri-stik.png",
+        descricao: "Ganhe agilidade e mantenha a qualidade na sua linha de produção. Jeri é o elástico cru que se destaca por ser de fácil costura e possuir excelente resistência. É ideal para confecções que valorizam a praticidade e a rapidez na montagem, garantindo uma estrutura sólida e de qualidade em cada etapa do processo produtivo.",
+        material: "Elástico"
+    },
+    {
+        id: 34,
+        nome: "Plla",
+        categoria: "Elásticos Crus",
+        imagem: "img - Copia/Elásticos Crus/plla-stik.png",
+        descricao: "Alto desempenho técnico para as maiores demandas do mercado. Plla é o elástico cru técnico, perfeito para processos industriais exigentes e de grande volume. Ele oferece a firmeza, a durabilidade e o desempenho superior necessários para o uso em larga escala, com uma garantia de qualidade que assegura a padronização do seu produto.",
+        material: "Elástico"
+    },
+    {
+        id: 35,
+        nome: "Plus II",
+        categoria: "Elásticos Crus",
+        imagem: "img - Copia/Elásticos Crus/plusii-stik.png",
+        descricao: "A garantia de que o ajuste será mantido, sempre. Plus II é o elástico cru que possui estabilidade dimensional excepcional. É um material essencial para garantir que as medidas das peças sejam preservadas e não se alterem, mesmo após os processos de tingimento e acabamento, mantendo a qualidade e o encaixe perfeito da roupa.",
+        material: "Elástico"
+    },    
+    {
+        id: 36,
+        nome: "Grecia",
+        categoria: "Alças",
+        imagem: "img - Copia/Alças/grecia-stik (1).png",
+        descricao: "Uma alça que garante a precisão do ajuste final. Grecia é a solução técnica para manter a integridade dimensional de suas peças. Sua formulação garante que as medidas da roupa sejam mantidas e estáveis mesmo após passarem por todos os processos de tingimento e acabamento, entregando um resultado final que veste perfeitamente e agrada o consumidor.",
+        material: "Elástico"
+    },
+
+    // Modeladores
+    {
+        id: 37,
+        nome: "Cintarela",
+        categoria: "Modeladores",
+        imagem: "img - Copia/Modeladores/cintarela2-stik (1).png",
+        descricao: "Desenvolva modeladores com definição, conforto e durabilidade inigualáveis. Cintarela é o elástico que proporciona um suporte e um ajuste preciso para peças que demandam compressão. Sua construção técnica garante que o vestuário mantenha a forma e a compressão necessária por um longo período de tempo, valorizando a silhueta e o design.",
+        material: "Elástico"
+    },
+
+    {
+        id: 39,
+        nome: "Belly",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/bellypersonalisados-stik.png",
+        descricao: "Adicione um toque de luxo e personalidade à sua linha premium. Esta é a versão customizada do elástico Belly, com um acabamento diferenciado e resistência superior. O produto adiciona um toque exclusivo e visualmente rico às suas peças, mantendo o alto desempenho e a qualidade que são esperados de um material premium.",
+        material: "Elástico"
+    },
+    {
+        id: 40,
+        nome: "Fenix",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/fenix-stik.png",
+        descricao: "A sua identidade em destaque com performance confiável. Fenix é o elástico que possui um design exclusivo e desempenho comprovado, desenvolvido sob medida para as necessidades da sua marca. Ele garante que a integridade da estampa ou padrão personalizado se mantenha impecável, reforçando a comunicação visual da sua coleção.",
+        material: "Elástico"
+    },
+    {
+        id: 41,
+        nome: "Fox",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/fox-stik.png",
+        descricao: "Maximize o apelo visual customizado para todas as suas peças. Fox é o elástico personalizado e versátil, que oferece uma excelente área de impressão para a sua marca. Ele combina a funcionalidade do elástico com um forte apelo visual customizado e marcante, elevando o design da sua linha de vestuário.",
+        material: "Elástico"
+    },
+    {
+        id: 42,
+        nome: "Gym",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/gym-stik.png",
+        descricao: "Conquiste o mercado esportivo com estilo e funcionalidade. Gym é o elástico personalizado ideal para aplicações fitness e esportivas. Ele combina alta elasticidade e uma notável resistência ao suor e lavagens, garantindo que a personalização da sua marca permaneça intacta, independentemente da intensidade do exercício.",
+        material: "Elástico"
+    },
+    {
+        id: 43,
+        nome: "Jana",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/jana-stik.png",
+        descricao: "Conforto e estilo pensados sob medida para o seu público. Jana é o elástico que harmoniza um toque agradável com um design que pode ser totalmente customizado. É perfeito para linhas de moda íntima que buscam detalhes personalizados e o máximo de bem-estar para o uso prolongado.",
+        material: "Elástico"
+    },
+    {
+        id: 44,
+        nome: "Kiss",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/kiss-stik.png",
+        descricao: "A delicadeza do toque que dura. Kiss é o elástico personalizado com toque suave e resistência ideal para o uso diário. Permite a criação de designs delicados e esteticamente agradáveis, sem abrir mão da durabilidade e da resistência necessárias para peças de uso contínuo.",
+        material: "Elástico"
+    },
+    {
+        id: 45,
+        nome: "Lexia",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/lexia-stik.png",
+        descricao: "Design moderno com um caimento e ajuste perfeitos. Lexia é o elástico de visual contemporâneo e ótimo caimento, que oferece total possibilidade de customização. É a escolha ideal para coleções que priorizam um ajuste perfeito, durável e um forte apelo de design na cintura ou em acabamentos.",
+        material: "Elástico"
+    },
+    {
+        id: 46,
+        nome: "Lion",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/lion-stik.png",
+        descricao: "Força e exclusividade em suas peças mais estruturadas. Lion é o elástico personalizado indicado para vestuário mais robusto ou que exige maior sustentação. Ele combina a firmeza estrutural do material com a visibilidade e a exclusividade da sua personalização, sendo ideal para cós de alta pressão.",
+        material: "Elástico"
+    },
+    {
+        id: 47,
+        nome: "Liptus",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/liptus-stik.png",
+        descricao: "Padrão consistente e confiabilidade garantida em larga escala. Liptus é o elástico personalizado que oferece um acabamento confiável e estável. Sua consistência técnica o torna o material perfeito para tiragens industriais que exigem uma padronização rigorosa e sem falhas.",
+        material: "Elástico"
+    },
+    {
+        id: 48,
+        nome: "Lisboa",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/lisboa-stik.png",
+        descricao: "Elegância e alta resistência para o seu segmento de luxo. Lisboa é um elástico de estética refinada e alta resistência ao estiramento, com amplas opções de customização. É perfeito para agregar valor, exclusividade e um acabamento de alto padrão em peças de luxo e alta-costura.",
+        material: "Elástico"
+    },
+    {
+        id: 50,
+        nome: "Master",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/masterpersonalisado-stik.png",
+        descricao: "A durabilidade e a resistência Master com a identidade da sua marca. Esta é a versão customizada do elástico Master, com personalização de alta durabilidade. Ele combina a resistência estrutural inquestionável com a forte e marcante identidade visual da sua marca, sendo ideal para peças que serão muito usadas.",
+        material: "Elástico"
+    },
+    {
+        id: 51,
+        nome: "Plus II",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/pluspesonalisados-stik.png",
+        descricao: "Firmeza, conforto e a sua assinatura em destaque. Este elástico equilibra sustentação e elasticidade de forma ideal, agora em uma versão totalmente customizada. É a solução perfeita para quem busca um ajuste confortável, durável e deseja manter a marca em evidência no cós ou alça.",
+        material: "Elástico"
+    },
+    {
+        id: 52,
+        nome: "Puma",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/puma-foto.png",
+        descricao: "Força e um estilo marcante que se destacam no vestuário. Puma é o elástico com visual robusto e uma construção resistente, que permite uma customização de alto impacto. É perfeito para a moda esportiva e peças que exigem um forte apelo visual, sem comprometer a durabilidade.",
+        material: "Elástico"
+    },
+    {
+        id: 53,
+        nome: "Senna",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/senna-stik.png",
+        descricao: "Durabilidade e a visibilidade da marca que resistem ao tempo. Senna é o elástico personalizado com excelente resistência ao desgaste e ao atrito. É ideal para aplicações em que a durabilidade do material e a visibilidade da marca são cruciais e precisam ser mantidas em condições de uso intenso.",
+        material: "Elástico"
+    },
+    {
+        id: 54,
+        nome: "Venus",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/venus-stik.png",
+        descricao: "O toque de luxo e a suavidade em um acabamento premium. Venus é o elástico personalizado com toque suave e acabamento superior. Ele adiciona um detalhe de luxo e conforto imediato às peças, valorizando instantaneamente a identidade e o cuidado da sua marca com o produto.",
+        material: "Elástico"
+    },
+    {
+        id: 55,
+        nome: "Virtus",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/virtus-stik.png",
+        descricao: "Confiabilidade técnica e estética premium para todas as suas criações. Virtus é o elástico personalizado que oferece consistência e um visual sofisticado. Sua construção garante um encaixe perfeito e duradouro, sendo um material de alta qualidade para peças de vestuário.",
+        material: "Elástico"
+    },
+    {
+        id: 56,
+        nome: "X Nillo",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/xnillo-stik.png",
+        descricao: "O elástico versátil e de alta qualidade para qualquer desafio. X Nillo é um produto personalizado com alto nível de acabamento e grande versatilidade. Adapta-se bem a diferentes tipos de peças e métodos de costura, assegurando sempre um resultado final de alta qualidade e resistência.",
+        material: "Elástico"
+    },
+
+    // Premium
+    {
+        id: 58,
+        nome: "Camila",
+        categoria: "Premium",
+        imagem: "img - Copia/Premium/camila-stik.png",
+        descricao: "Elegância e resistência que definem o padrão premium. Camila é o elástico que combina estilo e uma durabilidade superior. Sua textura e brilho são ideais para peças que buscam um diferencial estético no acabamento e a garantia de uma longa vida útil do vestuário.",
+        material: "Elástico"
+    },
+    {
+        id: 59,
+        nome: "Listras",
+        categoria: "Premium",
+        imagem: "img - Copia/Premium/listras-stik.png",
+        descricao: "Um detalhe sofisticado e durável que perdura no tempo. Listras é o elástico premium que apresenta um visual listrado diferenciado e resistente. Adiciona um toque de design moderno e sofisticado, mantendo a qualidade técnica e o desempenho elástico superior esperado da linha premium.",
+        material: "Elástico"
+    },
+    // Rendas
+    {
+        id: 61,
+        nome: "Ana Bicolor",
+        categoria: "Rendas",
+        imagem: "img - Copia/Rendas/anabivolor-stik.png",
+        descricao: "Contraste visual e elegância em cada centímetro da peça. Ana Bicolor é a renda que apresenta uma padronagem em duas cores, oferecendo um contraste estético elegante e um caimento excelente. É a escolha perfeita para peças que desejam um toque de cor sofisticado e um design inconfundível.",
+        material: "Elástico"
+    },
+    {
+        id: 62,
+        nome: "Capi",
+        categoria: "Rendas",
+        imagem: "img - Copia/Rendas/capi-stik.png",
+        descricao: "A versatilidade do material para compor peças elegantes e detalhes decorativos. Capi é a renda cuja estrutura garante durabilidade e mantém a delicadeza do desenho original intacta, mesmo após o uso contínuo e diversas lavagens. É um material confiável para criar composições sofisticadas.",
+        material: "Elástico"
+    },
+    {
+        id: 63,
+        nome: "Eva",
+        categoria: "Rendas",
+        imagem: "img - Copia/Rendas/eva-stik.png",
+        descricao: "O máximo de conforto e suavidade para áreas sensíveis. Eva é a renda de toque macio e acabamento suave, sendo ideal para aplicações em áreas da pele que demandam maior delicadeza. Proporciona um conforto extremo ao vestir e um visual delicado ao produto final.",
+        material: "Elástico"
+    },
+    {
+        id: 64,
+        nome: "Ina",
+        categoria: "Rendas",
+        imagem: "img - Copia/Rendas/ina-stik.png",
+        descricao: "Leveza e discrição para a criação de detalhes finos e acabamentos delicados. Ina é a renda que combina um visual delicado com alta maleabilidade. É a escolha perfeita para aplicações em peças femininas que buscam leveza, um caimento suave e um acabamento discreto, porém elegante.",
+        material: "Elástico"
+    },
+    {
+        id: 65,
+        nome: "Lara",
+        categoria: "Rendas",
+        imagem: "img - Copia/Rendas/lara-stik.png",
+        descricao: "Beleza estética e ajuste confortável sem apertar. Lara é a renda que combina leveza e resistência, ideal para ser utilizada em acabamentos de cós e pernas. Oferece um bom nível de ajuste e conforto, mantendo a beleza do padrão e garantindo que a peça fique no lugar sem causar incômodo.",
+        material: "Elástico"
+    },
+    {
+        id: 66,
+        nome: "Luna",
+        categoria: "Rendas",
+        imagem: "img - Copia/Rendas/luna-stik.png",
+        descricao: "O material chave para composições elegantes e luxuosas. Luna é a renda que possui uma aparência sofisticada e um design de alto padrão, perfeita para coleções que exigem excelência. Sua construção a torna uma excelente escolha para agregar um valor percebido alto aos seus produtos.",
+        material: "Elástico"
+    },
+    {
+        id: 67,
+        nome: "Mirra",
+        categoria: "Rendas",
+        imagem: "img - Copia/Rendas/mirra-stik.png",
+        descricao: "Acabamento primoroso para peças finas com durabilidade garantida. Mirra é a renda ideal para detalhes delicados e bordas de peças íntimas. A sua delicadeza visual é complementada pela resistência necessária para o uso contínuo, tornando-a funcional e bela.",
+        material: "Elástico"
+    },
+    {
+        id: 68,
+        nome: "Sofia",
+        categoria: "Rendas",
+        imagem: "img - Copia/Rendas/sofia-stik.png",
+        descricao: "Estética e funcionalidade em perfeita harmonia. Sofia é a renda que equilibra a beleza do design com o desempenho técnico. Oferece um excelente nível de elasticidade e estabilidade, sendo ideal para aplicações em que o conforto e a durabilidade do material são essenciais.",
+        material: "Elástico"
+    },
+
+    // Viés
+    {
+        id: 70,
+        nome: "Atlas",
+        categoria: "Viés",
+        imagem: "img - Copia/Viés/atlas-stik (1).png",
+        descricao: "Estrutura firme e bom caimento sem adicionar volume. Atlas é o viés com estrutura sólida e bom caimento, ideal para o reforço de costuras e contornos. Proporciona estabilidade técnica, garantindo que o acabamento seja robusto, elegante e não comprometa a leveza do tecido.",
+        material: "Elástico"
+    },
+    {
+        id: 71,
+        nome: "Eros",
+        categoria: "Viés Com Arco",
+        imagem: "img - Copia/Viés/eros-stik (1).png",
+        descricao: "Refinamento e resistência invisível para um acabamento superior. Eros é o viés de toque refinado, com acabamento discreto e notável resistência a atrito. É excelente para aplicações que exigem durabilidade e uma transição suave, praticamente imperceptível, entre os tecidos.",
+        material: "Elástico"
+    },
+    {
+        id: 72,
+        nome: "Nud",
+        categoria: "Viés Com Arco",
+        imagem: "img - Copia/Viés/nudvies-stik.png",
+        descricao: "Conforto e discrição para peças que exigem máximo bem-estar. Nud é o viés com toque suave e alta maleabilidade. É ideal para ser usado em acabamentos de peças íntimas e de moda praia, onde o conforto na pele e a discrição visual são a prioridade absoluta no design.",
+        material: "Elástico"
+    },
+    {
+        id: 73,
+        nome: "Senna",
+        categoria: "Viés",
+        imagem: "img - Copia/Viés/sennavies-stik.png",
+        descricao: "A elegância de um reforço que dura. Senna é o viés especialmente indicado para o reforço de costuras, unindo um visual elegante com alta funcionalidade. Sua construção robusta garante que o acabamento resista ao uso contínuo e à tensão sem perder a forma ou a integridade.",
+        material: "Elástico"
+    },
+    {
+        id: 74,
+        nome: "Sud",
+        categoria: "Viés Com Arco",
+        imagem: "img - Copia/Viés/sud-stik.png",
+        descricao: "Acabamento profissional em curvas e contornos complexos. Sud é o viés flexível e confiável, perfeito para ser aplicado em áreas com curvas e contornos. Garante um acabamento limpo, profissional e se adapta perfeitamente ao formato da peça, mantendo a forma do design.",
+        material: "Elástico"
+    },
+    {
+        id: 75,
+        nome: "X Nillo",
+        categoria: "Viés",
+        imagem: "img - Copia/Viés/xnillovies-stik.png",
+        descricao: "Viés versátil com acabamento profissional para qualquer desafio. X Nillo é um produto com alto nível de acabamento e grande versatilidade. Adapta-se com excelência a diferentes tipos de peças e métodos de costura, assegurando um resultado de alta qualidade em todos os projetos.",
+        material: "Elástico"
+    },
+    // Novos produtos adicionados - Personalizados
+    {
+        id: 76,
+        nome: "Cleide",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/cleide-stik.png",
+        descricao: "O equilíbrio perfeito entre suporte e conforto personalizado. Cleide é um elástico customizado com elasticidade cuidadosamente balanceada, projetada para oferecer segurança e bem-estar. É ideal para uso em sutiãs e vestuário que exigem um suporte confiável e com a marca em evidência.",
+        material: "Elástico"
+    },
+    {
+        id: 77,
+        nome: "Dila",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/dila-stik.png",
+        descricao: "Personalização macia, com resistência para o dia a dia. Dila é o elástico personalizado, macio e resistente ao desgaste, perfeito para peças íntimas de uso contínuo. Apresenta boa fixação em reguladores, garantindo um ajuste preciso, duradouro e confortável.",
+        material: "Elástico"
+    },
+    {
+        id: 78,
+        nome: "Listras",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/listraspersoanlisada-stik.png",
+        descricao: "Seu design listrado exclusivo com a nossa qualidade técnica. Este é o elástico personalizado com visual listrado diferenciado e alta durabilidade. Ele adiciona um toque de design sofisticado e único, mantendo o desempenho elástico e a qualidade esperada.",
+        material: "Elástico"
+    },
+    {
+        id: 79,
+        nome: "Cintarela",
+        categoria: "Personalizados",
+        imagem: "img - Copia/Personalizados/cintarelapremium-stik.png",
+        descricao: "Modelagem precisa com a identidade da sua marca em destaque. A versão personalizada do Cintarela garante suporte e um ajuste preciso em modeladores. Sua construção robusta mantém a compressão necessária e a forma da peça por mais tempo, com um toque exclusivo.",
+        material: "Elástico"
+    },
+]
 let artigos = null;
 
 /**
@@ -133,6 +547,7 @@ async function loadArtigos() {
     if (artigos) return artigos;
     try {
         const res = await fetch('./artigos.json');
+
         if (!res.ok) throw new Error('status ' + res.status);
         artigos = await res.json();
         return artigos;
@@ -375,31 +790,60 @@ function inicializarMenu() {
 
 
 // Funções para a página inicial
+// Helpers de apresentação
+function normalizeCategoria(cat) {
+    const map = { 'Alças': 'Alça', 'Bases': 'Base' };
+    return map[cat] || cat;
+}
+
+function formatNome(nome) {
+    if (!nome) return '';
+    return nome.replace(/\b\p{L}/gu, (m) => m.toUpperCase());
+}
+
 function criarProdutoCard(produto) {
     const produtoCard = document.createElement('a'); 
     produtoCard.classList.add('produto-card');
     produtoCard.href = `produto.html?id=${produto.id}`;
-    
+    const src = encodeURI(produto.imagem);
     produtoCard.innerHTML = `
-        <img src="${produto.imagem}" alt="${produto.categoria}">
-        <h3>${produto.categoria}</h3>
+        <img src="${src}" alt="${normalizeCategoria(produto.categoria)}">
+        <h3>${normalizeCategoria(produto.categoria)}</h3>
     `;
     return produtoCard;
 }
 
-function exibirProdutos(produtosParaExibir) {
+function criarCategoriaCard(categoria, imagemRepresentativa) {
+    const card = document.createElement('a');
+    card.classList.add('produto-card');
+    card.href = `categoria.html?categoria=${encodeURIComponent(categoria)}`;
+    const src = encodeURI(imagemRepresentativa);
+    card.innerHTML = `
+        <img src="${src}" alt="${categoria}">
+        <h3>${categoria}</h3>
+    `;
+    return card;
+}
+
+function exibirCategorias(produtosParaExibir) {
     const listaProdutosContainer = document.getElementById('lista-produtos');
     if (!listaProdutosContainer) return;
-    
     listaProdutosContainer.innerHTML = '';
-    
-    if (produtosParaExibir.length === 0) {
-        listaProdutosContainer.innerHTML = '<p class="no-results">Nenhum produto encontrado para sua busca.</p>';
+
+    if (!Array.isArray(produtosParaExibir) || produtosParaExibir.length === 0) {
+        listaProdutosContainer.innerHTML = '<p class="no-results">Nenhum produto encontrado.</p>';
         return;
     }
-    
-    produtosParaExibir.forEach(produto => {
-        const card = criarProdutoCard(produto);
+
+    // Agrupa por categoria normalizada e pega o primeiro item como imagem representativa
+    const porCategoria = new Map();
+    produtosParaExibir.forEach(p => {
+        const cat = normalizeCategoria(p.categoria);
+        if (!porCategoria.has(cat)) porCategoria.set(cat, p);
+    });
+
+    porCategoria.forEach((produtoRepresentativo, cat) => {
+        const card = criarCategoriaCard(cat, produtoRepresentativo.imagem);
         listaProdutosContainer.appendChild(card);
     });
 }
@@ -445,7 +889,7 @@ function inicializarPesquisa() {
                 const nomeNormalizado = produto.nome.toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "");
-                const categoriaNormalizada = produto.categoria.toLowerCase()
+                const categoriaNormalizada = normalizeCategoria(produto.categoria).toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "");
 
@@ -457,9 +901,10 @@ function inicializarPesquisa() {
                     const item = document.createElement('a');
                     item.href = `produto.html?id=${produto.id}`;
                     item.classList.add('search-result-item');
+                    const src = encodeURI(produto.imagem);
                     item.innerHTML = `
-                        <img src="${produto.imagem}" alt="${produto.nome}" />
-                        <span>${produto.nome} <small>(${produto.categoria})</small></span>
+                        <img src="${src}" alt="${formatNome(produto.nome)}" />
+                        <span>${formatNome(produto.nome)} <small>(${normalizeCategoria(produto.categoria)})</small></span>
                     `;
                     searchResultsList.appendChild(item);
                 });
@@ -826,11 +1271,68 @@ function carregarDetalhesDoProduto() {
     const produto = produtos.find(p => p.id === produtoId);
 
     if (produto) {
-        document.getElementById('main-product-image').src = produto.imagem;
-        document.querySelector('.product-name').textContent = produto.nome;
-        document.querySelector('.product-description').textContent = produto.descricao;
-        document.querySelector('.product-material').textContent = produto.material;
-        document.querySelector('.product-categoria').textContent = produto.categoria;
+        document.getElementById('main-product-image').src = encodeURI(produto.imagem);
+        document.querySelector('.product-name').textContent = formatNome(produto.nome);
+
+        // Subtítulo = primeira frase da descrição
+        const extrairPrimeiraFrase = (texto) => {
+            if (!texto) return { primeira: '', resto: '' };
+            const m = texto.match(/^[^.!?]+[.!?]/);
+            if (m) {
+                const primeira = m[0].trim();
+                const resto = texto.slice(m[0].length).trim();
+                return { primeira, resto };
+            }
+            return { primeira: texto.trim(), resto: '' };
+        };
+
+        const { primeira, resto } = extrairPrimeiraFrase(produto.descricao || '');
+        const subEl = document.querySelector('.product-subtitle');
+        if (subEl) subEl.textContent = primeira;
+
+        // Descrição em parágrafos (quebra por sentenças e agrupa em blocos de 1-2 sentenças)
+        const toParagraphs = (texto) => {
+            if (!texto) return [];
+            const sentencas = texto.split(/(?<=[.!?])\s+/).filter(Boolean);
+            const paragrafos = [];
+            for (let i = 0; i < sentencas.length; i += 2) {
+                paragrafos.push(sentencas.slice(i, i + 2).join(' '));
+            }
+            return paragrafos;
+        };
+
+        const descEl = document.querySelector('.product-description-modern');
+        if (descEl) {
+            descEl.innerHTML = '';
+            const paragrafos = toParagraphs(resto);
+            if (paragrafos.length === 0 && primeira) {
+                // Se não houver resto, cria um parágrafo com a descrição completa (fallback)
+                paragrafos.push(resto || produto.descricao);
+            }
+            paragrafos.forEach(txt => {
+                const p = document.createElement('p');
+                p.textContent = txt;
+                descEl.appendChild(p);
+            });
+        }
+
+        // Linha meta (Material | Categoria)
+        const metaEl = document.querySelector('.product-meta');
+        if (metaEl) metaEl.innerHTML = `Material: ${produto.material} &nbsp;|&nbsp; Categoria: ${normalizeCategoria(produto.categoria)}`;
+
+        // Renderiza cards 'Veja também' (produtos da mesma categoria, exceto o atual)
+        const grid = document.querySelector('.veja-tambem-grid');
+        if (grid) {
+            grid.innerHTML = '';
+            const outros = produtos.filter(p => normalizeCategoria(p.categoria) === normalizeCategoria(produto.categoria) && p.id !== produto.id);
+            outros.slice(0, 3).forEach(p => {
+                const card = document.createElement('a');
+                card.classList.add('produto-card');
+                card.href = `produto.html?id=${p.id}`;
+                card.innerHTML = `<img src="${encodeURI(p.imagem)}" alt="${formatNome(p.nome)}"><h3>${formatNome(p.nome)}</h3>`;
+                grid.appendChild(card);
+            });
+        }
 
         const variationOptions = document.querySelector('.variation-options');
         if (variationOptions) {
@@ -1051,6 +1553,7 @@ async function inicializarPagina() {
         
     
     const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname === '/';
+    const isCategoryPage = window.location.pathname.includes('categoria.html');
     const isProductPage = window.location.pathname.includes('produto.html');
     const isBlogPage = window.location.pathname.includes('blog.html');
     const isArticlePage = window.location.pathname.includes('artigo.html');
@@ -1063,7 +1566,7 @@ async function inicializarPagina() {
 
     if (isIndexPage) {
         inicializarHeaderIndex();
-        exibirProdutos(produtos);
+        exibirCategorias(produtos);
         initBannerCarousel();
         setupDraggableCarousel(document.getElementById('lista-produtos'));
         const prevBtn = document.getElementById('prevBtn');
@@ -1090,11 +1593,11 @@ async function inicializarPagina() {
             return;
         }
 
-        document.getElementById('main-product-image').src = produto.imagem;
-        document.querySelector('.product-name').textContent = produto.nome;
+        document.getElementById('main-product-image').src = encodeURI(produto.imagem);
+        document.querySelector('.product-name').textContent = formatNome(produto.nome);
         document.querySelector('.product-description').textContent = produto.descricao;
         document.querySelector('.product-material').textContent = produto.material;
-        document.querySelector('.product-categoria').textContent = produto.categoria;
+        document.querySelector('.product-categoria').textContent = normalizeCategoria(produto.categoria);
     } else if (isBlogPage) {
         displayArticles();
         // -------------------- Botão de cadastrar artigo -----------------------------
@@ -1114,6 +1617,8 @@ async function inicializarPagina() {
         inicializarPaginaTermos();
     } else if (isFaleConoscoPage) {
             inicializarPaginaFaleConosco();
+    } else if (isCategoryPage) {
+        renderCategoriaPage();
     }
 
     const linkIntitucional = document.getElementById('link-institucional');
@@ -1427,3 +1932,55 @@ async function collectAndSendLocation(toEmail) {
 window.collectAndSendLocation = collectAndSendLocation;
 
 // ---------- Fim das funções de localização ----------
+
+// -------- Página de Categoria: lista produtos por categoria --------
+function renderCategoriaPage() {
+    const params = new URLSearchParams(window.location.search);
+    let categoria = params.get('categoria') || '';
+    try { categoria = decodeURIComponent(categoria); } catch (_) {}
+    const catNorm = normalizeCategoria(categoria);
+
+    const container = document.getElementById('categoria-container');
+    if (!container) return;
+
+    // Título
+    const titulo = document.getElementById('categoria-title');
+    if (titulo) titulo.textContent = catNorm;
+
+    // Filtra produtos
+    const itens = produtos.filter(p => normalizeCategoria(p.categoria) === catNorm);
+
+    if (!itens.length) {
+        container.innerHTML = '<p class="no-results">Nenhum produto nesta categoria.</p>';
+        return;
+    }
+
+    // Reordena para começar pelo meio e alternar lados
+    const centralizados = [];
+    const meio = Math.floor(itens.length / 2);
+    centralizados.push(itens[meio]);
+    let left = meio - 1;
+    let right = meio + 1;
+    while (left >= 0 || right < itens.length) {
+        if (right < itens.length) centralizados.push(itens[right]);
+        if (left >= 0) centralizados.push(itens[left]);
+        right++;
+        left--;
+    }
+
+    // Monta cards
+    const frag = document.createDocumentFragment();
+    centralizados.forEach(p => {
+        const a = document.createElement('a');
+        a.href = `produto.html?id=${p.id}`;
+        a.classList.add('produto-card');
+        const src = encodeURI(p.imagem);
+        a.innerHTML = `
+            <img src="${src}" alt="${formatNome(p.nome)}">
+            <h3>${formatNome(p.nome)}</h3>
+        `;
+        frag.appendChild(a);
+    });
+    container.innerHTML = '';
+    container.appendChild(frag);
+}

@@ -467,23 +467,61 @@ body.light-mode .highlight-item span {
     cursor: grabbing;
 }
 
+/* --- Página de Categoria (grid 1/2/3 colunas) --- */
+.category-page { padding: 24px 16px; }
+.category-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 50px;
+    overflow: visible;
+    padding: 200px;
+    align-items: center;
+}
+
+.category-page h2 { 
+    text-align: center; 
+    margin: 0 0 20px; 
+    font-size: 80px;
+}
+
+
+
+@media (min-width: 768px) {
+    .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 992px) {
+    .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.category-grid .produto-card {
+    width: 100%;
+    flex: none;
+}
+.category-grid .produto-card img {
+    width: 100%;
+    height: auto;
+}
+
 /* Seção da Página do Produto */
 .product-page {
     background-color: var(--bg-color-dark);
     color: var(--text-color-light);
-    padding: 80px 50px;
+    padding: 80px 20px; /* container mais enxuto nas laterais */
     min-height: 100vh;
 }
 
 .product-container {
     display: flex;
-    gap: 50px;
+    flex-direction: row-reverse; /* imagem à direita, texto à esquerda */
+    gap: 40px;
     align-items: flex-start;
+    max-width: 1200px; /* limita o container geral */
+    width: 100%;
+    margin: 0 auto; /* centraliza na página */
 }
 
 /* Coluna da Esquerda: Imagem e Miniaturas */
 .product-image-section {
-    flex: 1;
+    flex: 1 1 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -496,6 +534,11 @@ body.light-mode .highlight-item span {
     border-radius: 80px;
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
+
+body.light-mode #main-product-image {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.281)
+}
+
 
 .product-thumbnails {
     margin-top: 20px;
@@ -524,14 +567,130 @@ body.light-mode .highlight-item span {
 
 /* Coluna da Direita: Detalhes do Produto */
 .product-details-section {
-    flex: 1;
+    flex: 1 1 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* texto encostado à imagem, alinhado à esquerda */
+    text-align: center;
 }
+.product-details-section p {
+    margin-bottom: 1em;
 
+}
 .product-name {
     font-size: 3rem;
     font-weight: 700;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
+    justify-content: center;
+    text-align: center; /* override do alinhamento global */
+    max-width: 680px;
 }
+.product-subtitle {
+    font-size: 1.70rem; /* menor que o título, com destaque */
+    font-weight: 600;
+    margin: 6px 0 28px 0;
+    text-align: left;
+    max-width: 680px;
+}
+.product-details-modern {
+    font-size: 1.15em;
+    line-height: 1.9; /* texto mais espaçado */
+    color: var(--text-color-light);
+    background: none;
+    margin-bottom: 40px;
+    padding: 0; /* alinhar com os títulos */
+    text-align: left;
+    max-width: 680px; /* largura confortável do bloco de texto */
+}
+
+
+.product-details-modern span {
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 15px;
+}
+.product-description-modern {
+    font-size: 1.15em;
+    color: var(--text-color-light);
+    margin-bottom: 0;
+    /* ocupa toda a largura do bloco de detalhes */
+    width: 100%;
+}
+.product-description-modern p {
+    margin: 0 0 14px 0; /* espaçamento entre parágrafos */
+}
+.product-meta {
+    opacity: 0.85;
+    font-size: 0.95rem;
+    margin-top: 10px;
+}
+.veja-tambem-section {
+    margin-top: 40px;
+    padding: 0 5px 40px 5px;
+}
+.veja-tambem-title {
+    font-size: 2em;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: left;
+    color: var(--accent-color);
+}
+.veja-tambem-grid {
+    display: grid;
+    
+    /* Centraliza o bloco do grid na página */
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px; 
+    
+    /* Tamanho mínimo menor e colunas que se esticam para eliminar “vãos” entre itens */
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); 
+    
+    /* Itens ocupam toda a largura da coluna (evita espaço extra dentro da célula) */
+    justify-items: stretch; 
+    
+    /* Espaçamento entre os itens (ajustado para um valor padrão) */
+    gap: 5px; 
+}
+
+.veja-tambem-grid .produto-card {
+    background: var(--secondary-background);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: transform 0.3s;
+    text-align: left;
+    color: #fff;
+    overflow: hidden;
+    
+    /* Cards preenchem a coluna para remover espaço lateral adicional */
+    width: 100%; 
+}
+
+
+
+.veja-tambem-grid .produto-card img {
+    width: 100%;
+    /* 3. Aumenta a altura da imagem para preencher melhor o novo card (de 180px para 220px) */
+    height: 250px; 
+    object-fit: cover;
+    border-radius: 0;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.veja-tambem-grid .produto-card h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: var(--bg-color-light);
+    text-align: left;
+    padding: 0 10px 10px 10px;
+}
+.veja-tambem-grid .produto-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+/* a regra acima foi movida para perto da seção */
 
 .product-category {
     font-size: 1.2rem;
@@ -563,6 +722,11 @@ body.light-mode .highlight-item span {
     .product-details-section {
         margin-top: 30px;
     }
+    
+    .veja-tambem-grid .produto-card {
+        width: 250px;
+    }
+
 }
 
 .produto-card {
@@ -576,10 +740,11 @@ body.light-mode .highlight-item span {
     color: #fff;
     position: relative;
     overflow: hidden;
+    text-decoration: none;
 }
 
 .produto-card img {
-    max-width: 100%;
+    width: 100%;
     height: 300px;
     object-fit: cover;
     border-radius: 0;
@@ -589,10 +754,10 @@ body.light-mode .highlight-item span {
 
 .produto-card h3 {
     margin: 0;
-    font-size: 1.3em;
+    font-size: 1.2em;
     color: var(--bg-color-light);
     text-align: left;
-    padding: 0 10px;
+    padding: 0 10px 10px 10px;
 }
 
 .carousel-btn {
@@ -723,6 +888,7 @@ body.light-mode .highlight-item span {
 .submenu-terceiro-nivel {
     position: relative; /* Volta para a posição normal */
     left: 0;
+}
 
 .submenu.active::before,
 .submenu-aninhado.active::before,
@@ -745,7 +911,7 @@ body.light-mode .highlight-item span {
     content: '';
     opacity: 0;
 }
-}
+
 .submenu-aninhado,
 .submenu-terceiro-nivel {
     padding-left: 20px;
@@ -1222,7 +1388,8 @@ body.light-mode .highlight-item span {
     font-size: 3em;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 50px;
+    text-align: left; /* substitui alinhamento global centralizado */
+    max-width: 680px; /* mesma largura do bloco de descrição */
     text-transform: uppercase;
     letter-spacing: 2px;
 }
@@ -1660,7 +1827,7 @@ body.light-mode .search-results-dropdown a span small{
         transform: none !important;
     }
 
-    .search
+    /* removido seletor inválido que quebrava o CSS no mobile */
     
     /* Reduz o espaçamento entre os ícones */
     .header-left, .header-right {
@@ -1720,7 +1887,8 @@ body.light-mode .search-results-dropdown a span small{
     .search-results-dropdown {
         right: 0px;
         left: auto;
-        width: var(min(0vw, 340px));
+        /* largura correta no mobile (antes havia uma var() inválida que resultava em 0px) */
+        width: min(60vw, 340px);
         max-height: 56vh;
     }
     .search-results-dropdown a { padding: 12px 14px; }
@@ -1822,6 +1990,25 @@ body.light-mode .search-results-dropdown a span small{
         border-radius: 8px;
         object-fit: cover;
         height: auto;
+    }
+
+    /* Ajustes para página de categoria no mobile */
+    .category-grid {
+        padding: 20px;
+        gap: 20px;
+    }
+    .category-page h2 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        text-align: left;
+    }
+
+    /* Veja também: cards devem ocupar toda a coluna no mobile */
+    .veja-tambem-grid .produto-card {
+        width: 100%;
+    }
+    .veja-tambem-grid {
+        grid-template-columns: 1fr;
     }
 
 }
