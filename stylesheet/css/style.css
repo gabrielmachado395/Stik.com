@@ -573,14 +573,12 @@ body.light-mode #main-product-image {
     align-items: flex-start; /* texto encostado à imagem, alinhado à esquerda */
     text-align: center;
 }
-.product-details-section p {
-    margin-bottom: 1em;
 
-}
 .product-name {
     font-size: 3rem;
     font-weight: 700;
     margin-bottom: 15px;
+    margin-top: 25px;
     justify-content: center;
     text-align: center; /* override do alinhamento global */
     max-width: 680px;
@@ -588,7 +586,7 @@ body.light-mode #main-product-image {
 .product-subtitle {
     font-size: 1.70rem; /* menor que o título, com destaque */
     font-weight: 600;
-    margin: 6px 0 28px 0;
+    margin: 20px 0 40px 0;
     text-align: left;
     max-width: 680px;
 }
@@ -603,7 +601,6 @@ body.light-mode #main-product-image {
     max-width: 680px; /* largura confortável do bloco de texto */
 }
 
-
 .product-details-modern span {
     display: block;
     margin-bottom: 8px;
@@ -616,13 +613,25 @@ body.light-mode #main-product-image {
     /* ocupa toda a largura do bloco de detalhes */
     width: 100%;
 }
+
 .product-description-modern p {
-    margin: 0 0 14px 0; /* espaçamento entre parágrafos */
+    margin: 0 0 40px 0; /* espaçamento entre parágrafos */
+    color: var(--text-color-light);
 }
+
+body.light-mode .product-description-modern p {
+    color: var(--text-color-dark);
+}
+
 .product-meta {
     opacity: 0.85;
     font-size: 0.95rem;
     margin-top: 10px;
+    color: var(--text-color-light);
+}
+
+body.light-mode .product-meta {
+    color: var(--text-color-dark);
 }
 .veja-tambem-section {
     margin-top: 40px;
@@ -2226,7 +2235,7 @@ body.light-mode {
     --accent-color: #8b0000;
     --accent-color-hover: #a33340;
 
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(--bg-color-light);
     color: var(--text-color-dark);
 }
 
@@ -2264,7 +2273,7 @@ body.light-mode .submenu-terceiro-nivel {
 
 /* Footer (Rodapé) */
 body.light-mode .main-footer {
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(--bg-color-light);
     color: var(--text-color-dark);
 }
 
@@ -2283,7 +2292,7 @@ body.light-mode .footer-bottom p {
 body.light-mode .product-highlights,
 body.light-mode .catalogo-section,
 body.light-mode .newsletter-section {
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(--bg-color-light);
 }
 
 body.light-mode .create-main .page-title {
@@ -2292,7 +2301,7 @@ body.light-mode .create-main .page-title {
 
 
 body.light-mode .main-content {
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(--bg-color-light);
 }
 
 body.light-mode .main-content h1, 
@@ -2301,7 +2310,7 @@ body.light-mode .main-content h2{
 }
 
 body.light-mode .catalogo-section {
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(--bg-color-light);
 }
 
 body.light-mode .main-footer{
@@ -2333,7 +2342,7 @@ body.light-mode .produto-card h3{
 
 /* Páginas e Formulários */
 body.light-mode .product-page {
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(--bg-color-light);
     color: var(--text-color-dark);
 }
 
@@ -2341,7 +2350,7 @@ body.light-mode .institutional-page,
 body.light-mode .blog-main,
 body.light-mode .create-main,
 body.light-mode .diferenciais-section {
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(--bg-color-light);
     color: var(--text-color-dark);
 }
 body.light-mode .contact-form-container{
@@ -2350,7 +2359,7 @@ body.light-mode .contact-form-container{
 }
 
 body.light-mode .contact-section{
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(---bg-color-light);
 }
 
 body.light-mode .institutional-page h3,
