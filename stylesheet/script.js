@@ -17,7 +17,7 @@ const produtos = [
     },
     {
         id: 4,
-        nome: "Alca Atena",
+        nome: "Alça Atena",
         categoria: "Personalizados",
         imagem: "./img/Personalizados/alcaatena-stik.png",
         descricao: "Dê vida à sua marca e a eleve a um novo patamar de exclusividade, requinte e sofisticação. Alça Atena é a solução de acabamento premium totalmente personalizada para atender e materializar o seu design e identidade visual. Por ser sob demanda, pode ser desenvolvida em uma ampla variedade de cores, padrões, texturas e larguras, adaptando-se perfeitamente a qualquer necessidade da sua coleção. Este produto não apenas oferece alta resistência e um toque extremamente refinado, mas também se torna um diferencial estético poderoso, capaz de capturar olhares e agregar valor inestimável à sua coleção de moda íntima e vestuário de luxo, fortalecendo o branding.",
@@ -556,6 +556,7 @@ async function loadArtigos() {
         return artigos;
     }
 }
+ 
 
 // utilitário para adiar inicializações não-críticas
 function deferInit(fn) {
@@ -1583,20 +1584,20 @@ async function inicializarPagina() {
     if (isProductPage) {
         carregarDetalhesDoProduto();
         inicializarNewsletterCarousel();
-        const params = new URLSearchParams(window.location.search);
-        const id = parseInt(params.get('id'), 10);
+        // const params = new URLSearchParams(window.location.search);
+        // const id = parseInt(params.get('id'), 10);
 
-        const produto = produtos.find(p => p.id === id);
-        if (!produto) {
-            document.body.innerHTML = "<p>Produto não encontrado.</p>";
-            return;
-        }
+        // const produto = produtos.find(p => p.id === id);
+        // if (!produto) {
+        //     document.body.innerHTML = "<p>Produto não encontrado.</p>";
+        //     return;
+        // }
 
-        document.getElementById('main-product-image').src = encodeURI(produto.imagem);
-        document.querySelector('.product-name').textContent = formatNome(produto.nome);
-        document.querySelector('.product-description').textContent = produto.descricao;
-        document.querySelector('.product-material').textContent = produto.material;
-        document.querySelector('.product-categoria').textContent = normalizeCategoria(produto.categoria);
+        // document.getElementById('main-product-image').src = encodeURI(produto.imagem);
+        // document.querySelector('.product-name').textContent = formatNome(produto.nome);
+        // document.querySelector('.product-description').textContent = produto.descricao;
+        // document.querySelector('.product-material').textContent = produto.material;
+        // document.querySelector('.product-categoria').textContent = normalizeCategoria(produto.categoria);
     } else if (isBlogPage) {
         displayArticles();
         // -------------------- Botão de cadastrar artigo -----------------------------
@@ -1615,7 +1616,7 @@ async function inicializarPagina() {
     } else if (isTermosPage) {
         inicializarPaginaTermos();
     } else if (isFaleConoscoPage) {
-            inicializarPaginaFaleConosco();
+        inicializarPaginaFaleConosco();
     } else if (isCategoryPage) {
         renderCategoriaPage();
     }
@@ -1945,6 +1946,23 @@ function renderCategoriaPage() {
     // Título
     const titulo = document.getElementById('categoria-title');
     if (titulo) titulo.textContent = catNorm;
+
+    // Descrição por categoria (texto curto e único para não deixar vazio)
+    const descEl = document.getElementById('categoria-description');
+    if (descEl) {
+        const descricoes = {
+            'Alça': 'Alças técnicas desenvolvidas para oferecer sustentação, conforto e estética nas suas peças. Do dia a dia ao luxo, nossa linha equilibra resistência, toque agradável e caimento perfeito para diferentes propostas de design.',
+            'Base': 'Bases pensadas para estruturar cós, bustos e barras com estabilidade dimensional e elasticidade controlada. Soluções que dão forma e longevidade às peças, sem abrir mão do conforto e do acabamento premium.',
+            'Elásticos Crus': 'Matérias‑primas em seu estado natural para quem cria e produz com liberdade. Elásticos crus prontos para tingimento e acabamento, com alta resistência, estabilidade e desempenho industrial consistente.',
+            'Modeladores': 'Materiais com compressão e recuperação elástica pensados para modelar com precisão. Ideais para peças que pedem suporte firme, definição de silhueta e conforto durante o uso prolongado.',
+            'Personalizados': 'Acabamentos sob medida que colocam a sua marca em evidência. Estampas, padrões e cores exclusivos, com a nossa qualidade técnica para garantir durabilidade, fidelidade de cor e alto valor percebido.',
+            'Premium': 'Linha premium com toque sofisticado, brilho equilibrado e performance elevada. Produtos que unem estética e durabilidade para coleções de alto padrão e peças que pedem acabamento impecável.',
+            'Rendas': 'Rendas com desenho marcante, toque macio e excelente estabilidade. Beleza e funcionalidade lado a lado para compor detalhes, recortes e acabamentos que elevam o visual das suas criações.',
+            'Viés': 'Vieses versáteis para reforço de costuras, contornos e acabamentos limpos. Maleáveis, resistentes e fáceis de aplicar, garantem resultado profissional em peças do básico ao sofisticado.',
+            'Viés Com Arco': 'Vieses com arco integrado para dar suporte localizado e manter a forma da peça. Perfeitos para sutiãs, corsets e modeladores, combinando estrutura, conforto e acabamento discreto.'
+        };
+        descEl.textContent = descricoes[catNorm] || 'Produtos selecionados para atender diferentes necessidades de criação e produção, combinando desempenho técnico, conforto e acabamento de alto nível.';
+    }
 
     // Filtra produtos
     const itens = produtos.filter(p => normalizeCategoria(p.categoria) === catNorm);

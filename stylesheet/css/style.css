@@ -97,6 +97,7 @@ button {
     align-items: center;
     z-index: 1000;
     transition: transform 0.5s ease-out, background-color 0.5s ease;
+
 }
 
 .top-header.is-hidden {
@@ -213,6 +214,7 @@ button {
     padding: 15px 0;
     font-size: 1.1em;
     transition: color 0.3s ease;
+    
 }
 
 .sidebar-nav a:hover {
@@ -224,6 +226,9 @@ button {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+.submenu .sidebar-link {
+    margin-left: 10px;
 }
 
 /* --- Estilos para os Submenus (2º e 3º Nível) --- */
@@ -281,7 +286,6 @@ body.sidebar-open .blog-main {
 }
 
 
-
 body.sidebar-open .top-header .main-header{
     transform: translateX(var(--sidebar-width))
 }
@@ -335,6 +339,7 @@ section {
     min-height: 50vh;
     padding: 60px 20px;
 }
+
 
 .animate-on-scroll {
     opacity: 0;
@@ -468,20 +473,40 @@ body.light-mode .highlight-item span {
 }
 
 /* --- Página de Categoria (grid 1/2/3 colunas) --- */
-.category-page { padding: 24px 16px; }
+.category-page { 
+    padding: 24px 16px; 
+    max-width: min(1180px, 92vw); /* limita a largura e cria margens laterais */
+    margin: 0 auto;              /* centraliza o bloco inteiro */
+}
 .category-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 50px;
+    gap: 30px;
     overflow: visible;
-    padding: 200px;
     align-items: center;
+    justify-items: center; /* centraliza os cards dentro de cada célula */
+    
 }
 
 .category-page h2 { 
     text-align: center; 
     margin: 0 0 20px; 
     font-size: 80px;
+    
+}
+
+/* Descrição abaixo do título da categoria */
+.category-description{
+    max-width: 980px;
+    margin: 8px auto 36px;
+    text-align: center;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.82);
+    font-size: 2.02rem;
+}
+
+body.light-mode .category-description{
+    color: #4b5563; /* cinza neutro no claro */
 }
 
 
@@ -493,8 +518,10 @@ body.light-mode .highlight-item span {
     .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .category-grid .produto-card {
-    width: 100%;
+    width: 300px;
     flex: none;
+    align-items: center;
+
 }
 .category-grid .produto-card img {
     width: 100%;
@@ -536,7 +563,8 @@ body.light-mode .highlight-item span {
 }
 
 body.light-mode #main-product-image {
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.281)
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.281);
+    background-color: var(--secondary-bg-color-light);
 }
 
 
@@ -665,14 +693,18 @@ body.light-mode .product-meta {
 .veja-tambem-grid .produto-card {
     background: var(--secondary-background);
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    box-shadow: 0 5px 8px rgba(0,0,0,0.12);
     transition: transform 0.3s;
     text-align: left;
     color: #fff;
     overflow: hidden;
     
     /* Cards preenchem a coluna para remover espaço lateral adicional */
-    width: 100%; 
+    width: 526px; 
+}
+
+body.veja-tambem-grid .produto-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.411);
 }
 
 
@@ -696,9 +728,11 @@ body.light-mode .product-meta {
 }
 .veja-tambem-grid .produto-card:hover {
     transform: translateY(-4px) scale(1.03);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    box-shadow: 0 8px 24px rgba(138, 138, 138, 0.411);
 }
-
+body.light-mode .veja-tambem-grid .produto-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18)
+}
 /* a regra acima foi movida para perto da seção */
 
 .product-category {
@@ -1173,7 +1207,7 @@ body.light-mode .product-meta {
 
 /* Estilo para cada cartão de artigo */
 .blog-post {
-    background-color: var(--primary-bg-color); /* Fundo branco ou claro */
+    background-color: var(--bg-color-light); /* Fundo branco ou claro */
     border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
@@ -1182,7 +1216,9 @@ body.light-mode .product-meta {
     flex-direction: column;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
+body.light-mode .blog-post {
+    background-color: var(--secondary-bg-color-light);
+}
 .blog-post:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
@@ -1261,7 +1297,7 @@ body.light-mode .product-meta {
 /* Título e Metadados do Artigo */
 .article-header {
     text-align: center;
-    /* margin-bottom: 100px; */
+    /* height: 10px; */
 }
 
 #article-title {
@@ -1319,6 +1355,7 @@ body.light-mode .product-meta {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.432);
     width: 100%;
     display: block;
+    background-color: var(--secondary-bg-color-light);
     
 }
 
@@ -1348,7 +1385,7 @@ body.light-mode .product-meta {
 }
 
 .article-content p {
-    margin-bottom: 15px;
+    margin-bottom: 30px;
 }
 
 .article-content strong {
@@ -2002,15 +2039,28 @@ body.light-mode .search-results-dropdown a span small{
     }
 
     /* Ajustes para página de categoria no mobile */
+    /* Categoria - mobile: 1 coluna, cards centralizados e responsivos */
     .category-grid {
-        padding: 20px;
-        gap: 20px;
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 18px;
+        justify-items: center;
     }
+    .category-grid .produto-card {
+        width: min(100%, 360px); /* ocupa toda a largura, com limite confortável */
+    }
+    .category-grid .produto-card img { height: auto; }
     .category-page h2 {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        text-align: left;
+        font-size: clamp(1.6rem, 7vw, 2.2rem);
+        margin-bottom: 8px;
+        text-align: center;
     }
+
+    .category-page h2 {
+        font-size: 40px;
+        padding-bottom: 20px;
+    }
+    .category-description { font-size: 1rem; margin: 6px auto 18px; padding: 0 6px; }
 
     /* Veja também: cards devem ocupar toda a coluna no mobile */
     .veja-tambem-grid .produto-card {
@@ -2072,7 +2122,7 @@ body.light-mode .search-results-dropdown a span small{
 }
 
 body.light-mode .faq-section {
-    background-color: var(--secondary-bg-color-light);
+    background-color: var(--bg-color-light);
 }
 body.light-mode .faq-section .page-title,
 body.light-mode .faq-section h3{
@@ -2215,7 +2265,7 @@ body.light-mode .contact-item p {
 }
 
 body.light-mode .cta-button {
-    color: var(--secondary-bg-color-light);
+    color: var(--bg-color-light);
 }
 
 .cta-button:hover {
@@ -2228,8 +2278,8 @@ body.light-mode {
     /* Paleta de Cores */
     --text-color-dark: #4e4e4e;
     --bg-color-light: #F8FAFC;
-    --secondary-bg-color-light: #D9EAFD;
-    --tertiary-bg-color-light: #BCCCDC;
+    --secondary-bg-color-light: #BCCCDC;
+    --tertiary-bg-color-light: #9AA6B2;
     
     /* Cores de Destaque (Mantidas da paleta original) */
     --accent-color: #8b0000;
@@ -2257,18 +2307,18 @@ body.light-mode .top-header.scrolled {
 
 /* Sidebar (menu lateral) */
 body.light-mode .sidebar {
-    background-color: var(--tertiary-bg-color-light);
+    background-color: var(--secondary-bg-color-light);
     color: var(--text-color-dark);
 }
 
 body.light-mode .sidebar-nav li {
-    border-bottom-color: var(--secondary-bg-color-light);
+    border-bottom-color: var(--tertiary-bg-color-light);
 }
 
 body.light-mode .submenu,
 body.light-mode .submenu-aninhado,
 body.light-mode .submenu-terceiro-nivel {
-    background-color: var(--tertiary-bg-color-light);
+    background-color: var(--secondary-bg-color-light);
 }
 
 /* Footer (Rodapé) */
@@ -2290,7 +2340,6 @@ body.light-mode .footer-bottom p {
 
 /* Seções e Cards de Produtos */
 body.light-mode .product-highlights,
-body.light-mode .catalogo-section,
 body.light-mode .newsletter-section {
     background-color: var(--bg-color-light);
 }
@@ -2332,7 +2381,7 @@ body.light-mode .highlight-item,
 body.light-mode .produto-card,
 body.light-mode .article-card,
 body.light-mode .faq-item {
-    background-color: var(--tertiary-bg-color-light);
+    background-color: var(--secondary-bg-color-light);
     color: var(--text-color-dark);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
@@ -2354,7 +2403,7 @@ body.light-mode .diferenciais-section {
     color: var(--text-color-dark);
 }
 body.light-mode .contact-form-container{
-    background-color: var(--tertiary-bg-color-light);
+    background-color: var(--secondary-bg-color-light);
     color: var(--text-color-dark);
 }
 
