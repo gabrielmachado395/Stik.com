@@ -171,17 +171,20 @@ button {
 .sidebar {
     position: fixed;
     top: 0;
-    left: calc(-1 * var(--sidebar-width)); /* Usa a variável */
-    width: var(--sidebar-width); /* Usa a variável */
-    height: auto;
-    min-height: 100vh;
+    left: calc(-1 * var(--sidebar-width));
+    right: auto;
+    bottom: 0;                   /* garante limite inferior */
+    height: 100vh;               /* garante que o contêiner tenha a altura da viewport */
+    width: var(--sidebar-width);
     background-color: var(--secondary-background);
     z-index: 1100;
-    padding: 30px;
+    padding: 30px 20px 60px;     /* padding-bottom maior para acessar últimos itens */
     transition: left 0.4s ease;
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Garante que a própria sidebar possa rolar se o conteúdo for grande */
+    overflow-y: auto;            /* habilita scroll vertical */
+    -webkit-overflow-scrolling: touch; /* suaviza o scroll em iOS */
+    overscroll-behavior: contain;/* evita "pass-through" do scroll para o body */
 }
 
 .sidebar.active {
@@ -278,6 +281,7 @@ button {
 body.sidebar-open main,
 body.sidebar-open .main-content,
 body.sidebar-open #footer-placeholder,
+body.sidebar-open #footer-placeholder .whatsapp-fab,
 body.sidebar-open #catalogo-placeholder,
 body.sidebar-open .article-detail-page,
 body.sidebar-open .blog-main {
@@ -333,6 +337,13 @@ body.sidebar-open .top-header .main-header{
     z-index: 1; /* Para garantir que fique abaixo do conteúdo da overlay */
 }
 
+/* Esconder FAB enquanto o hero estiver visível (controlado por JS via body.hero-in-view) */
+body.hero-in-view .whatsapp-fab {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(8px) scale(0.20);
+}
 
 /* --- Seções Gerais (Animação de Scroll) --- */
 section {
@@ -377,6 +388,7 @@ section {
     max-width: 1400px;
     margin: 0 auto;
     align-items: stretch;
+
 }
 
 .highlight-item {
@@ -474,7 +486,6 @@ body.light-mode .highlight-item span {
 
 /* --- Página de Categoria (grid 1/2/3 colunas) --- */
 .category-page { 
-    padding: 24px 16px; 
     max-width: min(1180px, 92vw); /* limita a largura e cria margens laterais */
     margin: 0 auto;              /* centraliza o bloco inteiro */
 }
@@ -532,7 +543,7 @@ body.light-mode .category-description{
 .product-page {
     background-color: var(--bg-color-dark);
     color: var(--text-color-light);
-    padding: 80px 20px; /* container mais enxuto nas laterais */
+
     min-height: 100vh;
 }
 
@@ -544,6 +555,7 @@ body.light-mode .category-description{
     max-width: 1200px; /* limita o container geral */
     width: 100%;
     margin: 0 auto; /* centraliza na página */
+    padding-top: 90px;
 }
 
 /* Coluna da Esquerda: Imagem e Miniaturas */
@@ -698,9 +710,9 @@ body.light-mode .product-meta {
     text-align: left;
     color: #fff;
     overflow: hidden;
-    
     /* Cards preenchem a coluna para remover espaço lateral adicional */
-    width: 526px; 
+    width: auto; 
+    max-width: 500px; 
 }
 
 body.veja-tambem-grid .produto-card {
@@ -836,6 +848,7 @@ body.light-mode .veja-tambem-grid .produto-card:hover {
     background-color: var(--bg-color-dark);
     padding: 80px 0px 0;
     color: var(--text-color-light);
+    
 }
 
 .footer-content {
@@ -846,6 +859,7 @@ body.light-mode .veja-tambem-grid .produto-card:hover {
     align-items: flex-start;
     padding-bottom: 40px;
     gap: 20px;
+
 }
 
 .footer-logo {
@@ -1737,11 +1751,24 @@ body.light-mode .search-box input {
     border-radius: 0 0 8px 8px;
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
     z-index: 1200; /* acima do header */
-    max-height: clamp(180px, 48vh, 420px);
+    /* fallback padrão para dropdown de pesquisa */
+    max-height: 420px;
     overflow-y: auto;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.24s ease, visibility 0.24s ease;
+}
+
+.search-result-item.keyboard-selected,
+.search-result-item.keyboard-selected:hover {
+    background-color: rgba(255, 255, 255, 0.493);
+    outline: 2px solid rgba(255,255,255,0.06);
+    outline-offset: -6px;
+}
+
+body.light-mode .search-result-item.keyboard-selected {
+    background-color: rgba(255, 255, 255, 0.493);
+    outline: 2px solid rgba(255,255,255,0.06);
 }
 
 body.light-mode .search-results-dropdown,
@@ -1946,7 +1973,7 @@ body.light-mode .search-results-dropdown a span small{
 
     .sidebar.active {
         height: 100%;
-        width: 50%;
+        width: 40%;
     }
     .newsletter-content {
         position: absolute; /* AQUI: Mude para absoluto */
@@ -2050,15 +2077,12 @@ body.light-mode .search-results-dropdown a span small{
         width: min(100%, 360px); /* ocupa toda a largura, com limite confortável */
     }
     .category-grid .produto-card img { height: auto; }
+    /* Títulos da categoria: ajustados por media queries abaixo */
     .category-page h2 {
-        font-size: clamp(1.6rem, 7vw, 2.2rem);
         margin-bottom: 8px;
         text-align: center;
-    }
-
-    .category-page h2 {
-        font-size: 40px;
-        padding-bottom: 20px;
+        font-size: 1.6rem; /* fallback para telas muito pequenas */
+        padding-bottom: 12px;
     }
     .category-description { font-size: 1rem; margin: 6px auto 18px; padding: 0 6px; }
 
@@ -2086,6 +2110,78 @@ body.light-mode .search-results-dropdown a span small{
 
     /* desativa tilt/parallax no mobile por desempenho/UX */
     .produto-card[style], .article-card[style] { transform: none !important; }
+    
+    /* Layout lateral fixo para mobile (substitui usos de clamp) */
+    .main-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .highlight-grid {
+        padding: 80px 16px;
+    }
+    .category-page {
+        padding: 24px 12px;
+    }
+    .product-page {
+        padding: 80px 16px;
+    }
+    .footer-content {
+        padding: 80px 16px;
+    }
+
+}
+
+/* ===== Media queries para tablets e notebooks (substituem clamp()) ===== */
+/* Tablets: entre 769px e 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .main-content {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+    .highlight-grid {
+        padding: 80px 32px;
+    }
+    .category-page {
+        padding: 32px 24px;
+    }
+    .product-page {
+        padding: 80px 32px;
+    }
+    .footer-content {
+        padding: 80px 32px;
+    }
+    .category-page h2 {
+        font-size: 2.2rem;
+    }
+    .search-results-dropdown {
+        max-height: 48vh;
+    }
+}
+
+/* Notebooks / small desktops: entre 1025px e 1366px */
+@media (min-width: 1025px) and (max-width: 1366px) {
+    .main-content {
+        padding-left: 48px;
+        padding-right: 48px;
+    }
+    .highlight-grid {
+        padding: 100px 48px;
+    }
+    .category-page {
+        padding: 40px 32px;
+    }
+    .product-page {
+        padding: 100px 48px;
+    }
+    .footer-content {
+        padding: 100px 48px;
+    }
+    .category-page h2 {
+        font-size: 40px;
+    }
+    .search-results-dropdown {
+        max-height: 420px;
+    }
 }
 
 
@@ -2519,11 +2615,49 @@ a:hover::after {
     width: 100%;
 }
 
-/* hero slight parallax layer */
-.video-hero-section { overflow: hidden; }
-.video-hero-inner { position: relative; z-index: 1; }
-.hero-parallax { transform: translateZ(0); transition: transform 0.2s linear; }
+/* ===== Floating WhatsApp FAB (bottom-right) ===== */
+.whatsapp-fab {
+    position: fixed;
+    right: 24px;
+    bottom: 60px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    z-index: 2200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: transform 200ms cubic-bezier(.2,.9,.2,1), box-shadow 200ms ease;
+}
+.whatsapp-fab img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.whatsapp-fab:hover,
+.whatsapp-fab:focus-within {
+    transform: translateY(-6px) scale(1.04);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.45), 0 6px 18px rgba(0,0,0,0.25);
+}
+.whatsapp-fab:active {
+    transform: translateY(-2px) scale(0.98);
+}
 
-/* staggered reveal helper */
-.staggered { opacity: 0; transform: translateY(18px); transition: opacity 520ms ease, transform 520ms ease; }
-.staggered.in { opacity: 1; transform: translateY(0); }
+/* Light mode shadow variant */
+body.light-mode .whatsapp-fab {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.92);
+}
+
+.whatsapp-fab::after,
+.whatsapp-fab a::after {
+    display: none !important;
+    width: 0 !important;
+    content: none !important;
+}
+/* Smaller on very small screens */
+@media (max-width: 480px) {
+    .whatsapp-fab { right: 16px; bottom: 16px; width: 56px; height: 56px; }
+    .whatsapp-fab img { width: 100%; height: 100%; }
+}
+

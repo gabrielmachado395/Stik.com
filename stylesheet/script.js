@@ -49,7 +49,7 @@ const produtos = [
     },
     {
         id: 11,
-        nome: "Agda",
+        nome: "Ágda",
         categoria: "Viés",
         imagem: "img/agda-stik.png",
         descricao: "Obtenha acabamentos profissionais, impecáveis e de longa duração com o viés Agda. Este produto é notavelmente flexível, extremamente resistente e ideal para ser aplicado em bordas e reforços de costuras, oferecendo um fechamento limpo e seguro. Sua maleabilidade superior facilita o trabalho em curvas, contornos complexos e detalhes arredondados, sendo um aliado crucial na produção em escala. Garante um resultado final elegante, duradouro e com aquele toque profissional que é crucial para elevar a percepção de qualidade do seu vestuário, assegurando a integridade e o visual da peça por mais tempo.",
@@ -84,7 +84,7 @@ const produtos = [
     },
     {
         id: 17,
-        nome: "Iris",
+        nome: "Íris",
         categoria: "Alças",
         imagem: "img - Copia/Alças/Iris-stik.png",
         descricao: "A durabilidade técnica que suas peças íntimas merecem, garantindo um ciclo de vida estendido e maior satisfação. Iris é a alça macia ao toque e altamente resistente ao desgaste, ao atrito e à fadiga do material, perfeita para lingeries de uso contínuo. Sua construção robusta permite uma fixação eficiente em reguladores, o que garante um ajuste preciso, duradouro e confortável, acompanhando a forma do corpo em todos os momentos com consistência e segurança, sem escorregar ou afrouxar.",
@@ -100,7 +100,7 @@ const produtos = [
     },
     {
         id: 20,
-        nome: "Nadia",
+        nome: "Nádia",
         categoria: "Alças",
         imagem: "img - Copia/Alças/nadia-stik.png",
         descricao: "Busque máxima versatilidade e confiança estrutural para diversos designs de vestuário. Nadia é a alça que se destaca por ser altamente durável e versátil, pronta para ser aplicada desde moda íntima de base e sutiãs, até acessórios de vestuário que exigem mais resistência e tração. Sua construção robusta garante a combinação perfeita entre resistência estrutural e flexibilidade ideal, adaptando-se a diferentes estilos e necessidades de costura com grande facilidade e consistência, oferecendo um excelente custo-benefício.",
@@ -110,7 +110,7 @@ const produtos = [
     // Bases
     {
         id: 21,
-        nome: "Caricia",
+        nome: "Carícia",
         categoria: "Bases",
         imagem: "img - Copia/Bases/caricia-stik.png",
         descricao: "Confeccione bases e cós com conforto superior e maleabilidade que abraçam o corpo de forma suave. Carícia é a base macia ideal para cós e acabamentos internos, graças ao seu toque suave na pele e excelente capacidade de recuperação elástica. Ela é a garantia de conforto absoluto para peças que estão em contato direto com a pele, proporcionando uma experiência agradável e de bem-estar a cada uso, sem perder a capacidade de ajuste e de manter a forma do vestuário com discrição e leveza.",
@@ -215,8 +215,9 @@ const produtos = [
         material: "Elástico"
     },
     {
+
         id: 36,
-        nome: "Grecia",
+        nome: "Grécia",
         categoria: "Alças",
         imagem: "img - Copia/Alças/grecia-stik (1).png",
         descricao: "Uma alça técnica que garante a precisão do ajuste final e a integridade dimensional da peça. Grecia é a solução técnica para manter a integridade dimensional de suas peças, especialmente em ambientes de alta tensão e uso contínuo. Sua formulação e construção garantem que as medidas da roupa sejam mantidas e estáveis mesmo após passarem por todos os processos de tingimento e acabamento, entregando um resultado final que veste perfeitamente, agrada o consumidor e mantém a durabilidade e o suporte essencial.",
@@ -243,7 +244,7 @@ const produtos = [
     },
     {
         id: 40,
-        nome: "Fenix",
+        nome: "Fênix",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/fenix-stik.png",
         descricao: "A sua identidade em destaque com performance técnica e confiável em cada detalhe de costura. Fenix é o elástico que possui um design exclusivo e desempenho comprovado, desenvolvido sob medida para as necessidades e padrões de design da sua marca. Ele garante que a integridade da estampa ou padrão personalizado se mantenha impecável, reforçando a comunicação visual da sua coleção e assegurando a durabilidade do design mesmo após o uso e lavagem frequentes, com alta fidelidade de cor.",
@@ -283,7 +284,7 @@ const produtos = [
     },
     {
         id: 45,
-        nome: "Lexia",
+        nome: "Léxia",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/lexia-stik.png",
         descricao: "Design moderno com um caimento e ajuste perfeitos e duradouros, elevando a peça. Lexia é o elástico de visual contemporâneo e ótimo caimento, que oferece total possibilidade de customização com a sua marca e padrão. É a escolha ideal para coleções que priorizam um ajuste perfeito, durável e um forte apelo de design na cintura ou em acabamentos, garantindo que a peça vista de forma impecável e estruturada no corpo.",
@@ -347,7 +348,7 @@ const produtos = [
     },
     {
         id: 54,
-        nome: "Venus",
+        nome: "Vênus",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/venus-stik.png",
         descricao: "O toque de luxo e a suavidade em um acabamento premium e totalmente customizado. Venus é o elástico personalizado com toque suave, sedoso e acabamento superior, ideal para contato direto com a pele em peças íntimas. Ele adiciona um detalhe de luxo e conforto imediato às peças, valorizando instantaneamente a identidade e o cuidado da sua marca com o produto e a experiência do consumidor, com excelente recuperação elástica e caimento.",
@@ -798,7 +799,15 @@ function normalizeCategoria(cat) {
 
 function formatNome(nome) {
     if (!nome) return '';
-    return nome.replace(/\b\p{L}/gu, (m) => m.toUpperCase());
+    return nome
+        .trim()
+        .split(/\s+/)
+        .map(word => {
+            const first = word.charAt(0).toLocaleUpperCase('pt-BR');
+            const rest = word.slice(1).toLocaleLowerCase('pt-BR');
+            return first + rest;
+        })
+        .join(' ');
 }
 
 function criarProdutoCard(produto) {
@@ -936,8 +945,123 @@ function inicializarPesquisa() {
         const header = document.getElementById('mainHeader') || document.querySelector('.top-header');
         if (header) header.classList.remove('search-open');
     }
+    (function setupSearchKeyboardNavigation() {
+  const searchBox = document.querySelector('.search-box');
+  if (!searchBox) return;
+
+  const input = searchBox.querySelector('input');
+  const dropdown = searchBox.querySelector('.search-results-dropdown');
+
+  let currentIndex = -1;
+
+  function items() {
+    return dropdown ? Array.from(dropdown.querySelectorAll('.search-result-item')) : [];
+  }
+
+  function clearSelection() {
+    const it = items();
+    it.forEach(el => el.classList.remove('keyboard-selected'));
+    currentIndex = -1;
+  }
+
+  function updateSelection(idx) {
+    const it = items();
+    if (it.length === 0) return;
+    if (idx < 0) idx = 0;
+    if (idx >= it.length) idx = it.length - 1;
+    // remove previous
+    it.forEach(el => el.classList.remove('keyboard-selected'));
+    const sel = it[idx];
+    if (!sel) return;
+    sel.classList.add('keyboard-selected');
+    currentIndex = idx;
+    // garantir que o item esteja visível no dropdown
+    sel.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
+  function activateSelected() {
+    const it = items();
+    if (currentIndex >= 0 && it[currentIndex]) {
+      // simula clique (abre link / seleciona)
+      it[currentIndex].click();
+      return true;
+    }
+    return false;
+  }
+
+  // Observa alterações na classe .is-active para focar o input ao abrir
+  const mo = new MutationObserver(mutations => {
+    for (const m of mutations) {
+      if (m.attributeName === 'class') {
+        const isActive = searchBox.classList.contains('is-active');
+        if (isActive && input) {
+          // aguarda micro-tick para garantir que o input esteja visível
+          setTimeout(() => input.focus({preventScroll: true}), 50);
+        } else {
+          clearSelection();
+        }
+      }
+    }
+  });
+  mo.observe(searchBox, { attributes: true, attributeFilter: ['class'] });
+
+  // Reset quando conteúdo do dropdown mudar (novos resultados)
+  if (dropdown) {
+    const ro = new MutationObserver(() => {
+      clearSelection();
+    });
+    ro.observe(dropdown, { childList: true, subtree: true, characterData: true });
+  }
+
+  // Key handlers no input
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      const it = items();
+      if (!it || it.length === 0) {
+        if (e.key === 'Enter') return; // permitir comportamento padrão (submit/pesquisa)
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        // se nada selecionado, seleciona o primeiro
+        if (currentIndex < 0) updateSelection(0);
+        else updateSelection(Math.min(currentIndex + 1, it.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentIndex < 0) updateSelection(it.length - 1);
+        else updateSelection(Math.max(currentIndex - 1, 0));
+      } else if (e.key === 'Enter') {
+        // Se há um item selecionado via teclado, ativa-o. Caso contrário, permite o comportamento normal.
+        if (currentIndex >= 0) {
+          e.preventDefault();
+          activateSelected();
+        }
+      } else if (e.key === 'Escape') {
+        // fecha a search-box se existir lógica (remoção de classe)
+        searchBox.classList.remove('is-active');
+        clearSelection();
+        input.blur();
+      }
+    });
+  }
+
+  // Permite usar também as setas quando o foco estiver no dropdown (opcional)
+  if (dropdown) {
+    dropdown.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+        // encaminha para o input handler (mantém a mesma lógica)
+        input.dispatchEvent(new KeyboardEvent('keydown', e));
+      }
+    });
+    // garantir que cliques com mouse resetem a seleção do teclado
+    dropdown.addEventListener('mousedown', () => clearSelection());
+  }
+})();
+
 }
 
+// Função para suavizar a rolagem na Parte "Catalogo" no mobile e desktop
 function setupDraggableCarousel(carouselElement) {
     if (!carouselElement) return;
 
@@ -948,7 +1072,8 @@ function setupDraggableCarousel(carouselElement) {
     const startDrag = (e) => {
         isDown = true;
         carouselElement.classList.add('active');
-        startX = (e.pageX || e.touches[0].pageX);
+        // usa touches quando disponível
+        startX = (e.pageX !== undefined) ? e.pageX : (e.touches && e.touches[0] && e.touches[0].pageX);
         scrollLeft = carouselElement.scrollLeft;
     };
 
@@ -959,23 +1084,27 @@ function setupDraggableCarousel(carouselElement) {
 
     const drag = (e) => {
         if (!isDown) return;
-        e.preventDefault();
-        const x = (e.pageX || e.touches[0].pageX);
+        // NÃO chama preventDefault() — permite o comportamento nativo/momentum no touch
+        const x = (e.pageX !== undefined) ? e.pageX : (e.touches && e.touches[0] && e.touches[0].pageX);
+        if (typeof x !== 'number') return;
         const walk = x - startX;
         carouselElement.scrollLeft = scrollLeft - walk;
     };
     
+    // mouse (desktop) — mantém drag por mouse
     carouselElement.addEventListener('mousedown', startDrag);
     carouselElement.addEventListener('mouseleave', endDrag);
     carouselElement.addEventListener('mouseup', endDrag);
     carouselElement.addEventListener('mousemove', drag);
     
+    // touch (mobile) — listeners passivos, sem preventDefault para preservar momentum
     carouselElement.addEventListener('touchstart', startDrag, { passive: true });
-    carouselElement.addEventListener('touchend', endDrag);
-    carouselElement.addEventListener('touchcancel', endDrag);
-    carouselElement.addEventListener('touchmove', drag, { passive: false });
+    carouselElement.addEventListener('touchend', endDrag, { passive: true });
+    carouselElement.addEventListener('touchcancel', endDrag, { passive: true });
+    carouselElement.addEventListener('touchmove', drag, { passive: true });
 }
 
+// Função que inicia o carrosel infinito na área da Newsletter
 function initBannerCarousel() {
     const bannerImages = [
         { src: "./img/banner/banner-site-8_Prancheta-1-scaled (1).jpg", alt: 'Elásticos para a sua confecção de moda fitness' },
@@ -1023,7 +1152,7 @@ function initBannerCarousel() {
     setupDraggableCarousel(mainBannerTrack);
 }
 
-// --- Micro interactions: parallax, staggered reveal and subtle tilt ---
+// Função que faz com que os cards tenham mini animações ao passar o mouse
 function initMicroInteractions() {
     // parallax on hero (based on mouse move) - subtle
     const hero = document.querySelector('.video-hero-section');
@@ -1106,11 +1235,12 @@ function initMicroInteractions() {
     }
 }
 
-
+// Função que direciona para a tela de criação de artigos do o blog
 function createNewArticle() {
     window.location.href = 'create-article.html';
 }
 
+// Função que cria os card's dos artigos na tela do blog
 function createArticleCard(article) {
     const card = document.createElement('a');
     card.href = `article.html?id=${article.id}`;
@@ -1182,7 +1312,7 @@ async function displayArticles() {
         const readMore = document.createElement('a');
         readMore.className = 'read-more';
         readMore.href = `artigo.html?id=${artigo.id}`;
-        readMore.innerHTML = 'Read more <i class="fas fa-arrow-right"></i>';
+        readMore.innerHTML = 'Leia mais <i class="fas fa-arrow-right"></i>';
 
         articleEl.appendChild(thumbDiv);
         articleEl.appendChild(metaDiv);
@@ -1234,6 +1364,7 @@ async function carregarArtigo() {
     });
 }
 
+// Cria o formulário de criação do artigo
 function setupArticleForm() {
     const form = document.getElementById('article-form');
     if (!form) return;
@@ -1419,6 +1550,7 @@ function bindCatalogForm() {
     });
 }
 
+// Animações ao rolar a página de 'surgir de baixo para cima'
 function inicializarAnimateOnScroll() {
     const elementosAnimar = document.querySelectorAll('.animate-on-scroll');
     const observerOptions = {
@@ -1435,8 +1567,25 @@ function inicializarAnimateOnScroll() {
     }, observerOptions);
 
     elementosAnimar.forEach(elemento => observer.observe(elemento));
+
+    // Reaproveita aqui para observar o hero e alternar a visibilidade do FAB
+    const hero = document.querySelector('.video-hero-section');
+    if (hero && 'IntersectionObserver' in window) {
+        const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // ajuste o threshold conforme preferir (aqui 5% visível)
+                if (entry.isIntersecting && entry.intersectionRatio > 0.05) {
+                    document.body.classList.add('hero-in-view');
+                } else {
+                    document.body.classList.remove('hero-in-view');
+                }
+            });
+        }, { threshold: [0, 0.05, 0.25] });
+        heroObserver.observe(hero);
+    }
 }
 
+// Função principal da área do Vídeo, ela quem deixa o vídeo como um espaço exclusivo para o vídeo
 function inicializarHeaderIndex() {
     const topHeader = document.getElementById('mainHeader');
     const videoHeroSection = document.querySelector('.video-hero-section');
@@ -1534,36 +1683,43 @@ function inicializarModoClaro() {
 
 // Função principal de inicialização da página
 async function inicializarPagina() {
-    // A função de pesquisa será chamada dentro do callback do carregamento do header
-    await carregarComponente('header-placeholder', 'header.html', inicializarPesquisa);
-    
-    // ATENÇÃO: A RESTAURAÇÃO DO ESTADO SÓ OCORRE AQUI DENTRO, APÓS O CARREGAMENTO DA SIDEBAR
-    await carregarComponente('sidebar-placeholder', 'sidebar.html', () => {
-        inicializarMenu();
-        restoreSidebarState();
-    });
-    
-    await carregarComponente('footer-placeholder', 'footer.html');
-    
-    deferInit(() => {
-        inicializarNewsletterCarousel();
-        inicializarModoClaro();
-        initRecaptcha();
-    });
-        
-    
-    const isIndexPage = window.location.pathname.includes('index.html') || window.location.pathname === '/';
-    const isCategoryPage = window.location.pathname.includes('categoria.html');
-    const isProductPage = window.location.pathname.includes('produto.html');
-    const isBlogPage = window.location.pathname.includes('blog.html');
-    const isArticlePage = window.location.pathname.includes('artigo.html');
-    const isCreateArticlePage = window.location.pathname.includes('create-article.html');
-    const isFaqPage = window.location.pathname.includes('faq.html');
-    const isPoliticaPage = window.location.pathname.includes('politica_de_privacidade.html');
-    const isTermosPage = window.location.pathname.includes('termos_de_uso.html');
-    const isFaleConoscoPage = window.location.pathname.includes('fale_conosco.html');
-    
+    // Carrega todos os componentes em paralelo e espera que todos terminem
+    await Promise.all([
+        carregarComponente('header-placeholder', 'header.html', inicializarPesquisa),
+        carregarComponente('sidebar-placeholder', 'sidebar.html', () => {
+            inicializarMenu();
+            restoreSidebarState();
+        }),
+        carregarComponente('footer-placeholder', 'footer.html')
+    ]);
 
+    // AGORA, com os componentes carregados, executa a lógica da página
+    const pathname = window.location.pathname.replace(/\/+$/, ''); // sem trailing slash
+    const isIndexPage = pathname === '' || pathname === '/' || pathname.endsWith('index.html');
+    const isCategoryPage = /\/categoria(\.html)?$/.test(pathname);
+    const isProductPage = /\/produto(\.html)?$/.test(pathname);
+    const isBlogPage = /\/blog(\.html)?$/.test(pathname);
+    const isArticlePage = /\/artigo(\.html)?$/.test(pathname);
+    const isCreateArticlePage = /\/create-article(\.html)?$/.test(pathname);
+    const isFaqPage = /\/faq(\.html)?$/.test(pathname);
+    const isPoliticaPage = /\/politica_de_privacidade(\.html)?$/.test(pathname);
+    const isTermosPage = /\/termos_de_uso(\.html)?$/.test(pathname);
+    const isFaleConoscoPage = /\/fale_conosco(\.html)?$/.test(pathname);
+
+    // Função utilitária que injeta o template da página caso ainda não esteja presente
+    async function ensurePageTemplate(templateUrl) {
+        const mainPlaceholder = document.getElementById('main-content-placeholder');
+        if (!mainPlaceholder) return;
+        // detecta presença de marcações específicas simples para decidir se já foi injetado
+        const hasTemplate = mainPlaceholder.querySelector('.page-ready, .product-container, .blog-list, .article-detail, .category-page, .catalogo-section');
+        if (!hasTemplate) {
+            await carregarConteudoPrincipal(templateUrl + window.location.search);
+            // carregarConteudoPrincipal já chama inicializarAnimateOnScroll etc.
+            return true;
+        }
+        return false;
+    }
+    
     if (isIndexPage) {
         inicializarHeaderIndex();
         exibirCategorias(produtos);
@@ -1580,33 +1736,13 @@ async function inicializarPagina() {
     } else {
         inicializarHeaderPaginaSecundaria();
     }
-    
+
     if (isProductPage) {
         carregarDetalhesDoProduto();
-        inicializarNewsletterCarousel();
-        // const params = new URLSearchParams(window.location.search);
-        // const id = parseInt(params.get('id'), 10);
-
-        // const produto = produtos.find(p => p.id === id);
-        // if (!produto) {
-        //     document.body.innerHTML = "<p>Produto não encontrado.</p>";
-        //     return;
-        // }
-
-        // document.getElementById('main-product-image').src = encodeURI(produto.imagem);
-        // document.querySelector('.product-name').textContent = formatNome(produto.nome);
-        // document.querySelector('.product-description').textContent = produto.descricao;
-        // document.querySelector('.product-material').textContent = produto.material;
-        // document.querySelector('.product-categoria').textContent = normalizeCategoria(produto.categoria);
     } else if (isBlogPage) {
-        displayArticles();
-        // -------------------- Botão de cadastrar artigo -----------------------------
-        // const createBtn = document.getElementById('create-article-btn');
-        // if (createBtn) {
-        //     createBtn.addEventListener('click', createNewArticle);
-        // }
+        await displayArticles(); // Adicionado await para garantir que os artigos sejam carregados
     } else if (isArticlePage) {
-        carregarArtigo();
+        await carregarArtigo(); // Adicionado await
     } else if (isCreateArticlePage) {
         setupArticleForm();
     } else if (isFaqPage) {
@@ -1620,6 +1756,14 @@ async function inicializarPagina() {
     } else if (isCategoryPage) {
         renderCategoriaPage();
     }
+    
+    // Funções que podem rodar por último
+    deferInit(() => {
+        inicializarNewsletterCarousel();
+        inicializarModoClaro();
+        initRecaptcha();
+        inicializarAnimateOnScroll();
+    });
 
     const linkIntitucional = document.getElementById('link-institucional');
     if (linkIntitucional) {
@@ -1628,8 +1772,6 @@ async function inicializarPagina() {
             carregarComponente('main-content-placeholder', 'institucional.html');
         });
     }
-    
-    inicializarAnimateOnScroll();
 }
 
 
@@ -1771,9 +1913,6 @@ async function initRecaptcha() {
   }, false);
 })();
 
-
-// ...existing code...
-
 /**
  * Scroll suave avançado: mantém a velocidade inicial do scroll,
  * mas suaviza a desaceleração no final, para uma sensação mais natural.
@@ -1828,8 +1967,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 });
-
-// ...existing code...
 
 // ---------- Funções de cookies e geolocalização (adicionadas) ----------
 
@@ -2001,3 +2138,4 @@ function renderCategoriaPage() {
     container.innerHTML = '';
     container.appendChild(frag);
 }
+
