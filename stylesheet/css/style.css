@@ -1,6 +1,6 @@
 /* --- Estilos Globais e Resets --- */
 html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     height: 100%;
     margin: 0;
 }
@@ -8,7 +8,7 @@ html {
 /* Se quiser controlar a velocidade (apenas em alguns browsers modernos com scroll-snap) */
 @media (prefers-reduced-motion: no-preference) {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
 }
 
@@ -16,6 +16,7 @@ html {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
 :root {
@@ -190,6 +191,7 @@ button {
 .sidebar.active {
     left: 0;
 }
+
 
 .sidebar-header {
     display: flex;
@@ -467,11 +469,12 @@ body.light-mode .highlight-item span {
     display: flex;
     overflow-x: auto;
     /* Adiciona o comportamento de encaixe para uma rolagem suave e precisa */
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
     gap: 30px;
     padding: 20px 0;
     margin: 0 auto;
+    
 }
 .catalogo-grid > * {
     scroll-snap-align: center;
@@ -784,6 +787,13 @@ body.light-mode .veja-tambem-grid .produto-card:hover {
 
 }
 
+@media (max-width: 1028px) {
+    .product-container {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
 .produto-card {
     flex: 0 0 auto;
     width: 260px;
@@ -953,10 +963,10 @@ body.light-mode .veja-tambem-grid .produto-card:hover {
     content: '';
     position: absolute;
     top: 0;
-    left: 0; /* Posição à esquerda do submenu */
+    left: 0; /* Posição à esquerda do submenu */    
     width: 3px; /* Largura da barra */
     height: 100%; /* Ocupa a altura total do submenu */
-    background-color: var(--accent-color); /* Cor de destaque (vermelho da STIK) */
+
     opacity: 1;
     transition: opacity 0.4s ease;
 }
@@ -988,14 +998,14 @@ body.light-mode .veja-tambem-grid .produto-card:hover {
 }
 
 /* ADICIONADO: Estilos para o consentimento do catálogo/newsletter */
-.consent-label {
+/* .consent-label {
     display: flex;
-    align-items: flex-start; /* Alinha o checkbox com o topo do texto */
+    align-items: flex-start; Alinha o checkbox com o topo do texto
     gap: 8px;
     font-size: 0.9rem;
     line-height: 1.5;
     cursor: pointer;
-}
+} */
 
 .consent-label input[type="checkbox"] {
     margin-top: 3px; /* Pequeno ajuste para alinhar visualmente com o texto */
@@ -1638,7 +1648,7 @@ body.light-mode .institutional-page {
 }
 
 .diferenciais-section {
-    background-color: var(--bg-color-dark);
+    background-color: var(--);
     padding: 80px 20px;
     text-align: center;
 }
@@ -1888,6 +1898,8 @@ body.light-mode .search-results-dropdown a span small{
     a::after { transition: width 180ms ease; }
     /* garante que os itens com stagger ainda apareçam suavemente */
     .staggered { transition-duration: 420ms; }
+
+
 }
 
 @media (max-width: 768px) {
@@ -1907,9 +1919,6 @@ body.light-mode .search-results-dropdown a span small{
         gap: 15px;
     }
 
-    .catalogo-grid {
-        scroll-behavior: auto;
-    }
     .catalogo-section h2 {
         font-size: 2em;
     }
@@ -2156,6 +2165,17 @@ body.light-mode .search-results-dropdown a span small{
     .search-results-dropdown {
         max-height: 48vh;
     }
+    .newsletter-content {
+    position: absolute; /* AQUI: Mude para absoluto */
+    bottom: 0; /* AQUI: Posiciona no fundo */
+    left: 50%; /* AQUI: Centraliza horizontalmente */
+    transform: translateX(-50%); /* AQUI: Corrige o alinhamento central */
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 0;
+    }
+
 }
 
 /* Notebooks / small desktops: entre 1025px e 1366px */

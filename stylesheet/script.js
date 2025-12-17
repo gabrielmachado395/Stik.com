@@ -890,6 +890,7 @@ function inicializarPesquisa() {
             .normalize("NFD") // Normaliza a string para decompor os caracteres
             .replace(/[\u0300-\u036f]/g, ""); // Remove os diacríticos (acentos)
 
+        const termoBuscaNoSpaces = termoBusca.replace(/\s+/g, '')
         searchResultsList.innerHTML = '';
 
         if (termoBusca.length > 1) {
@@ -898,11 +899,15 @@ function inicializarPesquisa() {
                 const nomeNormalizado = produto.nome.toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "");
+                const nomeSemEspacos = nomeNormalizado.replace(/\s+/g, '');
                 const categoriaNormalizada = normalizeCategoria(produto.categoria).toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "");
+                const categoriaSemEspacos = categoriaNromalizada.replace(/\s+/g, '');
 
-                return nomeNormalizado.includes(termoBusca) || categoriaNormalizada.includes(termoBusca);
+                const matchesNome = nomeNormalizado.includes(termobusca) || nomeSemEspacos.includes(termoBuscaNoSpaces);
+                const matchesCategoria = categoriaNormalizada.includes(termoBusca) || categoriaSemEspacos.includes(termoBuscaNoSpaces);
+                return matchesNome || matchesCategoria
             });
 
             if (produtosFiltrados.length > 0) {
