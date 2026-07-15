@@ -1,0 +1,18 @@
+{
+  "id": "ccdd932c-739c-46ba-9c40-cdf65543b537",
+  "runtime": "node",
+  "purpose": "locate modern layer marker in css",
+  "script_chars": 303,
+  "started_at": "2026-07-15T16:50:42.096Z",
+  "finished_at": "2026-07-15T16:50:42.355Z",
+  "exit_code": 0,
+  "signal": null,
+  "timed_out": false,
+  "duration_ms": 259,
+  "stdout_bytes": 199,
+  "stderr_bytes": 0,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "stdout_path": "C:\\dev\\Stik.com\\.gsd\\exec\\ccdd932c-739c-46ba-9c40-cdf65543b537.stdout",
+  "stderr_path": "C:\\dev\\Stik.com\\.gsd\\exec\\ccdd932c-739c-46ba-9c40-cdf65543b537.stderr"
+}

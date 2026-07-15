@@ -674,8 +674,85 @@ function restoreSidebarState() {
             icon.classList.remove('fa-rotate-180', 'fa-rotate-90');
         }
     });
+
+    highlightCurrentSidebarLink();
 }
 // ------------------------------------------
+
+function highlightCurrentSidebarLink() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    const pathname = window.location.pathname.replace(/\/+$/, '');
+    const params = new URLSearchParams(window.location.search);
+    const currentHash = window.location.hash;
+
+    const clearCurrent = () => {
+        sidebar.querySelectorAll('.sidebar-link.is-current').forEach(link => {
+            link.classList.remove('is-current');
+        });
+    };
+
+    const activateLink = (selector) => {
+        const link = sidebar.querySelector(selector);
+        if (!link) return null;
+        link.classList.add('is-current');
+        return link;
+    };
+
+    const normalizeSidebarCategory = (value) => {
+        if (!value) return '';
+        const decoded = decodeURIComponent(value).trim();
+        return normalizeCategoria(decoded).toLocaleLowerCase('pt-BR');
+    };
+
+    clearCurrent();
+
+    let activeRoute = 'home';
+    if (/\/blog(\.html)?$/.test(pathname) || /\/artigo(\.html)?$/.test(pathname) || /\/create-article(\.html)?$/.test(pathname)) {
+        activeRoute = 'blog';
+    } else if (/\/institucional(\.html)?$/.test(pathname)) {
+        activeRoute = 'institucional';
+    } else if (/\/fale_conosco(\.html)?$/.test(pathname)) {
+        activeRoute = 'contato';
+    } else if ((pathname === '' || pathname === '/' || pathname.endsWith('index.html')) && currentHash === '#newsletter') {
+        activeRoute = 'catalogo';
+    } else if (/\/categoria(\.html)?$/.test(pathname) || /\/produto(\.html)?$/.test(pathname)) {
+        activeRoute = 'produtos';
+    }
+
+    const activeMainLink = activateLink(`.sidebar-link[data-sidebar-route="${activeRoute}"]`);
+
+    if (activeRoute === 'produtos') {
+        const submenu = sidebar.querySelector('.has-submenu > .submenu');
+        const chevron = sidebar.querySelector('.has-submenu > .sidebar-link .fa-chevron-down');
+        if (submenu) submenu.classList.add('active');
+        if (chevron) chevron.classList.add('fa-rotate-180');
+
+        let activeCategory = params.get('categoria');
+
+        if (!activeCategory && /\/produto(\.html)?$/.test(pathname)) {
+            const productId = parseInt(params.get('id'), 10);
+            const currentProduct = Array.isArray(produtos) ? produtos.find(produto => produto.id === productId) : null;
+            activeCategory = currentProduct?.categoria || '';
+        }
+
+        const normalizedActiveCategory = normalizeSidebarCategory(activeCategory);
+        if (normalizedActiveCategory) {
+            const categoryLink = Array.from(sidebar.querySelectorAll('.submenu .sidebar-link')).find(link => {
+                return normalizeSidebarCategory(link.dataset.sidebarCategory) === normalizedActiveCategory;
+            });
+            if (categoryLink) categoryLink.classList.add('is-current');
+        }
+    }
+
+    if (activeMainLink && activeRoute !== 'produtos') {
+        const submenu = sidebar.querySelector('.has-submenu > .submenu');
+        const chevron = sidebar.querySelector('.has-submenu > .sidebar-link .fa-chevron-down');
+        if (submenu) submenu.classList.remove('active');
+        if (chevron) chevron.classList.remove('fa-rotate-180');
+    }
+}
 
 function inicializarMenu() {
     const menuToggle = document.querySelector('.menu-toggle');
@@ -687,6 +764,8 @@ function inicializarMenu() {
     const allLinks = document.querySelectorAll('.sidebar-nav a');
 
     if (!sidebar) return;
+
+    highlightCurrentSidebarLink();
 
     const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 
@@ -706,6 +785,7 @@ function inicializarMenu() {
                 }
             }
 
+            highlightCurrentSidebarLink();
             saveSidebarState();
         });
     }
@@ -1109,6 +1189,169 @@ function setupDraggableCarousel(carouselElement) {
     carouselElement.addEventListener('touchmove', drag, { passive: true });
 }
 
+function setupInfiniteCatalogCarousel(carouselElement) {
+    if (!carouselElement || carouselElement.dataset.infiniteReady === 'true') return;
+
+    const originalCards = Array.from(carouselElement.children);
+    if (originalCards.length === 0) return;
+    if (originalCards.length === 1) {
+        setupDraggableCarousel(carouselElement);
+        return;
+    }
+
+    const createClone = (card) => {
+        const clone = card.cloneNode(true);
+        clone.dataset.clone = 'true';
+        clone.setAttribute('aria-hidden', 'true');
+        clone.tabIndex = -1;
+        return clone;
+    };
+
+    const beforeClones = originalCards.map(createClone);
+    const afterClones = originalCards.map(createClone);
+    carouselElement.replaceChildren(...beforeClones, ...originalCards, ...afterClones);
+
+    carouselElement.dataset.infiniteReady = 'true';
+
+    let segmentWidth = 0;
+    let isAdjusting = false;
+    let isMouseDown = false;
+    let startX = 0;
+    let startScrollLeft = 0;
+    let didDrag = false;
+    let velocity = 0;
+    let lastPointerX = 0;
+    let lastPointerTime = 0;
+    let inertiaFrame = null;
+    let inertiaLastTime = 0;
+
+    const updateSegmentWidth = () => {
+        segmentWidth = carouselElement.scrollWidth / 3;
+    };
+
+    const stopInertia = () => {
+        if (inertiaFrame !== null) {
+            cancelAnimationFrame(inertiaFrame);
+            inertiaFrame = null;
+        }
+    };
+
+    const jumpToMiddle = (preserveOffset = 0) => {
+        updateSegmentWidth();
+        if (!segmentWidth) return;
+        carouselElement.scrollLeft = segmentWidth + preserveOffset;
+    };
+
+    jumpToMiddle();
+
+    const rebalanceScroll = () => {
+        if (!segmentWidth || isAdjusting) return;
+
+        if (carouselElement.scrollLeft < segmentWidth * 0.5) {
+            isAdjusting = true;
+            carouselElement.scrollLeft += segmentWidth;
+            isAdjusting = false;
+        } else if (carouselElement.scrollLeft > segmentWidth * 1.5) {
+            isAdjusting = true;
+            carouselElement.scrollLeft -= segmentWidth;
+            isAdjusting = false;
+        }
+    };
+
+    const startMouseDrag = (pageX) => {
+        stopInertia();
+        isMouseDown = true;
+        didDrag = false;
+        startX = pageX;
+        startScrollLeft = carouselElement.scrollLeft;
+        lastPointerX = pageX;
+        lastPointerTime = performance.now();
+        velocity = 0;
+        carouselElement.classList.add('active');
+    };
+
+    const moveMouseDrag = (pageX) => {
+        if (!isMouseDown) return;
+        const now = performance.now();
+        const walk = pageX - startX;
+        if (Math.abs(walk) > 6) didDrag = true;
+        carouselElement.scrollLeft = startScrollLeft - walk;
+
+        const deltaX = pageX - lastPointerX;
+        const deltaTime = Math.max(now - lastPointerTime, 1);
+        const nextVelocity = -deltaX / deltaTime;
+        velocity = velocity * 0.75 + nextVelocity * 0.25;
+        lastPointerX = pageX;
+        lastPointerTime = now;
+    };
+
+    const endMouseDrag = () => {
+        if (!isMouseDown) return;
+        isMouseDown = false;
+        carouselElement.classList.remove('active');
+
+        if (Math.abs(velocity) < 0.02) return;
+
+        inertiaLastTime = performance.now();
+        const animateInertia = (now) => {
+            const deltaTime = Math.max(now - inertiaLastTime, 1);
+            inertiaLastTime = now;
+
+            carouselElement.scrollLeft += velocity * deltaTime;
+            velocity *= Math.pow(0.94, deltaTime / 16.67);
+
+            if (Math.abs(velocity) < 0.01) {
+                stopInertia();
+                return;
+            }
+
+            inertiaFrame = requestAnimationFrame(animateInertia);
+        };
+
+        inertiaFrame = requestAnimationFrame(animateInertia);
+    };
+
+    carouselElement.addEventListener('scroll', rebalanceScroll, { passive: true });
+
+    carouselElement.addEventListener('wheel', (event) => {
+        const hasNativeHorizontal = Math.abs(event.deltaX) > 0;
+        const hasShiftWheel = event.shiftKey && Math.abs(event.deltaY) > 0;
+        if (!hasNativeHorizontal && !hasShiftWheel) return;
+
+        const horizontalDelta = hasNativeHorizontal ? event.deltaX : event.deltaY;
+        event.preventDefault();
+        carouselElement.scrollLeft += horizontalDelta;
+    }, { passive: false });
+
+    carouselElement.addEventListener('mousedown', (event) => {
+        if (event.button !== 0) return;
+        startMouseDrag(event.pageX);
+    });
+
+    window.addEventListener('mousemove', (event) => {
+        moveMouseDrag(event.pageX);
+    });
+
+    window.addEventListener('mouseup', endMouseDrag);
+    carouselElement.addEventListener('dragstart', (event) => event.preventDefault());
+
+    carouselElement.addEventListener('click', (event) => {
+        if (!didDrag) return;
+        event.preventDefault();
+        event.stopPropagation();
+        didDrag = false;
+    }, true);
+
+    window.addEventListener('resize', () => {
+        stopInertia();
+        const previousSegmentWidth = segmentWidth;
+        updateSegmentWidth();
+        if (!previousSegmentWidth || !segmentWidth) return;
+        const offsetFromMiddle = carouselElement.scrollLeft - previousSegmentWidth;
+        carouselElement.scrollLeft = segmentWidth + offsetFromMiddle;
+    });
+}
+
 // Função que inicia o carrosel infinito na área da Newsletter
 function initBannerCarousel() {
     const bannerImages = [
@@ -1199,7 +1442,8 @@ function initMicroInteractions() {
     }
 
     // subtle tilt on produto cards
-    const produtoCards = document.querySelectorAll('.produto-card, .article-card');
+    const produtoCards = Array.from(document.querySelectorAll('.produto-card, .article-card'))
+        .filter(card => !card.closest('.catalogo-grid'));
     produtoCards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
@@ -1729,15 +1973,7 @@ async function inicializarPagina() {
         inicializarHeaderIndex();
         exibirCategorias(produtos);
         initBannerCarousel();
-        setupDraggableCarousel(document.getElementById('lista-produtos'));
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const catalogoGrid = document.getElementById('lista-produtos');
-        if (prevBtn && nextBtn && catalogoGrid) {
-            const scrollStep = 300;
-            nextBtn.addEventListener('click', () => catalogoGrid.scrollLeft += scrollStep);
-            prevBtn.addEventListener('click', () => catalogoGrid.scrollLeft -= scrollStep);
-        }
+        setupInfiniteCatalogCarousel(document.getElementById('lista-produtos'));
     } else {
         inicializarHeaderPaginaSecundaria();
     }

@@ -1,0 +1,18 @@
+{
+  "id": "68f56d62-9a7c-4f33-b240-dfc35fd0a19c",
+  "runtime": "node",
+  "purpose": "external link line numbers in footer",
+  "script_chars": 157,
+  "started_at": "2026-07-15T16:24:15.980Z",
+  "finished_at": "2026-07-15T16:24:16.114Z",
+  "exit_code": 0,
+  "signal": null,
+  "timed_out": false,
+  "duration_ms": 134,
+  "stdout_bytes": 864,
+  "stderr_bytes": 0,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "stdout_path": "C:\\dev\\Stik.com\\.gsd\\exec\\68f56d62-9a7c-4f33-b240-dfc35fd0a19c.stdout",
+  "stderr_path": "C:\\dev\\Stik.com\\.gsd\\exec\\68f56d62-9a7c-4f33-b240-dfc35fd0a19c.stderr"
+}

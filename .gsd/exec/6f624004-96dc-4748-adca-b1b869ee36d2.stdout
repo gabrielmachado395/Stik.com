@@ -1,0 +1,123 @@
+1: /* --- Estilos Globais e Resets --- */
+9: @media (prefers-reduced-motion: no-preference) {
+22: :root {
+47: @media (min-width: 769px) {
+53: body {
+61: body.sidebar-open {
+88: /* --- Estilos do Cabeçalho Superior (Header) --- */
+171: /* --- Estilos da Sidebar --- */
+239: /* --- Estilos para os Submenus (2º e 3º Nível) --- */
+283: body.sidebar-open main,
+284: body.sidebar-open .main-content,
+285: body.sidebar-open #footer-placeholder,
+286: body.sidebar-open #footer-placeholder .whatsapp-fab,
+287: body.sidebar-open #catalogo-placeholder,
+288: body.sidebar-open .article-detail-page,
+289: body.sidebar-open .blog-main {
+295: body.sidebar-open .top-header .main-header{
+300: /* --- Seção de Vídeo em Tela Cheia --- */
+343: body.hero-in-view .whatsapp-fab {
+350: /* --- Seções Gerais (Animação de Scroll) --- */
+368: /* --- Seção de Destaques de Produtos --- */
+435: body.light-mode .highlight-item span {
+447: /* --- Seção do Catálogo (Carrossel) --- */
+490: /* --- Página de Categoria (grid 1/2/3 colunas) --- */
+522: body.light-mode .category-description{
+528: @media (min-width: 768px) {
+531: @media (min-width: 992px) {
+580: body.light-mode #main-product-image {
+665: body.light-mode .product-description-modern p {
+676: body.light-mode .product-meta {
+721: body.veja-tambem-grid .produto-card {
+748: body.light-mode .veja-tambem-grid .produto-card:hover {
+774: @media (max-width: 768px) {
+790: @media (max-width: 1028px) {
+856: /* --- Estilos do Rodapé --- */
+987: /* --- Seção da Newsletter --- */
+1014: /* --- Conteúdo da Newsletter (Por Cima) --- */
+1031: /* --- Carrossel de Fundo --- */
+1089: /* --- Animação CSS de Carrossel Infinito --- */
+1243: body.light-mode .blog-post {
+1447: /* --- Estilos da Página Institucional --- */
+1473: body.light-mode .institutional-page {
+1491: @media (min-width: 992px) {
+1595: @media (max-width: 900px) {
+1601: @media (max-width: 480px) {
+1640: @media (max-width: 768px) {
+1689: /* --- Estilos para a funcionalidade de pesquisa --- */
+1734: body.light-mode .search-box input {
+1779: body.light-mode .search-result-item.keyboard-selected {
+1784: body.light-mode .search-results-dropdown,
+1785: body.light-mode .search-box {
+1832: body.light-mode .search-results-dropdown a span small{
+1858: @media (max-width: 992px) {
+1905: @media (max-width: 768px) {
+1979: :root {
+2109: @media (max-width: 768px) {
+2145: @media (min-width: 769px) and (max-width: 1024px) {
+2182: @media (min-width: 1025px) and (max-width: 1366px) {
+2208: /* --- Estilos para Conteúdos Internos (FAQ, Política, etc.) --- */
+2234: /* --- Seção de FAQ --- */
+2240: body.light-mode .faq-section {
+2243: body.light-mode .faq-section .page-title,
+2244: body.light-mode .faq-section h3{
+2254: @media (max-width: 768px) {
+2283: /* --- Seções de Política e Termos --- */
+2317: /* --- Seção de Contato --- */
+2334: body.light-mode .contact-item h4,
+2335: body.light-mode .contact-item p {
+2383: body.light-mode .cta-button {
+2392: /* --- Estilos do Modo Claro (Light Mode) --- */
+2393: body.light-mode {
+2409: body.light-mode a,
+2410: body.light-mode .top-header .icon-btn {
+2414: body.light-mode a:hover {
+2419: body.light-mode .top-header.scrolled {
+2425: body.light-mode .sidebar {
+2430: body.light-mode .sidebar-nav li {
+2434: body.light-mode .submenu,
+2435: body.light-mode .submenu-aninhado,
+2436: body.light-mode .submenu-terceiro-nivel {
+2441: body.light-mode .main-footer {
+2446: body.light-mode .footer-bottom {
+2452: body.light-mode .footer-bottom p {
+2458: body.light-mode .product-highlights,
+2459: body.light-mode .newsletter-section {
+2463: body.light-mode .create-main .page-title {
+2468: body.light-mode .main-content {
+2472: body.light-mode .main-content h1,
+2473: body.light-mode .main-content h2{
+2477: body.light-mode .catalogo-section {
+2481: body.light-mode .main-footer{
+2485: body.light-mode .product-highlights h2,
+2486: body.light-mode .catalogo-section h2,
+2487: body.light-mode .produto-card h3 {
+2491: body.light-mode .product-highlights span{
+2496: body.light-mode .highlight-item,
+2497: body.light-mode .produto-card,
+2498: body.light-mode .article-card,
+2499: body.light-mode .faq-item {
+2504: body.light-mode .produto-card h3{
+2509: body.light-mode .product-page {
+2514: body.light-mode .institutional-page,
+2515: body.light-mode .blog-main,
+2516: body.light-mode .create-main,
+2517: body.light-mode .diferenciais-section {
+2521: body.light-mode .contact-form-container{
+2526: body.light-mode .contact-section{
+2527: background-color: var(---bg-color-light);
+2530: body.light-mode .institutional-page h3,
+2531: body.light-mode .institutional-page p{
+2535: body.light-mode .newsletter-content {
+2541: body.light-mode .newsletter-content h2,
+2542: body.light-mode .newsletter-content span {
+2554: body.light-mode .newsletter-content a {
+2560: body.light-mode .newsletter-content input,
+2561: body.light-mode .form-group input,
+2562: body.light-mode .contact-form input,
+2563: body.light-mode .contact-form textarea {
+2569: body.light-mode .trix-content {
+2575: body.light-mode .trix-toolbar {
+2581: body.light-mode .carousel-btn {
+2668: body.light-mode .whatsapp-fab {
+2679: @media (max-width: 480px) {

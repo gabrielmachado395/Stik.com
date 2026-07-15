@@ -1,0 +1,18 @@
+{
+  "id": "16e63b41-9197-42f8-bd5f-81a3d99d6c55",
+  "runtime": "node",
+  "purpose": "extract index hero section",
+  "script_chars": 196,
+  "started_at": "2026-07-15T16:31:23.088Z",
+  "finished_at": "2026-07-15T16:31:23.270Z",
+  "exit_code": 0,
+  "signal": null,
+  "timed_out": false,
+  "duration_ms": 182,
+  "stdout_bytes": 519,
+  "stderr_bytes": 0,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "stdout_path": "C:\\dev\\Stik.com\\.gsd\\exec\\16e63b41-9197-42f8-bd5f-81a3d99d6c55.stdout",
+  "stderr_path": "C:\\dev\\Stik.com\\.gsd\\exec\\16e63b41-9197-42f8-bd5f-81a3d99d6c55.stderr"
+}

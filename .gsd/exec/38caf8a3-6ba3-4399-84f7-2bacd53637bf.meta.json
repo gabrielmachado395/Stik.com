@@ -1,0 +1,18 @@
+{
+  "id": "38caf8a3-6ba3-4399-84f7-2bacd53637bf",
+  "runtime": "python",
+  "purpose": "summarize existing markdown headings and size",
+  "script_chars": 272,
+  "started_at": "2026-07-15T14:32:16.412Z",
+  "finished_at": "2026-07-15T14:32:16.638Z",
+  "exit_code": 9009,
+  "signal": null,
+  "timed_out": false,
+  "duration_ms": 226,
+  "stdout_bytes": 0,
+  "stderr_bytes": 220,
+  "stdout_truncated": false,
+  "stderr_truncated": false,
+  "stdout_path": "C:\\dev\\Stik.com\\.gsd\\exec\\38caf8a3-6ba3-4399-84f7-2bacd53637bf.stdout",
+  "stderr_path": "C:\\dev\\Stik.com\\.gsd\\exec\\38caf8a3-6ba3-4399-84f7-2bacd53637bf.stderr"
+}

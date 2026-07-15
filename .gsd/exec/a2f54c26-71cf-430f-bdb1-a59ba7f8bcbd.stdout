@@ -1,0 +1,31 @@
+chars 7170 lines 254
+1: # Plano de Melhoria de Layout
+3: ## Objetivo
+13: ## Diagnóstico Atual
+15: ### Pontos fortes
+21: ### Problemas que hoje limitam o layout
+34: ## Direção de Redesign
+36: ### Meta visual
+47: ### Princípios
+56: ## Arquitetura Recomendada do Frontend
+60: ### HTML
+67: ### CSS
+85: ### JavaScript
+97: ## Prioridades de UI
+99: ### 1. Base visual
+111: ### 2. Header e navegação
+122: ### 3. Home
+132: ### 4. Página de categoria
+141: ### 5. Página de produto
+153: ### 6. Institucional e blog
+163: ### 7. Footer e contato
+172: ## Roadmap de Execução
+174: ### Fase 1. Saneamento estrutural
+184: ### Fase 2. Design system e layout global
+193: ### Fase 3. Home e páginas comerciais
+202: ### Fase 4. Páginas de apoio
+213: ### Fase 5. Polimento
+220: ## Critérios de Sucesso
+229: ## Ordem Recomendada de Implementação
+239: ## Observações Técnicas
+245: ## Próximo Passo Prático

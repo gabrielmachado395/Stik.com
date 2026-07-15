@@ -1,0 +1,10 @@
+<section class="video-hero-section">
+            <div class="video-container">
+                <video autoplay muted loop id="institutionalVideo">
+                    <source src="img/original video.mp4" type="video/mp4" media="(min-width: 769px)">
+                    <source src="img/Férias no Mediterrâneo - Feito com Clipchamp (1).mp4" type="video/mp4" media="(max-width: 768px)">
+                </video>
+            </div>
+            <div id="header-hover-area"></div>
+            
+        </section>
