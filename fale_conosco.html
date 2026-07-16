@@ -12,37 +12,62 @@
     <div id="sidebar-placeholder"></div>
     <div id="overlay"></div>
     
-    <main class="main-content">
+    <main class="main-content contact-main">
         <section class="contact-section">
             <div class="container">
-                <h1 class="page-title animate-on-scroll">Fale Conosco</h1>                
-                <div class="contact-info animate-on-scroll">
-                    <div class="contact-item">
-                        <h4>Atendimento ao Cliente</h4>
-                        <p>sac@stik.com</p>
-                        <p>(85) 3202-5400</p>
-                    </div>
+                <header class="contact-hero animate-on-scroll">
+                    <h1 class="page-title">Fale Conosco</h1>
+                    <p class="contact-intro">Estamos prontos para atender você com agilidade, clareza e o suporte necessário para tirar dúvidas, acompanhar pedidos ou iniciar uma nova conversa com a STIK.</p>
+                </header>
+
+                <div class="contact-layout">
+                    <aside class="contact-panel animate-on-scroll" aria-label="Informações de contato">
+                        <h2>Atendimento</h2>
+                        <p class="contact-panel-copy">Escolha o canal mais conveniente e fale com a nossa equipe durante o horário comercial.</p>
+
+                        <div class="contact-info">
+                            <article class="contact-item">
+                                <span class="contact-item-icon" aria-hidden="true">
+                                    <i class="fas fa-headset"></i>
+                                </span>
+                                <div class="contact-item-body">
+                                    <h4>Atendimento ao Cliente</h4>
+                                    <p>sac@stik.com</p>
+                                    <p>(85) 3202-5400</p>
+                                </div>
+                            </article>
+
+                            <article class="contact-item">
+                                <span class="contact-item-icon" aria-hidden="true">
+                                    <i class="fas fa-clock"></i>
+                                </span>
+                                <div class="contact-item-body">
+                                    <h4>Horário de Atendimento</h4>
+                                    <p>Segunda a Sexta-feira</p>
+                                    <p>Das 8h às 17:20h</p>
+                                </div>
+                            </article>
+                        </div>
+                    </aside>
                     
-                    <div class="contact-item">
-                        <h4>Horário de Atendimento</h4>
-                        <p>Segunda a Sexta-feira, das 8h às 17:20h.</p>
+                    <div class="contact-form-container animate-on-scroll">
+                        <span class="contact-form-eyebrow">Envie sua mensagem</span>
+                        <h2>Vamos conversar</h2>
+                        <p class="contact-form-intro">Preencha o formulário e retornaremos o mais breve possível com a orientação que você precisa.</p>
+
+                        <form class="contact-form">
+                            <label for="name">Seu Nome</label>
+                            <input type="text" id="name" name="name" placeholder="Seu nome..." required>
+                            
+                            <label for="email">Seu E-mail</label>
+                            <input type="email" id="email" name="email" placeholder="Seu email..." required>
+                            
+                            <label for="message">Mensagem</label>
+                            <textarea id="message" name="message" rows="5" placeholder="Sua mensagem..." required></textarea>
+                            
+                            <button type="submit" class="cta-button">Enviar Mensagem</button>
+                        </form>
                     </div>
-                </div>
-                
-                <div class="contact-form-container animate-on-scroll">
-                    <h2>Envie sua Mensagem</h2>
-                    <form class="contact-form">
-                        <label for="name">Seu Nome:</label>
-                        <input type="text" id="name" name="name" placeholder="Seu nome..." required>
-                        
-                        <label for="email">Seu E-mail:</label>
-                        <input type="email" id="email" name="email" placeholder="Seu email..." required>
-                        
-                        <label for="message">Mensagem:</label>
-                        <textarea id="message" name="message" rows="5" placeholder="Sua mensagem..." required></textarea>
-                        
-                        <button type="submit" class="cta-button">Enviar Mensagem</button>
-                    </form>
                 </div>
             </div>
         </section>
