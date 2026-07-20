@@ -584,9 +584,9 @@ section {
 .category-grid .produto-card:hover,
 .catalogo-grid .produto-card:focus-visible,
 .category-grid .produto-card:focus-visible {
-    border-color: rgba(233, 198, 130, 0.58);
+    border-color: rgba(36, 48, 65, 0.18);
     transform: translateY(-8px);
-    box-shadow: 0 24px 58px rgba(15, 23, 42, 0.2), 0 12px 28px rgba(233, 198, 130, 0.16);
+    box-shadow: 0 24px 58px rgba(15, 23, 42, 0.18);
     outline: none;
 }
 
@@ -594,7 +594,7 @@ section {
 .category-grid .produto-card:hover::before,
 .catalogo-grid .produto-card:focus-visible::before,
 .category-grid .produto-card:focus-visible::before {
-    opacity: 1;
+    opacity: 0;
 }
 
 .catalogo-grid .produto-card img,
@@ -615,7 +615,7 @@ section {
 .category-grid .produto-card:hover img,
 .catalogo-grid .produto-card:focus-visible img,
 .category-grid .produto-card:focus-visible img {
-    filter: saturate(1.08) contrast(1.03);
+    filter: none;
     transform: scale(1.035);
 }
 
@@ -655,15 +655,15 @@ section {
 .category-grid .produto-card:hover h3,
 .catalogo-grid .produto-card:focus-visible h3,
 .category-grid .produto-card:focus-visible h3 {
-    color: var(--color-accent-hover);
+    color: #243041;
 }
 
 .catalogo-grid .produto-card:hover h3::before,
 .category-grid .produto-card:hover h3::before,
 .catalogo-grid .produto-card:focus-visible h3::before,
 .category-grid .produto-card:focus-visible h3::before {
-    opacity: 1;
-    transform: translateX(-50%) scaleX(1);
+    opacity: 0.72;
+    transform: translateX(-50%) scaleX(0.72);
 }
 
 .catalogo-grid::-webkit-scrollbar { display: none; }
@@ -2267,7 +2267,7 @@ body.veja-tambem-grid .produto-card {
     .newsletter-content {
         position: absolute; /* AQUI: Mude para absoluto */
         bottom: 0; /* AQUI: Posiciona no fundo */
-        left: 50%; /* AQUI: Centraliza horizontalmente */
+        /* left: 50%; AQUI: Centraliza horizontalmente */
         transform: translateX(-50%); /* AQUI: Corrige o alinhamento central */
         width: 100%;
         padding: 10px;
@@ -4231,6 +4231,10 @@ a,
 
 .catalogo-grid .produto-card {
     scroll-snap-align: center;
+}
+
+.catalogo-grid--infinite {
+    scroll-snap-type: none;
 }
 
 .catalogo-grid--native {

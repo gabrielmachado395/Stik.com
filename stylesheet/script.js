@@ -572,6 +572,16 @@ function hasFineHover() {
     return mediaMatches('(hover: hover) and (pointer: fine)');
 }
 
+function shouldUseLimitedCatalogCarousel() {
+    const profile = getPerformanceProfile();
+    const fineHover = hasFineHover();
+
+    if (profile.reducedMotion || profile.saveData) return true;
+    if (profile.smallViewport || profile.coarsePointer || !fineHover) return true;
+
+    return profile.lowMemory && profile.lowCpu;
+}
+
 function escapeAttribute(value) {
     return String(value ?? '')
         .replace(/&/g, '&amp;')
@@ -1217,19 +1227,59 @@ function setupDraggableCarousel(carouselElement) {
     let isDown = false;
     let startX;
     let scrollLeft;
+    let velocity = 0;
+    let lastPointerX = 0;
+    let lastPointerTime = 0;
+    let inertiaFrame = null;
     const useNativeTouchScroll = mediaMatches('(pointer: coarse)');
+    const INERTIA_DECAY = 0.972;
+    const INERTIA_START_VELOCITY = 0.015;
+    const INERTIA_STOP_VELOCITY = 0.003;
+    const INERTIA_MAX_DELTA_TIME = 32;
+
+    const stopInertia = () => {
+        if (inertiaFrame !== null) {
+            cancelAnimationFrame(inertiaFrame);
+            inertiaFrame = null;
+        }
+    };
     
     const startDrag = (e) => {
+        stopInertia();
         isDown = true;
         carouselElement.classList.add('active');
         // usa touches quando disponível
         startX = (e.pageX !== undefined) ? e.pageX : (e.touches && e.touches[0] && e.touches[0].pageX);
         scrollLeft = carouselElement.scrollLeft;
+        lastPointerX = startX;
+        lastPointerTime = performance.now();
+        velocity = 0;
     };
 
     const endDrag = () => {
+        if (!isDown) return;
         isDown = false;
         carouselElement.classList.remove('active');
+
+        if (Math.abs(velocity) < INERTIA_START_VELOCITY) return;
+
+        let inertiaLastTime = performance.now();
+        const animateInertia = (now) => {
+            const deltaTime = Math.min(Math.max(now - inertiaLastTime, 1), INERTIA_MAX_DELTA_TIME);
+            inertiaLastTime = now;
+
+            carouselElement.scrollLeft += velocity * deltaTime;
+            velocity *= Math.pow(INERTIA_DECAY, deltaTime / 16.67);
+
+            if (Math.abs(velocity) < INERTIA_STOP_VELOCITY) {
+                stopInertia();
+                return;
+            }
+
+            inertiaFrame = requestAnimationFrame(animateInertia);
+        };
+
+        inertiaFrame = requestAnimationFrame(animateInertia);
     };
 
     const drag = (e) => {
@@ -1239,6 +1289,13 @@ function setupDraggableCarousel(carouselElement) {
         if (typeof x !== 'number') return;
         const walk = x - startX;
         carouselElement.scrollLeft = scrollLeft - walk;
+        const now = performance.now();
+        const deltaX = x - lastPointerX;
+        const deltaTime = Math.max(now - lastPointerTime, 1);
+        const nextVelocity = -deltaX / deltaTime;
+        velocity = velocity * 0.75 + nextVelocity * 0.25;
+        lastPointerX = x;
+        lastPointerTime = now;
     };
     
     // mouse (desktop) — mantém drag por mouse
@@ -1268,13 +1325,15 @@ function setupInfiniteCatalogCarousel(carouselElement) {
         return;
     }
 
-    if (shouldUseLightMotion()) {
+    if (shouldUseLimitedCatalogCarousel()) {
         carouselElement.classList.add('catalogo-grid--native');
         if (hasFineHover()) {
             setupDraggableCarousel(carouselElement);
         }
         return;
     }
+
+    carouselElement.classList.add('catalogo-grid--infinite');
 
     const createClone = (card) => {
         const clone = card.cloneNode(true);
@@ -1300,6 +1359,10 @@ function setupInfiniteCatalogCarousel(carouselElement) {
     let inertiaFrame = null;
     let inertiaLastTime = 0;
     let rebalanceFrame = null;
+    const INERTIA_DECAY = 0.972;
+    const INERTIA_START_VELOCITY = 0.015;
+    const INERTIA_STOP_VELOCITY = 0.003;
+    const INERTIA_MAX_DELTA_TIME = 32;
 
     const updateSegmentWidth = () => {
         segmentWidth = carouselElement.scrollWidth / 3;
@@ -1369,17 +1432,17 @@ function setupInfiniteCatalogCarousel(carouselElement) {
         carouselElement.classList.remove('active');
         window.removeEventListener('mousemove', onWindowMouseMove);
 
-        if (Math.abs(velocity) < 0.02) return;
+        if (Math.abs(velocity) < INERTIA_START_VELOCITY) return;
 
         inertiaLastTime = performance.now();
         const animateInertia = (now) => {
-            const deltaTime = Math.max(now - inertiaLastTime, 1);
+            const deltaTime = Math.min(Math.max(now - inertiaLastTime, 1), INERTIA_MAX_DELTA_TIME);
             inertiaLastTime = now;
 
             carouselElement.scrollLeft += velocity * deltaTime;
-            velocity *= Math.pow(0.94, deltaTime / 16.67);
+            velocity *= Math.pow(INERTIA_DECAY, deltaTime / 16.67);
 
-            if (Math.abs(velocity) < 0.01) {
+            if (Math.abs(velocity) < INERTIA_STOP_VELOCITY) {
                 stopInertia();
                 return;
             }
