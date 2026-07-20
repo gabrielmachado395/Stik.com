@@ -539,6 +539,60 @@ const produtos = [
 ];
 let artigos = null;
 
+function mediaMatches(query) {
+    return typeof window !== 'undefined' && 'matchMedia' in window && window.matchMedia(query).matches;
+}
+
+function getPerformanceProfile() {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const memory = Number(navigator.deviceMemory) || 8;
+    const cores = Number(navigator.hardwareConcurrency) || 8;
+    const saveData = Boolean(connection && connection.saveData);
+    const smallViewport = mediaMatches('(max-width: 768px)');
+    const coarsePointer = mediaMatches('(pointer: coarse)');
+    const reducedMotion = mediaMatches('(prefers-reduced-motion: reduce)');
+    const lowMemory = memory <= 4;
+    const lowCpu = cores <= 4;
+
+    return {
+        saveData,
+        smallViewport,
+        coarsePointer,
+        reducedMotion,
+        lowPower: saveData || lowMemory || lowCpu || (smallViewport && coarsePointer)
+    };
+}
+
+function shouldUseLightMotion() {
+    const profile = getPerformanceProfile();
+    return profile.lowPower || profile.reducedMotion;
+}
+
+function hasFineHover() {
+    return mediaMatches('(hover: hover) and (pointer: fine)');
+}
+
+function escapeAttribute(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function optimizedImageMarkup(src, alt, options = {}) {
+    const loading = options.loading || 'lazy';
+    const fetchPriority = options.fetchPriority ? ` fetchpriority="${escapeAttribute(options.fetchPriority)}"` : '';
+    return `<img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" loading="${loading}" decoding="async"${fetchPriority}>`;
+}
+
+function optimizeImageElement(img, options = {}) {
+    if (!img) return;
+    img.loading = options.loading || 'lazy';
+    img.decoding = 'async';
+    if (options.fetchPriority) img.fetchPriority = options.fetchPriority;
+}
+
 /**
  * Carrega artigos de forma lazy a partir de um arquivo JSON (crie data/artigos.json).
  * Reduz o tempo de parsing do script principal.
@@ -904,7 +958,7 @@ function criarProdutoCard(produto) {
     produtoCard.href = `produto.html?id=${produto.id}`;
     const src = encodeURI(produto.imagem);
     produtoCard.innerHTML = `
-        <img src="${src}" alt="${normalizeCategoria(produto.categoria)}">
+        ${optimizedImageMarkup(src, normalizeCategoria(produto.categoria))}
         <h3>${normalizeCategoria(produto.categoria)}</h3>
     `;
     return produtoCard;
@@ -916,7 +970,7 @@ function criarCategoriaCard(categoria, imagemRepresentativa) {
     card.href = `categoria.html?categoria=${encodeURIComponent(categoria)}`;
     const src = encodeURI(imagemRepresentativa);
     card.innerHTML = `
-        <img src="${src}" alt="${categoria}">
+        ${optimizedImageMarkup(src, categoria)}
         <h3>${categoria}</h3>
     `;
     return card;
@@ -991,9 +1045,9 @@ function inicializarPesquisa() {
                 const categoriaNormalizada = normalizeCategoria(produto.categoria).toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "");
-                const categoriaSemEspacos = categoriaNromalizada.replace(/\s+/g, '');
+                const categoriaSemEspacos = categoriaNormalizada.replace(/\s+/g, '');
 
-                const matchesNome = nomeNormalizado.includes(termobusca) || nomeSemEspacos.includes(termoBuscaNoSpaces);
+                const matchesNome = nomeNormalizado.includes(termoBusca) || nomeSemEspacos.includes(termoBuscaNoSpaces);
                 const matchesCategoria = categoriaNormalizada.includes(termoBusca) || categoriaSemEspacos.includes(termoBuscaNoSpaces);
                 return matchesNome || matchesCategoria
             });
@@ -1005,7 +1059,7 @@ function inicializarPesquisa() {
                     item.classList.add('search-result-item');
                     const src = encodeURI(produto.imagem);
                     item.innerHTML = `
-                        <img src="${src}" alt="${formatNome(produto.nome)}" />
+                        ${optimizedImageMarkup(src, formatNome(produto.nome))}
                         <span>${formatNome(produto.nome)} <small>(${normalizeCategoria(produto.categoria)})</small></span>
                     `;
                     searchResultsList.appendChild(item);
@@ -1157,10 +1211,13 @@ function inicializarPesquisa() {
 // Função para suavizar a rolagem na Parte "Catalogo" no mobile e desktop
 function setupDraggableCarousel(carouselElement) {
     if (!carouselElement) return;
+    if (carouselElement.dataset.dragReady === 'true') return;
+    carouselElement.dataset.dragReady = 'true';
 
     let isDown = false;
     let startX;
     let scrollLeft;
+    const useNativeTouchScroll = mediaMatches('(pointer: coarse)');
     
     const startDrag = (e) => {
         isDown = true;
@@ -1190,11 +1247,13 @@ function setupDraggableCarousel(carouselElement) {
     carouselElement.addEventListener('mouseup', endDrag);
     carouselElement.addEventListener('mousemove', drag);
     
-    // touch (mobile) — listeners passivos, sem preventDefault para preservar momentum
-    carouselElement.addEventListener('touchstart', startDrag, { passive: true });
-    carouselElement.addEventListener('touchend', endDrag, { passive: true });
-    carouselElement.addEventListener('touchcancel', endDrag, { passive: true });
-    carouselElement.addEventListener('touchmove', drag, { passive: true });
+    // No touch, o scroll nativo do browser é mais leve e mantém momentum.
+    if (!useNativeTouchScroll) {
+        carouselElement.addEventListener('touchstart', startDrag, { passive: true });
+        carouselElement.addEventListener('touchend', endDrag, { passive: true });
+        carouselElement.addEventListener('touchcancel', endDrag, { passive: true });
+        carouselElement.addEventListener('touchmove', drag, { passive: true });
+    }
 }
 
 function setupInfiniteCatalogCarousel(carouselElement) {
@@ -1202,8 +1261,18 @@ function setupInfiniteCatalogCarousel(carouselElement) {
 
     const originalCards = Array.from(carouselElement.children);
     if (originalCards.length === 0) return;
+    carouselElement.dataset.infiniteReady = 'true';
+
     if (originalCards.length === 1) {
         setupDraggableCarousel(carouselElement);
+        return;
+    }
+
+    if (shouldUseLightMotion()) {
+        carouselElement.classList.add('catalogo-grid--native');
+        if (hasFineHover()) {
+            setupDraggableCarousel(carouselElement);
+        }
         return;
     }
 
@@ -1219,8 +1288,6 @@ function setupInfiniteCatalogCarousel(carouselElement) {
     const afterClones = originalCards.map(createClone);
     carouselElement.replaceChildren(...beforeClones, ...originalCards, ...afterClones);
 
-    carouselElement.dataset.infiniteReady = 'true';
-
     let segmentWidth = 0;
     let isAdjusting = false;
     let isMouseDown = false;
@@ -1232,6 +1299,7 @@ function setupInfiniteCatalogCarousel(carouselElement) {
     let lastPointerTime = 0;
     let inertiaFrame = null;
     let inertiaLastTime = 0;
+    let rebalanceFrame = null;
 
     const updateSegmentWidth = () => {
         segmentWidth = carouselElement.scrollWidth / 3;
@@ -1276,6 +1344,8 @@ function setupInfiniteCatalogCarousel(carouselElement) {
         lastPointerTime = performance.now();
         velocity = 0;
         carouselElement.classList.add('active');
+        window.addEventListener('mousemove', onWindowMouseMove, { passive: true });
+        window.addEventListener('mouseup', onWindowMouseUp, { once: true });
     };
 
     const moveMouseDrag = (pageX) => {
@@ -1297,6 +1367,7 @@ function setupInfiniteCatalogCarousel(carouselElement) {
         if (!isMouseDown) return;
         isMouseDown = false;
         carouselElement.classList.remove('active');
+        window.removeEventListener('mousemove', onWindowMouseMove);
 
         if (Math.abs(velocity) < 0.02) return;
 
@@ -1319,7 +1390,23 @@ function setupInfiniteCatalogCarousel(carouselElement) {
         inertiaFrame = requestAnimationFrame(animateInertia);
     };
 
-    carouselElement.addEventListener('scroll', rebalanceScroll, { passive: true });
+    const requestRebalanceScroll = () => {
+        if (rebalanceFrame !== null) return;
+        rebalanceFrame = requestAnimationFrame(() => {
+            rebalanceFrame = null;
+            rebalanceScroll();
+        });
+    };
+
+    const onWindowMouseMove = (event) => {
+        moveMouseDrag(event.pageX);
+    };
+
+    const onWindowMouseUp = () => {
+        endMouseDrag();
+    };
+
+    carouselElement.addEventListener('scroll', requestRebalanceScroll, { passive: true });
 
     carouselElement.addEventListener('wheel', (event) => {
         const hasNativeHorizontal = Math.abs(event.deltaX) > 0;
@@ -1335,12 +1422,6 @@ function setupInfiniteCatalogCarousel(carouselElement) {
         if (event.button !== 0) return;
         startMouseDrag(event.pageX);
     });
-
-    window.addEventListener('mousemove', (event) => {
-        moveMouseDrag(event.pageX);
-    });
-
-    window.addEventListener('mouseup', endMouseDrag);
     carouselElement.addEventListener('dragstart', (event) => event.preventDefault());
 
     carouselElement.addEventListener('click', (event) => {
@@ -1350,18 +1431,24 @@ function setupInfiniteCatalogCarousel(carouselElement) {
         didDrag = false;
     }, true);
 
+    let resizeFrame = null;
     window.addEventListener('resize', () => {
-        stopInertia();
-        const previousSegmentWidth = segmentWidth;
-        updateSegmentWidth();
-        if (!previousSegmentWidth || !segmentWidth) return;
-        const offsetFromMiddle = carouselElement.scrollLeft - previousSegmentWidth;
-        carouselElement.scrollLeft = segmentWidth + offsetFromMiddle;
-    });
+        if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => {
+            resizeFrame = null;
+            stopInertia();
+            const previousSegmentWidth = segmentWidth;
+            updateSegmentWidth();
+            if (!previousSegmentWidth || !segmentWidth) return;
+            const offsetFromMiddle = carouselElement.scrollLeft - previousSegmentWidth;
+            carouselElement.scrollLeft = segmentWidth + offsetFromMiddle;
+        });
+    }, { passive: true });
 }
 
 function setupInfiniteNewsletterCarousel(trackElement) {
     if (!trackElement) return;
+    if (trackElement.dataset.infiniteReady === 'true') return;
 
     if (!trackElement.dataset.originalMarkup) {
         const originalImages = Array.from(trackElement.children).filter((image) => image.matches('img'));
@@ -1369,11 +1456,15 @@ function setupInfiniteNewsletterCarousel(trackElement) {
         trackElement.dataset.originalMarkup = originalImages.map((image) => image.outerHTML).join('');
     }
 
-    const SPEED_PX_PER_SECOND = 26;
+    const lightMotion = shouldUseLightMotion();
+    const SPEED_PX_PER_SECOND = lightMotion ? 18 : 26;
+    const FRAME_INTERVAL = lightMotion ? 1000 / 45 : 0;
     let offset = 0;
     let segmentWidth = 0;
     let frameId = null;
     let lastTimestamp = 0;
+    let isRunning = false;
+    let isInViewport = !('IntersectionObserver' in window);
 
     const stopAnimation = () => {
         if (frameId !== null) {
@@ -1399,6 +1490,7 @@ function setupInfiniteNewsletterCarousel(trackElement) {
     };
 
     const buildTrack = () => {
+        isRunning = false;
         stopAnimation();
         trackElement.replaceChildren();
 
@@ -1407,7 +1499,9 @@ function setupInfiniteNewsletterCarousel(trackElement) {
         segmentWidth = firstSegment.scrollWidth;
 
         const viewportWidth = trackElement.parentElement ? trackElement.parentElement.clientWidth : window.innerWidth;
-        const segmentCount = Math.max(3, Math.ceil((viewportWidth * 2) / Math.max(segmentWidth, 1)) + 1);
+        const viewportMultiplier = lightMotion ? 1.25 : 2;
+        const minSegments = lightMotion ? 2 : 3;
+        const segmentCount = Math.max(minSegments, Math.ceil((viewportWidth * viewportMultiplier) / Math.max(segmentWidth, 1)) + 1);
 
         for (let index = 1; index < segmentCount; index++) {
             trackElement.appendChild(createSegment(true));
@@ -1417,12 +1511,26 @@ function setupInfiniteNewsletterCarousel(trackElement) {
         trackElement.style.transform = 'translate3d(0, 0, 0)';
     };
 
+    const shouldRunAnimation = () => isInViewport && !document.hidden;
+
     const animate = (timestamp) => {
+        frameId = null;
+        if (!isRunning || !shouldRunAnimation()) {
+            isRunning = false;
+            return;
+        }
+
         if (!lastTimestamp) {
             lastTimestamp = timestamp;
         }
 
-        const deltaSeconds = (timestamp - lastTimestamp) / 1000;
+        const elapsed = timestamp - lastTimestamp;
+        if (FRAME_INTERVAL && elapsed < FRAME_INTERVAL) {
+            frameId = requestAnimationFrame(animate);
+            return;
+        }
+
+        const deltaSeconds = Math.min(elapsed / 1000, 0.08);
         lastTimestamp = timestamp;
         offset -= SPEED_PX_PER_SECOND * deltaSeconds;
 
@@ -1432,6 +1540,20 @@ function setupInfiniteNewsletterCarousel(trackElement) {
 
         trackElement.style.transform = `translate3d(${offset}px, 0, 0)`;
         frameId = requestAnimationFrame(animate);
+    };
+
+    const playAnimation = () => {
+        if (!shouldRunAnimation() || isRunning) return;
+        isRunning = true;
+        lastTimestamp = 0;
+        if (frameId === null) {
+            frameId = requestAnimationFrame(animate);
+        }
+    };
+
+    const pauseAnimation = () => {
+        isRunning = false;
+        stopAnimation();
     };
 
     buildTrack();
@@ -1446,15 +1568,35 @@ function setupInfiniteNewsletterCarousel(trackElement) {
             resizeTimer = setTimeout(() => {
                 lastTimestamp = 0;
                 buildTrack();
-                frameId = requestAnimationFrame(animate);
+                playAnimation();
             }, 120);
-        });
+        }, { passive: true });
         trackElement.dataset.resizeBound = 'true';
     }
 
-    stopAnimation();
-    lastTimestamp = 0;
-    frameId = requestAnimationFrame(animate);
+    if ('IntersectionObserver' in window) {
+        const section = trackElement.closest('.newsletter-section') || trackElement;
+        const observer = new IntersectionObserver((entries) => {
+            isInViewport = entries.some((entry) => entry.isIntersecting);
+            if (isInViewport) {
+                playAnimation();
+            } else {
+                pauseAnimation();
+            }
+        }, { rootMargin: '160px 0px' });
+        observer.observe(section);
+    } else {
+        playAnimation();
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            pauseAnimation();
+        } else {
+            playAnimation();
+        }
+    });
+
     trackElement.dataset.infiniteReady = 'true';
 }
 
@@ -1482,7 +1624,7 @@ function initBannerCarousel() {
     bannerImages.forEach(img => {
         const item = document.createElement('div');
         item.classList.add('carousel-item');
-        item.innerHTML = `<img src="${img.src}" alt="${img.alt}">`;
+        item.innerHTML = optimizedImageMarkup(img.src, img.alt);
         mainBannerTrack.appendChild(item);
     });
 
@@ -1515,42 +1657,67 @@ function initBannerCarousel() {
 
 // Função que faz com que os cards tenham mini animações ao passar o mouse
 function initMicroInteractions() {
-    // parallax on hero (based on mouse move) - subtle
-    const hero = document.querySelector('.video-hero-section');
-    if (hero) {
-        hero.classList.add('video-hero-inner');
-        hero.addEventListener('mousemove', (e) => {
-            const rect = hero.getBoundingClientRect();
-            const px = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 .. 0.5
-            const py = (e.clientY - rect.top) / rect.height - 0.5;
-            const layers = hero.querySelectorAll('img, video');
-            layers.forEach(el => {
-                const depth = 10; // a bit stronger
-                const tx = px * depth;
-                const ty = py * depth;
-                el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.02)`;
-            });
-        });
-        hero.addEventListener('mouseleave', () => {
-            hero.querySelectorAll('img, video').forEach(el => el.style.transform = 'translate3d(0,0,0) scale(1)');
-        });
-    }
+    const canUsePointerEffects = hasFineHover() && !shouldUseLightMotion();
 
     // staggered reveal for highlight items on scroll (small delay between them)
-    const highlights = document.querySelectorAll('.highlight-item');
+    const highlights = Array.from(document.querySelectorAll('.highlight-item'));
     if (highlights.length) {
-        highlights.forEach((item, idx) => {
-            item.classList.add('staggered');
-            // when in viewport, add class 'in' with a delay
+        highlights.forEach((item) => item.classList.add('staggered'));
+
+        if ('IntersectionObserver' in window) {
             const io = new IntersectionObserver((entries, obs) => {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        setTimeout(() => item.classList.add('in'), idx * 110);
-                        obs.unobserve(entry.target);
-                    }
+                    if (!entry.isIntersecting) return;
+                    const index = highlights.indexOf(entry.target);
+                    setTimeout(() => entry.target.classList.add('in'), Math.max(index, 0) * 85);
+                    obs.unobserve(entry.target);
                 });
             }, { threshold: 0.18 });
-            io.observe(item);
+
+            highlights.forEach(item => io.observe(item));
+        } else {
+            highlights.forEach(item => item.classList.add('in'));
+        }
+    }
+
+    if (!canUsePointerEffects) {
+        initNewsletterCarouselEffects();
+        return;
+    }
+
+    // parallax on hero (based on mouse move) - subtle
+    const hero = document.querySelector('.video-hero-section');
+    if (hero && hero.dataset.parallaxReady !== 'true') {
+        hero.dataset.parallaxReady = 'true';
+        hero.classList.add('video-hero-inner');
+        const layers = Array.from(hero.querySelectorAll('img, video'));
+        let frameId = null;
+        let lastEvent = null;
+
+        hero.addEventListener('mousemove', (e) => {
+            lastEvent = e;
+            if (frameId !== null) return;
+
+            frameId = requestAnimationFrame(() => {
+                frameId = null;
+                if (!lastEvent) return;
+
+                const rect = hero.getBoundingClientRect();
+                const px = (lastEvent.clientX - rect.left) / rect.width - 0.5;
+                const py = (lastEvent.clientY - rect.top) / rect.height - 0.5;
+
+                layers.forEach(el => {
+                    const depth = 8;
+                    const tx = px * depth;
+                    const ty = py * depth;
+                    el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(1.015)`;
+                });
+            });
+        });
+
+        hero.addEventListener('mouseleave', () => {
+            lastEvent = null;
+            layers.forEach(el => el.style.transform = 'translate3d(0,0,0) scale(1)');
         });
     }
 
@@ -1558,17 +1725,32 @@ function initMicroInteractions() {
     const produtoCards = Array.from(document.querySelectorAll('.produto-card, .article-card'))
         .filter(card => !card.closest('.catalogo-grid'));
     produtoCards.forEach(card => {
+        if (card.dataset.tiltReady === 'true') return;
+        card.dataset.tiltReady = 'true';
+        let frameId = null;
+        let lastEvent = null;
+
         card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const cx = rect.left + rect.width/2;
-            const cy = rect.top + rect.height/2;
-            const dx = (e.clientX - cx) / rect.width;
-            const dy = (e.clientY - cy) / rect.height;
-            const rotX = (dy * 8).toFixed(2);
-            const rotY = (-dx * 8).toFixed(2);
-            card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(8px)`;
+            lastEvent = e;
+            if (frameId !== null) return;
+
+            frameId = requestAnimationFrame(() => {
+                frameId = null;
+                if (!lastEvent) return;
+
+                const rect = card.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const dx = (lastEvent.clientX - cx) / rect.width;
+                const dy = (lastEvent.clientY - cy) / rect.height;
+                const rotX = (dy * 5).toFixed(2);
+                const rotY = (-dx * 5).toFixed(2);
+                card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(6px)`;
+            });
         });
+
         card.addEventListener('mouseleave', () => {
+            lastEvent = null;
             card.style.transform = '';
         });
     });
@@ -1594,7 +1776,7 @@ function createArticleCard(article) {
     const trimmedContent = contentWithoutHtml.length > 150 ? contentWithoutHtml.substring(0, 150) + '...' : contentWithoutHtml;
     
     card.innerHTML = `
-    <img src="${imageUrl}" alt="${article.title}">
+    ${optimizedImageMarkup(imageUrl, article.title)}
     <div class="article-card-content">
             <h2>${article.title}</h2>
             <p>${trimmedContent}</p>
@@ -1743,7 +1925,11 @@ function carregarDetalhesDoProduto() {
     const produto = produtos.find(p => p.id === produtoId);
 
     if (produto) {
-        document.getElementById('main-product-image').src = encodeURI(produto.imagem);
+        const mainProductImage = document.getElementById('main-product-image');
+        if (mainProductImage) {
+            optimizeImageElement(mainProductImage, { loading: 'eager', fetchPriority: 'high' });
+            mainProductImage.src = encodeURI(produto.imagem);
+        }
         document.querySelector('.product-name').textContent = formatNome(produto.nome);
 
         // Subtítulo = primeira frase da descrição
@@ -1801,7 +1987,7 @@ function carregarDetalhesDoProduto() {
                 const card = document.createElement('a');
                 card.classList.add('produto-card');
                 card.href = `produto.html?id=${p.id}`;
-                card.innerHTML = `<img src="${encodeURI(p.imagem)}" alt="${formatNome(p.nome)}"><h3>${formatNome(p.nome)}</h3>`;
+                card.innerHTML = `${optimizedImageMarkup(encodeURI(p.imagem), formatNome(p.nome))}<h3>${formatNome(p.nome)}</h3>`;
                 grid.appendChild(card);
             });
         }
@@ -1837,6 +2023,7 @@ function bindCatalogForm() {
     const input = document.getElementById('catalog-email');
     const feedback = document.getElementById('catalog-feedback');
     if (!form || !input || !feedback) return;
+    prepareLazyRecaptcha(form);
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1855,11 +2042,13 @@ function bindCatalogForm() {
 
         feedback.textContent = 'Enviando catálogo...';
         try {
+            await initRecaptcha();
+
             // tenta obter token reCAPTCHA se o widget estiver disponível
             let recaptchaToken = null;
-            if (window.grecaptcha && window.RECAPTCHA_SITE_KEY) {
+            if (window.RECAPTCHA_SITE_KEY) {
                 try {
-                    recaptchaToken = await window.grecaptcha.execute(window.RECAPTCHA_SITE_KEY, { action: 'send_catalog' });
+                    recaptchaToken = await getRecaptchaToken('send_catalog', 6000);
                 } catch (err) {
                     console.warn('Falha ao executar grecaptcha:', err);
                 }
@@ -1952,21 +2141,42 @@ function initDiferenciaisSequence() {
 }
 
 function inicializarAnimateOnScroll() {
-    const elementosAnimar = document.querySelectorAll('.animate-on-scroll');
+    const elementosAnimar = Array.from(document.querySelectorAll('.animate-on-scroll'))
+        .filter(elemento => elemento.dataset.scrollAnimationReady !== 'true' && !elemento.classList.contains('is-visible'));
+
+    if (!elementosAnimar.length) {
+        initDiferenciaisSequence();
+        return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+        elementosAnimar.forEach(elemento => {
+            elemento.dataset.scrollAnimationReady = 'true';
+            elemento.classList.add('is-visible');
+        });
+        initDiferenciaisSequence();
+        return;
+    }
+
     const observerOptions = {
-        threshold: 0.2
+        threshold: 0.12,
+        rootMargin: '0px 0px -8% 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
+                entry.target.dataset.scrollAnimationReady = 'true';
                 observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
-    elementosAnimar.forEach(elemento => observer.observe(elemento));
+    elementosAnimar.forEach(elemento => {
+        elemento.dataset.scrollAnimationReady = 'true';
+        observer.observe(elemento);
+    });
     initDiferenciaisSequence();
 
     // Reaproveita aqui para observar o hero e alternar a visibilidade do FAB
@@ -1996,24 +2206,37 @@ function inicializarHeaderIndex() {
         return;
     }
 
-    const videoHeroHeight = videoHeroSection.clientHeight;
+    let videoHeroHeight = videoHeroSection.clientHeight;
+    let isHeaderVisible = null;
+    let isHeaderScrolled = null;
+    let ticking = false;
 
     const showHeader = () => {
+        if (isHeaderVisible === true) return;
+        isHeaderVisible = true;
         topHeader.classList.remove('is-hidden');
         topHeader.classList.add('is-visible');
     };
 
     const hideHeader = () => {
+        if (isHeaderVisible === false) return;
+        isHeaderVisible = false;
         topHeader.classList.remove('is-visible');
         topHeader.classList.add('is-hidden');
+    };
+
+    const setScrolled = (scrolled) => {
+        if (isHeaderScrolled === scrolled) return;
+        isHeaderScrolled = scrolled;
+        topHeader.classList.toggle('scrolled', scrolled);
     };
 
     const updateHeaderOnScroll = () => {
         if (window.scrollY > (videoHeroHeight - 100)) {
             showHeader();
-            topHeader.classList.add('scrolled');
+            setScrolled(true);
         } else {
-            topHeader.classList.remove('scrolled');
+            setScrolled(false);
             if (!headerHoverArea.matches(':hover')) {
                 hideHeader();
             }
@@ -2022,7 +2245,19 @@ function inicializarHeaderIndex() {
 
     headerHoverArea.addEventListener('mouseenter', showHeader);
 
-    window.addEventListener('scroll', updateHeaderOnScroll);
+    window.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            ticking = false;
+            updateHeaderOnScroll();
+        });
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+        videoHeroHeight = videoHeroSection.clientHeight;
+        updateHeaderOnScroll();
+    }, { passive: true });
 
     updateHeaderOnScroll();
 }
@@ -2124,7 +2359,7 @@ async function inicializarPagina() {
     // Funções que podem rodar por último
     deferInit(() => {
         inicializarNewsletterCarousel();
-        initRecaptcha();
+        prepareLazyRecaptcha();
         inicializarAnimateOnScroll();
     });
 
@@ -2137,6 +2372,27 @@ async function inicializarPagina() {
     }
 }
 
+
+let recaptchaInitPromise = null;
+
+function prepareLazyRecaptcha(scope = document) {
+    const root = scope && scope.querySelectorAll ? scope : document;
+    const forms = root.matches && root.matches('#catalog-form, .contact-form')
+        ? [root]
+        : Array.from(root.querySelectorAll('#catalog-form, .contact-form'));
+
+    forms.forEach(form => {
+        if (form.dataset.recaptchaLazyReady === 'true') return;
+        form.dataset.recaptchaLazyReady = 'true';
+
+        const warmUp = () => {
+            initRecaptcha();
+        };
+
+        form.addEventListener('focusin', warmUp, { once: true });
+        form.addEventListener('pointerenter', warmUp, { once: true });
+    });
+}
 
 async function getRecaptchaToken(action = 'contact', timeout = 6000) {
   if (!window.RECAPTCHA_SITE_KEY) return null;
@@ -2159,6 +2415,7 @@ async function getRecaptchaToken(action = 'contact', timeout = 6000) {
 function bindContactForm() {
   const form = document.querySelector('.contact-form');
   if (!form) return;
+  prepareLazyRecaptcha(form);
 
   // cria feedback se não houver
   let feedback = document.getElementById('contact-feedback');
@@ -2189,6 +2446,8 @@ function bindContactForm() {
     feedback.textContent = 'Enviando mensagem...';
 
     try {
+      await initRecaptcha();
+
       // tenta obter token reCAPTCHA se disponível
       let recaptchaToken = null;
       if (window.RECAPTCHA_SITE_KEY) {
@@ -2233,25 +2492,45 @@ function inicializarPaginaFaleConosco() {
 
 // Inicializa reCAPTCHA v3 se a site key estiver disponível via /api/config
 async function initRecaptcha() {
-    try {
-        const res = await fetch('/api/config');
-        const cfg = await res.json();
-        if (cfg && cfg.recaptchaSiteKey) {
-            window.RECAPTCHA_SITE_KEY = cfg.recaptchaSiteKey;
-            // injeta o script do Google reCAPTCHA v3
-            const script = document.createElement('script');
-            script.src = `https://www.google.com/recaptcha/api.js?render=${cfg.recaptchaSiteKey}`;
-            script.async = true;
-            script.defer = true;
-            document.head.appendChild(script);
-            // garante que grecaptcha esteja pronto: chamamos grecaptcha.ready antes de usar
-            script.addEventListener('load', () => {
-                console.log('reCAPTCHA script carregado');
+    if (window.grecaptcha && window.RECAPTCHA_SITE_KEY) return true;
+    if (recaptchaInitPromise) return recaptchaInitPromise;
+
+    recaptchaInitPromise = (async () => {
+        try {
+            if (!window.RECAPTCHA_SITE_KEY) {
+                const res = await fetch('/api/config');
+                const cfg = await res.json();
+                if (cfg && cfg.recaptchaSiteKey) {
+                    window.RECAPTCHA_SITE_KEY = cfg.recaptchaSiteKey;
+                }
+            }
+
+            if (!window.RECAPTCHA_SITE_KEY) return false;
+
+            const existingScript = document.querySelector('script[src*="recaptcha/api.js"]');
+            if (existingScript) {
+                return true;
+            }
+
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(window.RECAPTCHA_SITE_KEY)}`;
+                script.async = true;
+                script.defer = true;
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Falha ao carregar reCAPTCHA'));
+                document.head.appendChild(script);
             });
+
+            return true;
+        } catch (err) {
+            recaptchaInitPromise = null;
+            console.warn('Não foi possível inicializar reCAPTCHA:', err);
+            return false;
         }
-    } catch (err) {
-        console.warn('Não foi possível inicializar reCAPTCHA:', err);
-    }
+    })();
+
+    return recaptchaInitPromise;
 }
 
 (function handleNewsletterSidebarLinks() {
@@ -2496,7 +2775,7 @@ function renderCategoriaPage() {
         a.classList.add('produto-card');
         const src = encodeURI(p.imagem);
         a.innerHTML = `
-            <img src="${src}" alt="${formatNome(p.nome)}">
+            ${optimizedImageMarkup(src, formatNome(p.nome))}
             <h3>${formatNome(p.nome)}</h3>
         `;
         frag.appendChild(a);
@@ -2567,7 +2846,7 @@ function renderCategoriaPage() {
 
             const src = encodeURI(produto.imagem);
             card.innerHTML = `
-                <img src="${src}" alt="${formatNome(produto.nome)}">
+                ${optimizedImageMarkup(src, formatNome(produto.nome))}
                 <h3>${formatNome(produto.nome)}</h3>
             `;
 
