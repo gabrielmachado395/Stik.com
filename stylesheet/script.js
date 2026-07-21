@@ -1218,7 +1218,7 @@ function inicializarPesquisa() {
 
 }
 
-// Função para suavizar a rolagem na Parte "Catalogo" no mobile e desktop
+// Função para suavizar a rolagem na parte "Catálogo" no mobile e desktop
 function setupDraggableCarousel(carouselElement) {
     if (!carouselElement) return;
     if (carouselElement.dataset.dragReady === 'true') return;
@@ -1988,12 +1988,35 @@ function carregarDetalhesDoProduto() {
     const produto = produtos.find(p => p.id === produtoId);
 
     if (produto) {
+        const nomeFormatado = formatNome(produto.nome);
+        const categoriaFormatada = normalizeCategoria(produto.categoria);
+        const materialFormatado = produto.material || 'Não informado';
         const mainProductImage = document.getElementById('main-product-image');
         if (mainProductImage) {
             optimizeImageElement(mainProductImage, { loading: 'eager', fetchPriority: 'high' });
             mainProductImage.src = encodeURI(produto.imagem);
+            mainProductImage.alt = nomeFormatado;
         }
-        document.querySelector('.product-name').textContent = formatNome(produto.nome);
+        const productNameEl = document.querySelector('.product-name');
+        if (productNameEl) productNameEl.textContent = nomeFormatado;
+
+        const categoryLabel = document.querySelector('.product-category-label');
+        if (categoryLabel) categoryLabel.textContent = categoriaFormatada;
+
+        const breadcrumbCategory = document.querySelector('.product-breadcrumb-category');
+        if (breadcrumbCategory) {
+            breadcrumbCategory.textContent = categoriaFormatada;
+            breadcrumbCategory.href = `categoria.html?categoria=${encodeURIComponent(categoriaFormatada)}`;
+        }
+
+        const breadcrumbCurrent = document.querySelector('.product-breadcrumb-current');
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = nomeFormatado;
+
+        const categoryValue = document.querySelector('.product-category-value');
+        if (categoryValue) categoryValue.textContent = categoriaFormatada;
+
+        const materialValue = document.querySelector('.product-material-value');
+        if (materialValue) materialValue.textContent = materialFormatado;
 
         // Subtítulo = primeira frase da descrição
         const extrairPrimeiraFrase = (texto) => {
@@ -2039,13 +2062,15 @@ function carregarDetalhesDoProduto() {
 
         // Linha meta (Material | Categoria)
         const metaEl = document.querySelector('.product-meta');
-        if (metaEl) metaEl.innerHTML = `Material: ${produto.material} &nbsp;|&nbsp; Categoria: ${normalizeCategoria(produto.categoria)}`;
+        if (metaEl) {
+            metaEl.textContent = `${nomeFormatado} combina material ${materialFormatado} com aplicação na categoria ${categoriaFormatada}.`;
+        }
 
         // Renderiza cards 'Veja também' (produtos da mesma categoria, exceto o atual)
         const grid = document.querySelector('.veja-tambem-grid');
         if (grid) {
             grid.innerHTML = '';
-            const outros = produtos.filter(p => normalizeCategoria(p.categoria) === normalizeCategoria(produto.categoria) && p.id !== produto.id);
+            const outros = produtos.filter(p => normalizeCategoria(p.categoria) === categoriaFormatada && p.id !== produto.id);
             outros.slice(0, 3).forEach(p => {
                 const card = document.createElement('a');
                 card.classList.add('produto-card');

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produto - Stik</title>
     <link rel="stylesheet" href="stylesheet/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
@@ -10,33 +11,79 @@
     <div id="header-placeholder"></div>
     <div id="sidebar-placeholder"></div>
     <div id="overlay"></div>
-    
+
     <main class="product-page">
-        <div class="product-container animate-on-scroll">
-            <div class="product-image-section">
-                <img src="#" alt="Imagem principal do produto" id="main-product-image" decoding="async" fetchpriority="high">
-                <div class="product-thumbnails">
-                    <div class="variation-options"></div>
-                </div>
-            </div>
-            <div class="product-details-section">
-                <h1 class="product-name"></h1>
+        <section class="product-hero-band" aria-label="Resumo do produto">
+            <div class="product-hero-content">
+                <nav class="product-breadcrumb" aria-label="Caminho do produto">
+                    <a href="index.html">Home</a>
+                    <a class="product-breadcrumb-category" href="index.html#catalogo">Catálogo</a>
+                    <strong class="product-breadcrumb-current"></strong>
+                </nav>
+
+                <div class="product-title-block">
+                    <span class="product-category-label"></span>
+                    <h1 class="product-name"></h1>
                     <h2 class="product-subtitle"></h2>
-                    <div class="product-details-modern">
-                        <div class="product-description-modern"></div>
-                        <div class="product-meta"></div>
-                    </div>
                 </div>
             </div>
-            <section class="veja-tambem-section animate-on-scroll">
+        </section>
+
+        <section class="product-detail-shell">
+            <div class="product-container product-layout animate-on-scroll">
+                <aside class="product-image-section" aria-label="Imagem do produto">
+                    <div class="product-image-card">
+                        <img src="#" alt="Imagem principal do produto" id="main-product-image" decoding="async" fetchpriority="high">
+                    </div>
+                    <div class="product-thumbnails">
+                        <div class="variation-options"></div>
+                    </div>
+                </aside>
+
+                <article class="product-details-section">
+                    <section class="product-info-card product-overview-card">
+                        <span class="product-card-kicker">Visão geral</span>
+                        <div class="product-description-modern"></div>
+                    </section>
+
+                    <section class="product-info-card product-facts-card">
+                        <h2>Informações do produto</h2>
+                        <dl class="product-facts-grid">
+                            <div>
+                                <dt>Categoria</dt>
+                                <dd class="product-category-value"></dd>
+                            </div>
+                            <div>
+                                <dt>Material</dt>
+                                <dd class="product-material-value"></dd>
+                            </div>
+                        </dl>
+                    </section>
+
+                    <section class="product-info-card product-meta-card">
+                        <h2>Detalhes</h2>
+                        <div class="product-meta"></div>
+                    </section>
+
+                    <section class="product-info-card product-contact-card">
+                        <h2>Quer desenvolver com este produto?</h2>
+                        <p>Fale com a nossa equipe para alinhar aplicação, volume e acabamento ideal.</p>
+                        <a class="product-contact-button" href="https://api.whatsapp.com/send/?phone=558532025400" target="_blank" rel="noopener">Falar pelo WhatsApp</a>
+                    </section>
+                </article>
+            </div>
+        </section>
+
+        <section class="veja-tambem-section animate-on-scroll">
+            <div class="veja-tambem-shell">
                 <h2 class="veja-tambem-title">Veja também</h2>
                 <div class="veja-tambem-grid"></div>
-            </section>
             </div>
-        </div>
+        </section>
     </main>
+
     <div id="catalogo-placeholder"></div>
-    <div id="footer-placeholder"></div>    
+    <div id="footer-placeholder"></div>
     <script src="stylesheet/script.js"></script>
 </body>
 </html>

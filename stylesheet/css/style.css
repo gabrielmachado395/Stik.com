@@ -92,7 +92,7 @@ button {
 }
 
 
-/* --- Estilos do CabeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§alho Superior (Header) --- */
+/* --- Estilos do Cabeçalho Superior (Header) --- */
 .top-header {
     position: fixed;
     top: 0;
@@ -131,7 +131,7 @@ button {
     gap: 25px;
 }
 
-/* Estado/animacao do header quando a busca abre (sem mexer no conteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºdo da pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina) */
+/* Estado/animação do header quando a busca abre (sem mexer no conteúdo da página) */
 .top-header .header-right { transition: transform 260ms cubic-bezier(.2,.9,.2,1); will-change: transform; }
 .top-header.search-open { --searchbox-width: 360px; }
 .top-header.search-open .header-right { transform: translateX(calc(-1 * var(--searchbox-width) - 12px)); }
@@ -155,21 +155,21 @@ button {
     font-size: 1.3em;
 }
 
-/* Estilos para a ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rea de hover do cabeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§alho */
+/* Estilos para a área de hover do cabeçalho */
 #header-hover-area {
     position:absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 80px; /* Altura da ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rea de interaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o, ajuste conforme o necessÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio */
+    height: 80px; /* Altura da área de interação, ajuste conforme o necessário */
     z-index: 1001; /* Fica acima do header para capturar o evento */
 
 }
 
 
-/* Quando o header fica visÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel, ele deve ter um z-index maior */
+/* Quando o header fica visível, ele deve ter um z-index maior */
 #mainHeader.is-visible {
-    z-index: 1002; /* Fica acima da ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rea de hover para ser clicÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡vel */
+    z-index: 1002; /* Fica acima da área de hover para ser clicável */
 }
 
 .top-header {
@@ -183,11 +183,11 @@ button {
     left: calc(-1 * var(--sidebar-width));
     right: auto;
     bottom: 0;                   /* garante limite inferior */
-    height: 100vh;               /* garante que o contÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªiner tenha a altura da viewport */
+    height: 100vh;               /* garante que o contêiner tenha a altura da viewport */
     width: var(--sidebar-width);
     background-color: var(--color-surface);
     z-index: 1100;
-    padding: 30px 20px 60px;     /* padding-bottom maior para acessar ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºltimos itens */
+    padding: 30px 20px 60px;     /* padding-bottom maior para acessar últimos itens */
     transition: left 0.4s ease;
     display: flex;
     flex-direction: column;
@@ -219,7 +219,7 @@ button {
 
 .sidebar-nav li {
     border-bottom: 1px solid #535353;
-    position: relative; /* Ponto de referÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªncia para submenus */
+    position: relative; /* Ponto de referência para submenus */
 }
 
 .sidebar-nav a {
@@ -244,12 +244,12 @@ button {
     margin-left: 10px;
 }
 
-/* --- Estilos para os Submenus (2ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº e 3ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº NÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel) --- */
+/* --- Estilos para os Submenus (2º e 3º Nível) --- */
 .submenu,
 .submenu-aninhado,
 .submenu-terceiro-nivel {
     list-style: none;
-    max-height: 0; /* Esconde o submenu com transiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o */
+    max-height: 0; /* Esconde o submenu com transição */
     overflow: hidden;
     transition: max-height 0.4s ease-in-out;
 }
@@ -262,7 +262,7 @@ button {
 
 }
 
-/* RotaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o dos ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­cones de chevron */
+/* Rotação dos ícones de chevron */
 .fa-rotate-90 {
     transform: rotate(90deg);
     transition: transform 0.3s ease;
@@ -305,7 +305,7 @@ body.sidebar-open .top-header .main-header{
 }
 
 
-/* --- SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de VÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­deo em Tela Cheia --- */
+/* --- Seção de Vídeo em Tela Cheia --- */
 .video-hero-section {
     position: relative;
     height: 100vh;
@@ -344,10 +344,10 @@ body.sidebar-open .top-header .main-header{
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 1; /* Para garantir que fique abaixo do conteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºdo da overlay */
+    z-index: 1; /* Para garantir que fique abaixo do conteúdo da overlay */
 }
 
-/* Esconder FAB enquanto o hero estiver visÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel (controlado por JS via body.hero-in-view) */
+/* Esconder FAB enquanto o hero estiver visível (controlado por JS via body.hero-in-view) */
 body.hero-in-view .whatsapp-fab {
     opacity: 1;
     visibility: visible;
@@ -355,10 +355,10 @@ body.hero-in-view .whatsapp-fab {
     transform: none;
 }
 
-/* --- SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes Gerais (AnimaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Scroll) --- */
+/* --- Seções Gerais (Animação de Scroll) --- */
 section {
-    min-height: 50vh;
-    padding: 60px 20px;
+    /* min-height: 50vh; */
+    padding: 60px 0;
 }
 
 
@@ -418,7 +418,7 @@ section {
     }
 }
 
-/* --- SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Destaques de Produtos --- */
+/* --- Seção de Destaques de Produtos --- */
 .product-highlights {
     max-width: 100%;
     padding: 80px 20px;
@@ -471,10 +471,34 @@ section {
     transition: transform 0.6s cubic-bezier(.2,.9,.2,1);
 }
 
+.highlight-item::after {
+    content: "";
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 18px;
+    z-index: 2;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    opacity: 0;
+    pointer-events: none;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 260ms cubic-bezier(.22, 1, .36, 1), opacity 180ms ease;
+}
+
+.highlight-item:hover::after,
+.highlight-item:focus-within::after {
+    opacity: 1;
+    transform: scaleX(1);
+}
+
 .highlight-item span {
     position: absolute;
     bottom: 30px;
     left: 50%;
+    z-index: 3;
     transform: translateX(-50%);
     background-color: #31363fad;
     padding: 10px 20px;
@@ -497,7 +521,7 @@ section {
 .small-bottom-left { grid-area: bottom-left; height: 380px; }
 .small-bottom-right { grid-area: bottom-right; height: 380px; }
 
-/* --- SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o do CatÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡logo (Carrossel) --- */
+/* --- Seção do Catálogo (Carrossel) --- */
 /* .catalogo-section {
     padding: 80px 20px;
     background-color: var;
@@ -576,9 +600,26 @@ section {
 }
 
 .catalogo-grid .produto-card::after,
-.category-grid .produto-card::after {
-    content: none;
+.category-grid .produto-card::after,
+.veja-tambem-grid .produto-card::after {
+    content: "";
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 14px;
+    z-index: 2;
+    width: auto;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    opacity: 0;
+    pointer-events: none;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 260ms cubic-bezier(.22, 1, .36, 1), opacity 180ms ease;
 }
+
+
 
 .catalogo-grid .produto-card:hover,
 .category-grid .produto-card:hover,
@@ -595,6 +636,16 @@ section {
 .catalogo-grid .produto-card:focus-visible::before,
 .category-grid .produto-card:focus-visible::before {
     opacity: 0;
+}
+
+.catalogo-grid .produto-card:hover::after,
+.category-grid .produto-card:hover::after,
+.veja-tambem-grid .produto-card:hover::after,
+.catalogo-grid .produto-card:focus-visible::after,
+.category-grid .produto-card:focus-visible::after,
+.veja-tambem-grid .produto-card:focus-visible::after {
+    opacity: 1;
+    transform: scaleX(1);
 }
 
 .catalogo-grid .produto-card img,
@@ -638,7 +689,7 @@ section {
 
 .catalogo-grid .produto-card h3::before,
 .category-grid .produto-card h3::before {
-    content: "";
+    content: none;
     position: absolute;
     top: 8px;
     left: 50%;
@@ -673,7 +724,7 @@ section {
     cursor: grabbing;
 }
 
-/* --- PÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina de Categoria (grid 1/2/3 colunas) --- */
+/* --- Página de Categoria (grid 1/2/3 colunas) --- */
 .category-page { 
     max-width: min(1180px, 92vw); /* limita a largura e cria margens laterais */
     margin: 0 auto;              /* centraliza o bloco inteiro */
@@ -684,7 +735,7 @@ section {
     gap: 30px;
     overflow: visible;
     align-items: center;
-    justify-items: center; /* centraliza os cards dentro de cada cÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©lula */
+    justify-items: center; /* centraliza os cards dentro de cada célula */
     
 }
 
@@ -695,7 +746,7 @@ section {
     
 }
 
-/* DescriÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o abaixo do tÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulo da categoria */
+/* Descrição abaixo do título da categoria */
 .category-description{
     max-width: 980px;
     margin: 8px auto 36px;
@@ -718,7 +769,7 @@ section {
     align-items: stretch;
 }
 
-/* SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o da PÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina do Produto */
+/* Seção da Página do Produto */
 .product-page {
     background-color: var(--color-bg);
     color: var(--color-text);
@@ -728,12 +779,12 @@ section {
 
 .product-container {
     display: flex;
-    flex-direction: row-reverse; /* imagem ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  direita, texto ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  esquerda */
+    flex-direction: row-reverse; /* imagem à direita, texto à esquerda */
     gap: 40px;
     align-items: flex-start;
     max-width: 1200px; /* limita o container geral */
     width: 100%;
-    margin: 0 auto; /* centraliza na pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina */
+    margin: 0 auto; /* centraliza na página */
     padding-top: 90px;
 }
 
@@ -785,7 +836,7 @@ section {
     flex: 1 1 50%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* texto encostado ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  imagem, alinhado ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  esquerda */
+    align-items: flex-start; /* texto encostado à imagem, alinhado à esquerda */
     text-align: center;
 }
 
@@ -799,7 +850,7 @@ section {
     max-width: 680px;
 }
 .product-subtitle {
-    font-size: 1.70rem; /* menor que o tÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulo, com destaque */
+    font-size: 1.70rem; /* menor que o título, com destaque */
     font-weight: 600;
     margin: 20px 0 40px 0;
     text-align: left;
@@ -807,13 +858,13 @@ section {
 }
 .product-details-modern {
     font-size: 1.15em;
-    line-height: 1.9; /* texto mais espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ado */
+    line-height: 1.9; /* texto mais espaçado */
     color: var(--color-text);
     background: none;
     margin-bottom: 40px;
-    padding: 0; /* alinhar com os tÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulos */
+    padding: 0; /* alinhar com os títulos */
     text-align: left;
-    max-width: 680px; /* largura confortÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡vel do bloco de texto */
+    max-width: 680px; /* largura confortável do bloco de texto */
 }
 
 .product-details-modern span {
@@ -830,7 +881,7 @@ section {
 }
 
 .product-description-modern p {
-    margin: 0 0 40px 0; /* espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§amento entre parÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡grafos */
+    margin: 0 0 40px 0; /* espaçamento entre parágrafos */
     color: var(--color-text);
 }
 
@@ -854,18 +905,18 @@ section {
 .veja-tambem-grid {
     display: grid;
     
-    /* Centraliza o bloco do grid na pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina */
+    /* Centraliza o bloco do grid na página */
     margin-left: auto;
     margin-right: auto;
     margin-top: 10px; 
     
-    /* Tamanho mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­nimo menor e colunas que se esticam para eliminar ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“vÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£osÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â entre itens */
+    /* Tamanho mínimo menor e colunas que se esticam para eliminar “vãos” entre itens */
     grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); 
     
-    /* Itens ocupam toda a largura da coluna (evita espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o extra dentro da cÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©lula) */
+    /* Itens ocupam toda a largura da coluna (evita espaço extra dentro da célula) */
     justify-items: stretch; 
     
-    /* EspaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§amento entre os itens (ajustado para um valor padrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o) */
+    /* Espaçamento entre os itens (ajustado para um valor padrão) */
     gap: 5px; 
 }
 
@@ -877,7 +928,7 @@ section {
     text-align: left;
     color: #fff;
     overflow: hidden;
-    /* Cards preenchem a coluna para remover espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o lateral adicional */
+    /* Cards preenchem a coluna para remover espaço lateral adicional */
     width: auto; 
     max-width: 500px; 
 }
@@ -1013,7 +1064,7 @@ body.veja-tambem-grid .produto-card {
     right: -15px;
 }
 
-/* --- Estilos do RodapÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â© --- */
+/* --- Estilos do Rodapé --- */
 .main-footer {
     background-color: var(--color-bg);
     padding: 80px 0px 0;
@@ -1146,7 +1197,7 @@ body.veja-tambem-grid .produto-card {
 .submenu,
 .submenu-aninhado,
 .submenu-terceiro-nivel {
-    position: relative; /* Volta para a posiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o normal */
+    position: relative; /* Volta para a posição normal */
     left: 0;
 }
 
@@ -1156,7 +1207,7 @@ body.veja-tambem-grid .produto-card {
     content: '';
     position: absolute;
     top: 0;
-    left: 0; /* PosiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  esquerda do submenu */    
+    left: 0; /* Posição à esquerda do submenu */
     width: 3px; /* Largura da barra */
     height: 100%; /* Ocupa a altura total do submenu */
 
@@ -1164,7 +1215,7 @@ body.veja-tambem-grid .produto-card {
     transition: opacity 0.4s ease;
 }
 
-/* Esconde o separador por padrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o */
+/* Esconde o separador por padrão */
 .submenu::before,
 .submenu-aninhado::before,
 .submenu-terceiro-nivel::before {
@@ -1177,20 +1228,20 @@ body.veja-tambem-grid .produto-card {
     padding-left: 20px;
 }
 
-/* --- SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o da Newsletter --- */
+/* --- Seção da Newsletter --- */
 .newsletter-section {
     position: relative;
     width: 100%;
-    height: 400px; /* Altura da seÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o */
+    height: 400px; /* Altura da seção */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    overflow: hidden; /* Esconde o que estiver fora da ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rea visÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel */
+    overflow: hidden; /* Esconde o que estiver fora da área visível */
     margin: 0 auto;
 }
 
-/* ADICIONADO: Estilos para o consentimento do catÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡logo/newsletter */
+/* ADICIONADO: Estilos para o consentimento do catálogo/newsletter */
 /* .consent-label {
     display: flex;
     align-items: flex-start; Alinha o checkbox com o topo do texto
@@ -1204,7 +1255,7 @@ body.veja-tambem-grid .produto-card {
     margin-top: 3px; /* Pequeno ajuste para alinhar visualmente com o texto */
     flex-shrink: 0; /* Impede que o checkbox encolha */
 }
-/* --- ConteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºdo da Newsletter (Por Cima) --- */
+/* --- Conteúdo da Newsletter (Por Cima) --- */
 .newsletter-content {
     width: 30%;
     overflow: auto;
@@ -1255,7 +1306,7 @@ body.veja-tambem-grid .produto-card {
     max-width: none;
     width: auto;
     height: 100%;
-    object-fit: cover; /* Garante que a imagem preencha o espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o sem distorcer */
+    object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
 }
 
 
@@ -1289,7 +1340,7 @@ body.veja-tambem-grid .produto-card {
     cursor: pointer;
 }
 
-/* --- AnimaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o CSS de Carrossel Infinito --- */
+/* --- Animação CSS de Carrossel Infinito --- */
 /* Para navegadores WebKit (Chrome, Safari, Edge, etc.) */
 .sidebar::-webkit-scrollbar,
 .submenu::-webkit-scrollbar,
@@ -1422,7 +1473,7 @@ body.veja-tambem-grid .produto-card {
     max-width: 1200px; /* Limita a largura do container */
 }
 
-/* Estilo para cada cartÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de artigo */
+/* Estilo para cada cartão de artigo */
 .blog-post {
     background-color: var(--color-bg); /* Fundo branco ou claro */
     border: 1px solid var(--color-border);
@@ -1451,7 +1502,7 @@ body.veja-tambem-grid .produto-card {
 .post-thumb img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Garante que a imagem preencha o espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o */
+    object-fit: cover; /* Garante que a imagem preencha o espaço */
     transition: transform 0.5s ease;
 }
 
@@ -1470,7 +1521,7 @@ body.veja-tambem-grid .produto-card {
     margin-right: 15px;
 }
 
-/* TÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulo */
+/* Título */
 .post-title {
     padding: 10px 20px;
     font-size: 1.3em;
@@ -1498,10 +1549,10 @@ body.veja-tambem-grid .produto-card {
     font-weight: bold;
 }
 
-/* Container Principal da PÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina de Artigo */
+/* Container Principal da Página de Artigo */
 .article-detail-page {
     display: absolute;
-    padding-top: 120px; /* EspaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o para o cabeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§alho fixo */
+    padding-top: 120px; /* Espaço para o cabeçalho fixo */
     padding-bottom: 80px;
     background-color: var(--color-bg);
     color: var(--color-text);
@@ -1511,7 +1562,7 @@ body.veja-tambem-grid .produto-card {
     
 }
 
-/* TÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulo e Metadados do Artigo */
+/* Título e Metadados do Artigo */
 .article-header {
     text-align: center;
     /* height: 10px; */
@@ -1535,12 +1586,12 @@ body.veja-tambem-grid .produto-card {
     transition: transform 0.3s ease;
 }
 
-/* REMOVIDA altura fixa e forÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ado resize automÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡tico */
+/* REMOVIDA altura fixa e forçado resize automático */
 .article-card img {
     width: 100%;
-    height: auto;              /* permite adaptar a altura ao conteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºdo */
+    height: auto;              /* permite adaptar a altura ao conteúdo */
     max-height: 420px;         /* opcional: evita imagens extremamente altas */
-    object-fit: cover;         /* mantÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©m o crop equilibrado quando necessÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio */
+    object-fit: cover;         /* mantém o crop equilibrado quando necessário */
     display: block;
     border-radius: 0;
     transition: transform 0.5s ease, filter 0.4s ease;
@@ -1549,7 +1600,7 @@ body.veja-tambem-grid .produto-card {
 /* Ajuste para miniaturas de post (lista de artigos) */
 .post-thumb {
     width: 100%;
-    height: auto;              /* deixa o container adaptar-se ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  imagem */
+    height: auto;              /* deixa o container adaptar-se à imagem */
     overflow: hidden;
     border-radius: 8px 8px 0 0;
     display: block;
@@ -1557,18 +1608,18 @@ body.veja-tambem-grid .produto-card {
 
 .post-thumb img {
     width: 100%;
-    height: auto;              /* remove height:100% que forÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ava distorÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o */
+    height: auto;              /* remove height:100% que forçava distorção */
     object-fit: cover;
     display: block;
     transition: transform 0.5s ease;
 }
 
-/* Container de imagem da pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina de artigo (detail) */
+/* Container de imagem da página de artigo (detail) */
 .article-image-container {
     flex-direction: column;
     align-items: center;
     border-radius: 8px;
-    overflow: hidden;          /* garante que a imagem nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o vaze e remove bordas brancas */
+    overflow: hidden;          /* garante que a imagem não vaze e remove bordas brancas */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.432);
     width: 100%;
     display: block;
@@ -1587,7 +1638,7 @@ body.veja-tambem-grid .produto-card {
 
 
 
-/* ConteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºdo do Artigo */
+/* Conteúdo do Artigo */
 .article-content {
     line-height: 1.8;
     color: var(--color-text);
@@ -1637,10 +1688,10 @@ body.veja-tambem-grid .produto-card {
     background-color: var(--color-text) !important;
 }
 
-/* --- Estilos da PÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina Institucional --- */
+/* --- Estilos da Página Institucional --- */
 
 .institutional-page {
-    padding-top: 100px; /* EspaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o para o cabeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§alho fixo */
+    padding-top: 100px; /* Espaço para o cabeçalho fixo */
     /* padding-bottom: 80px; */
     background-color: var(--color-bg);
     color: var(--color-text);
@@ -1652,7 +1703,7 @@ body.veja-tambem-grid .produto-card {
     font-weight: bold;
     text-align: center;
     text-align: left; /* substitui alinhamento global centralizado */
-    max-width: 680px; /* mesma largura do bloco de descriÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o */
+    max-width: 680px; /* mesma largura do bloco de descrição */
     text-transform: uppercase;
     letter-spacing: 2px;
 }
@@ -1701,7 +1752,7 @@ body.veja-tambem-grid .produto-card {
     display: flex;
     align-items: center;
     gap: 40px;
-    /* Empilha por padrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o (mobile-first). Em telas maiores vira duas colunas */
+    /* Empilha por padrão (mobile-first). Em telas maiores vira duas colunas */
     flex-direction: column;
     width: 100%;
 }
@@ -1710,7 +1761,7 @@ body.veja-tambem-grid .produto-card {
     flex-direction: column-reverse;
 }
 
-/* Em telas mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©dias/grandes exibimos conteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºdo em duas colunas (texto + imagem lado a lado) */
+/* Em telas médias/grandes exibimos conteúdo em duas colunas (texto + imagem lado a lado) */
 @media (min-width: 992px) {
     .institucional-content {
         flex-direction: row;
@@ -1724,13 +1775,13 @@ body.veja-tambem-grid .produto-card {
 
     .text-block,
     .image-block {
-        /* Cada coluna ocupa metade do espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o, respeitando espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§amentos */
+        /* Cada coluna ocupa metade do espaço, respeitando espaçamentos */
         flex: 0 0 50%;
         max-width: 50%;
     }
 
     .text-block {
-        text-align: left; /* alinhamento tÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­pico para leitura em colunas */
+        text-align: left; /* alinhamento típico para leitura em colunas */
         padding: 0 10px;
     }
 
@@ -1783,7 +1834,7 @@ body.veja-tambem-grid .produto-card {
     margin: 0 auto;
 }
 
-/* ===== Galeria de 4 imagens abaixo dos ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­cones ===== */
+/* ===== Galeria de 4 imagens abaixo dos ícones ===== */
 .gallery-section {
     padding: 40px auto;
     max-width: 1200px;
@@ -1842,7 +1893,7 @@ body.veja-tambem-grid .produto-card {
     }
 }
 
-/* ===== SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o institucional empilhada (texto acima, imagem abaixo, destaque maior) ===== */
+/* ===== Seção institucional empilhada (texto acima, imagem abaixo, destaque maior) ===== */
 .institucional-stacked {
     display: flex;
     flex-direction: column;
@@ -1873,7 +1924,7 @@ body.veja-tambem-grid .produto-card {
     display: block;
 }
 
-/* Pequenas adaptaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes em mobile para manter legibilidade */
+/* Pequenas adaptações em mobile para manter legibilidade */
 @media (max-width: 768px) {
     .stacked-image img {
         height: auto;
@@ -1967,10 +2018,10 @@ body.veja-tambem-grid .produto-card {
     align-items: center;
 }
 
-/* Esconde o search-box por padrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o (abre lateralmente ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  direita do botÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o) */
+/* Esconde o search-box por padrão (abre lateralmente à direita do botão) */
 .search-box {
     position: absolute;
-    left: 100%; /* abre ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  direita do ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­cone */
+    left: 100%; /* abre à direita do ícone */
     top: 50%;
     transform: translateY(-50%);
     margin-left: 12px;
@@ -2008,7 +2059,7 @@ body.veja-tambem-grid .produto-card {
     color: var(--color-text);
 }
 
-/* Estiliza o botÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de pesquisa */
+/* Estiliza o botão de pesquisa */
 .search-box .search-btn {
     width: 30px;
     height: 100%;
@@ -2034,7 +2085,7 @@ body.veja-tambem-grid .produto-card {
     border-radius: 0 0 8px 8px;
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
     z-index: 1200; /* acima do header */
-    /* fallback padrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o para dropdown de pesquisa */
+    /* fallback padrão para dropdown de pesquisa */
     max-height: 420px;
     overflow-y: auto;
     opacity: 0;
@@ -2096,9 +2147,9 @@ body.veja-tambem-grid .produto-card {
     color: rgba(255,255,255,0.7);
 }
 
-/* se vocÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âª usa classe has-results para controlar visibilidade, garanta que seja exibido */
+/* se você usa classe has-results para controlar visibilidade, garanta que seja exibido */
 .search-box:not(.has-results) .search-results-dropdown {
-    /* esconda quando nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o houver resultados (opcional) */
+    /* esconda quando não houver resultados (opcional) */
     display: none;
 }
 
@@ -2141,17 +2192,17 @@ body.veja-tambem-grid .produto-card {
         gap: 20px;
     }
 
-    /* Reduz a altura dos itens em telas menores para nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o ocuparem muito espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o */
+    /* Reduz a altura dos itens em telas menores para não ocuparem muito espaço */
     .highlight-item {
         height: auto !important;
     }
 
-    /* Ajusta o tamanho da fonte do tÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulo */
+    /* Ajusta o tamanho da fonte do título */
     .product-highlights h2 {
         font-size: 2em;
     }
 
-    /* animaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes reduzidas para telas mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©dias (<= 992px) */
+    /* animações reduzidas para telas médias (<= 992px) */
     .highlight-item {
         transition: transform 0.38s ease, box-shadow 0.38s ease;
     }
@@ -2169,14 +2220,14 @@ body.veja-tambem-grid .produto-card {
     }
 
     a::after { transition: width 180ms ease; }
-    /* garante que os itens com stagger ainda apareÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§am suavemente */
+    /* garante que os itens com stagger ainda apareçam suavemente */
     .staggered { transition-duration: 420ms; }
 
 
 }
 
 @media (max-width: 768px) {
-    /* Ajusta o espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§amento do cabeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§alho em telas menores */
+    /* Ajusta o espaçamento do cabeçalho em telas menores */
     .top-header {
         padding: 15px 20px;
     }
@@ -2185,9 +2236,9 @@ body.veja-tambem-grid .produto-card {
         transform: none !important;
     }
 
-    /* removido seletor invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido que quebrava o CSS no mobile */
+    /* removido seletor inválido que quebrava o CSS no mobile */
     
-    /* Reduz o espaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§amento entre os ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­cones */
+    /* Reduz o espaçamento entre os ícones */
     .header-left, .header-right {
         gap: 15px;
     }
@@ -2207,7 +2258,7 @@ body.veja-tambem-grid .produto-card {
         padding: 0 10px;
     }
     
-    /* Opcional: Esconde os botÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes de navegaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o em telas pequenas */
+    /* Opcional: Esconde os botões de navegação em telas pequenas */
     .carousel-btn {
         display: none;
     }
@@ -2234,7 +2285,7 @@ body.veja-tambem-grid .produto-card {
 
     .search-box {
         left: auto;
-        right: 0; /* em telas pequenas abre abaixo/direita do ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­cone como antes */
+        right: 0; /* em telas pequenas abre abaixo/direita do ícone como antes */
         top: 100%;
         transform: none;
         margin-left: 0;
@@ -2249,7 +2300,7 @@ body.veja-tambem-grid .produto-card {
     .search-results-dropdown {
         right: 0px;
         left: auto;
-        /* largura correta no mobile (antes havia uma var() invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lida que resultava em 0px) */
+        /* largura correta no mobile (antes havia uma var() inválida que resultava em 0px) */
         width: min(60vw, 340px);
         max-height: 56vh;
     }
@@ -2279,7 +2330,7 @@ body.veja-tambem-grid .produto-card {
         /* Garante que o item ocupe a largura total */
 
         
-        /* Muda o display para Flexbox para empilhar o conteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºdo */
+        /* Muda o display para Flexbox para empilhar o conteúdo */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -2318,13 +2369,13 @@ body.veja-tambem-grid .produto-card {
     }
 
     #institutionalVideo {
-        display: block; Garante que o vÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­deo seja exibido
+        display: block; Garante que o vídeo seja exibido
         position: absolute; Mantenha isso para o posicionamento
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover; Faz com que o vÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­deo preencha o contÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªiner, cortando o que nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o cabe
+        object-fit: cover; Faz com que o vídeo preencha o contêiner, cortando o que não cabe
     } */
 
     .faq-section h1 {
@@ -2340,8 +2391,8 @@ body.veja-tambem-grid .produto-card {
     section.article-image-container,
     .article-image-container {
         min-height: 0;
-        padding: 40px 20px; /* Adiciona um respiro vertical, ajuste se necessÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio */
-        /* FIM DA ADIÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢O */
+        padding: 40px 20px; /* Adiciona um respiro vertical, ajuste se necessário */
+        /* FIM DA ADIÇÃO */
         flex-direction: column;
         align-items: center;
         
@@ -2354,7 +2405,7 @@ body.veja-tambem-grid .produto-card {
         height: auto;
     }
 
-    /* Ajustes para pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡gina de categoria no mobile */
+    /* Ajustes para página de categoria no mobile */
     /* Categoria - mobile: 1 coluna, cards centralizados e responsivos */
     .category-grid {
         grid-template-columns: 1fr;
@@ -2363,10 +2414,10 @@ body.veja-tambem-grid .produto-card {
         justify-items: center;
     }
     .category-grid .produto-card {
-        width: min(100%, 360px); /* ocupa toda a largura, com limite confortÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡vel */
+        width: min(100%, 360px); /* ocupa toda a largura, com limite confortável */
     }
     .category-grid .produto-card img { height: auto; }
-    /* TÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulos da categoria: ajustados por media queries abaixo */
+    /* Títulos da categoria: ajustados por media queries abaixo */
     .category-page h2 {
         margin-bottom: 8px;
         text-align: center;
@@ -2375,7 +2426,7 @@ body.veja-tambem-grid .produto-card {
     }
     .category-description { font-size: 1rem; margin: 6px auto 18px; padding: 0 6px; }
 
-    /* Veja tambÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©m: cards devem ocupar toda a coluna no mobile */
+    /* Veja também: cards devem ocupar toda a coluna no mobile */
     .veja-tambem-grid .produto-card {
         width: 100%;
     }
@@ -2385,7 +2436,7 @@ body.veja-tambem-grid .produto-card {
 
 }
 
-/* Regras para telas pequenas (<= 768px) - animaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes muito sutis e sem tilt/parallax */
+/* Regras para telas pequenas (<= 768px) - animações muito sutis e sem tilt/parallax */
 @media (max-width: 768px) {
     .newsletter-section {
         height: 260px;
@@ -2493,10 +2544,10 @@ body.veja-tambem-grid .produto-card {
 }
 
 
-/* --- Estilos para ConteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºdos Internos (FAQ, PolÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tica, etc.) --- */
+/* --- Estilos para Conteúdos Internos (FAQ, Política, etc.) --- */
 
 .main-content {
-    padding-top: 120px; /* EspaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o para o cabeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§alho fixo */
+    padding-top: 120px; /* Espaço para o cabeçalho fixo */
     padding-bottom: 80px;
     background-color: var(--color-bg);
     color: var(--color-text);
@@ -2519,7 +2570,7 @@ body.veja-tambem-grid .produto-card {
     letter-spacing: 2px;
 }
 
-/* --- SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de FAQ --- */
+/* --- Seção de FAQ --- */
 .faq-section {
     margin-top: 70px ;
     background-color: var(--color-bg);
@@ -2564,7 +2615,7 @@ body.veja-tambem-grid .produto-card {
     line-height: 1.6;
 }
 
-/* --- SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes de PolÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tica e Termos --- */
+/* --- Seções de Política e Termos --- */
 .privacy-section,
 .terms-section,
 .contact-section {
@@ -2598,7 +2649,7 @@ body.veja-tambem-grid .produto-card {
     line-height: 1.6;
 }
 
-/* --- SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Contato --- */
+/* --- Seção de Contato --- */
 .contact-info {
     display: flex;
     flex-direction: column;
@@ -4349,6 +4400,588 @@ a,
 
     .newsletter-section .carousel-track {
         will-change: auto;
+    }
+}
+
+/* --- Product detail layout refresh --- */
+.product-page {
+    min-height: 100vh;
+    padding: 0 0 56px;
+    overflow-x: clip;
+    background: #f3f6fb;
+    color: var(--color-text);
+}
+
+.product-hero-band {
+    min-height: 330px;
+    padding: 116px 20px 88px;
+    background: var(--color-contrast-surface);
+    color: #fff;
+}
+
+.product-hero-content {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.25fr);
+    align-items: end;
+    gap: 30px;
+    width: min(1180px, calc(100% - 40px));
+    margin: 0 auto;
+}
+
+.product-breadcrumb {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 34px;
+    color: rgba(248, 248, 255, 0.74);
+    font-size: 0.9rem;
+}
+
+.product-breadcrumb a {
+    color: inherit;
+}
+
+.product-breadcrumb a::after {
+    content: none;
+}
+
+.product-breadcrumb a:hover {
+    color: #fff;
+}
+
+.product-breadcrumb span::before,
+.product-breadcrumb-current::before {
+    content: "/";
+    margin-right: 8px;
+    color: rgba(248, 248, 255, 0.45);
+    font-weight: 400;
+}
+
+.product-breadcrumb-current {
+    color: #fff;
+    font-weight: 800;
+}
+
+.product-title-block {
+    grid-column: 2;
+    align-self: center;
+}
+
+.product-category-label {
+    display: block;
+    min-height: 1.35em;
+    margin-bottom: 8px;
+    color: rgba(248, 248, 255, 0.72);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.product-title-block .product-name {
+    max-width: none;
+    margin: 0;
+    color: #fff;
+    font-size: 4.2rem;
+    font-weight: 800;
+    line-height: 0.96;
+    letter-spacing: 0;
+    text-align: left;
+}
+
+.product-title-block .product-subtitle {
+    max-width: 720px;
+    margin: 18px 0 0;
+    color: rgba(248, 248, 255, 0.78);
+    font-size: 1.12rem;
+    font-weight: 500;
+    line-height: 1.65;
+    text-align: left;
+}
+
+.product-detail-shell {
+    position: relative;
+    z-index: 2;
+    width: min(1180px, calc(100% - 40px));
+    margin: -128px auto 0;
+}
+
+.product-container.product-layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.25fr);
+    align-items: start;
+    gap: 30px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding-top: 0;
+}
+
+.product-image-section {
+    position: sticky;
+    top: 112px;
+    display: grid;
+    align-self: start;
+    justify-items: center;
+    gap: 20px;
+}
+
+.product-image-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.14);
+}
+
+.product-image-card #main-product-image {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+    object-fit: contain;
+}
+
+.product-thumbnails {
+    display: none;
+    width: 100%;
+    margin-top: 0;
+}
+
+.variation-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.product-details-section {
+    display: grid;
+    align-items: stretch;
+    gap: 16px;
+    padding-top: 150px;
+    text-align: left;
+}
+
+.product-info-card {
+    position: relative;
+    overflow: hidden;
+    padding: 26px 28px;
+    border: 1px solid rgba(36, 48, 65, 0.08);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.product-info-card h2 {
+    margin: 0 0 14px;
+    color: var(--color-contrast-surface);
+    font-size: 1.05rem;
+    line-height: 1.25;
+    letter-spacing: 0;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.product-card-kicker {
+    display: block;
+    margin-bottom: 14px;
+    color: var(--color-contrast-surface);
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.product-description-modern {
+    width: 100%;
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+.product-description-modern p {
+    margin: 0 0 16px;
+    color: var(--color-text-muted);
+}
+
+.product-description-modern p:last-child {
+    margin-bottom: 0;
+}
+
+.product-facts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0;
+}
+
+.product-facts-grid div {
+    padding: 16px;
+    border: 1px solid rgba(36, 48, 65, 0.08);
+    border-radius: 8px;
+    background: #f3f6fb;
+}
+
+.product-facts-grid dt {
+    margin-bottom: 8px;
+    color: var(--color-contrast-surface);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.product-facts-grid dd {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1rem;
+}
+
+.product-meta {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    line-height: 1.75;
+    opacity: 1;
+}
+
+.product-contact-card p {
+    margin: 0 0 18px;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+}
+
+.product-contact-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 8px;
+    background: var(--color-contrast-surface);
+    color: #fff;
+    font-weight: 800;
+}
+
+.product-contact-button::after {
+    content: none;
+}
+
+.product-contact-button:hover,
+.product-contact-button:focus-visible {
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.veja-tambem-section {
+    width: min(1180px, calc(100% - 40px));
+    margin: 56px auto 0;
+    padding: 0 0 32px;
+}
+
+.veja-tambem-shell {
+    width: 100%;
+}
+
+.veja-tambem-title {
+    margin: 0 0 18px;
+    color: var(--color-contrast-surface);
+    font-size: 1.6rem;
+    text-align: left;
+}
+
+.veja-tambem-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-items: stretch;
+    gap: 18px;
+    margin: 0;
+}
+
+.veja-tambem-grid .produto-card {
+    width: 100%;
+    max-width: none;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--color-text);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+}
+
+.veja-tambem-grid .produto-card img {
+    height: 190px;
+    border-radius: 0;
+    object-fit: cover;
+}
+
+.veja-tambem-grid .produto-card h3 {
+    padding: 0 14px 14px;
+    color: var(--color-text);
+    text-align: left;
+}
+
+.veja-tambem-grid .produto-card:hover,
+.veja-tambem-grid .produto-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+}
+
+@media (max-width: 1024px) {
+    .product-hero-band {
+        min-height: auto;
+        padding: 104px 20px 72px;
+    }
+
+    .product-hero-content,
+    .product-container.product-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .product-title-block {
+        grid-column: 1;
+    }
+
+    .product-detail-shell {
+        margin-top: -72px;
+    }
+
+    .product-image-section {
+        position: relative;
+        top: auto;
+    }
+
+    .product-details-section {
+        padding-top: 0;
+    }
+
+    .product-image-card {
+        max-width: 560px;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-page {
+        padding-bottom: 36px;
+    }
+
+    .product-hero-band {
+        padding: 96px 16px 64px;
+    }
+
+    .product-hero-content,
+    .product-detail-shell,
+    .veja-tambem-section {
+        width: calc(100% - 32px);
+    }
+
+    .product-detail-shell {
+        margin-top: -48px;
+    }
+
+    .product-title-block .product-name {
+        font-size: 2.6rem;
+    }
+
+    .product-title-block .product-subtitle {
+        font-size: 1rem;
+    }
+
+    .product-info-card {
+        padding: 22px 18px;
+    }
+
+    .product-facts-grid,
+    .veja-tambem-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Desktop mouse: diagonal accent hover for product/category cards --- */
+.highlight-item::after,
+.catalogo-grid .produto-card::after,
+.category-grid .produto-card::after,
+.veja-tambem-grid .produto-card::after {
+    content: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .highlight-item,
+    .catalogo-grid .produto-card,
+    .category-grid .produto-card,
+    .veja-tambem-grid .produto-card {
+        isolation: isolate;
+    }
+
+    .highlight-item img,
+    .catalogo-grid .produto-card img,
+    .category-grid .produto-card img,
+    .veja-tambem-grid .produto-card img {
+        position: relative;
+        z-index: 3;
+    }
+
+    .catalogo-grid .produto-card h3,
+    .category-grid .produto-card h3,
+    .veja-tambem-grid .produto-card h3 {
+        position: relative;
+        z-index: 4;
+        transition: color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+    }
+
+    .highlight-item span {
+        z-index: 4;
+        transition: color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+    }
+
+    .highlight-item::after,
+    .catalogo-grid .produto-card::after,
+    .category-grid .produto-card::after,
+    .veja-tambem-grid .produto-card::after {
+        content: "";
+        position: absolute;
+        inset: -34%;
+        z-index: 2;
+        width: auto;
+        height: auto;
+        border-radius: inherit;
+        background:
+            radial-gradient(circle at 18% 86%, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 34%),
+            linear-gradient(35deg, var(--color-accent) 0%, #f3d8a2 58%, rgba(255, 255, 255, 0.72) 100%);
+        background:
+            radial-gradient(circle at 18% 86%, color-mix(in srgb, #fff 42%, transparent) 0%, transparent 34%),
+            linear-gradient(
+                35deg,
+                color-mix(in srgb, var(--color-accent) 92%, #fff 8%) 0%,
+                color-mix(in srgb, var(--color-accent) 76%, #fff 24%) 58%,
+                rgba(255, 255, 255, 0.72) 100%
+            );
+        opacity: 0;
+        pointer-events: none;
+        transform: translate3d(-64%, 64%, 0);
+        transform-origin: left bottom;
+        transition: transform 520ms cubic-bezier(.22, 1, .36, 1), opacity 220ms ease;
+        will-change: transform, opacity;
+    }
+
+    .highlight-item:hover::after,
+    .catalogo-grid .produto-card:hover::after,
+    .category-grid .produto-card:hover::after,
+    .veja-tambem-grid .produto-card:hover::after,
+    .catalogo-grid .produto-card:focus-visible::after,
+    .category-grid .produto-card:focus-visible::after,
+    .veja-tambem-grid .produto-card:focus-visible::after {
+        opacity: 0.96;
+        transform: translate3d(0, 0, 0);
+    }
+
+    .catalogo-grid .produto-card::after {
+        inset: -42% -34% -30%;
+        background:
+            radial-gradient(circle at 16% 88%, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0.08) 32%, rgba(255, 255, 255, 0) 44%),
+            linear-gradient(35deg, var(--color-accent) 0%, #e9c682 46%, rgba(255, 255, 255, 0.66) 100%);
+        background:
+            radial-gradient(circle at 16% 88%, color-mix(in srgb, #fff 50%, transparent) 0%, color-mix(in srgb, #fff 12%, transparent) 32%, transparent 44%),
+            linear-gradient(
+                35deg,
+                color-mix(in srgb, var(--color-accent) 96%, #fff 4%) 0%,
+                color-mix(in srgb, var(--color-accent) 84%, #fff 16%) 46%,
+                rgba(255, 255, 255, 0.66) 100%
+            );
+        transform: translate3d(-58%, 58%, 0);
+    }
+
+    .catalogo-grid .produto-card:hover::after,
+    .catalogo-grid .produto-card:focus-visible::after {
+        opacity: 1;
+    }
+
+    .catalogo-grid .produto-card:hover,
+    .category-grid .produto-card:hover,
+    .veja-tambem-grid .produto-card:hover,
+    .catalogo-grid .produto-card:focus-visible,
+    .category-grid .produto-card:focus-visible,
+    .veja-tambem-grid .produto-card:focus-visible {
+        box-shadow:
+            0 24px 58px rgba(216, 180, 109, 0.34),
+            0 14px 32px rgba(15, 23, 42, 0.16);
+        box-shadow:
+            0 24px 58px color-mix(in srgb, var(--color-accent-hover) 36%, transparent),
+            0 14px 32px rgba(15, 23, 42, 0.16);
+    }
+
+    .highlight-item:hover,
+    .highlight-item:focus-within {
+        box-shadow:
+            0 28px 62px rgba(15, 23, 42, 0.22),
+            0 12px 26px rgba(15, 23, 42, 0.14);
+    }
+
+    .catalogo-grid .produto-card:hover h3,
+    .category-grid .produto-card:hover h3,
+    .veja-tambem-grid .produto-card:hover h3,
+    .catalogo-grid .produto-card:focus-visible h3,
+    .category-grid .produto-card:focus-visible h3,
+    .veja-tambem-grid .produto-card:focus-visible h3 {
+        color: #fff;
+        text-shadow: 0 1px 12px rgba(36, 48, 65, 0.18);
+    }
+
+    .highlight-item:hover span,
+    .highlight-item:focus-within span {
+        color: #fff;
+        background-color: rgba(36, 48, 65, 0.24);
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
+    }
+}
+
+/* --- Catalog rail sizing: fixed card height without affecting category/product pages --- */
+.catalogo-grid {
+    --catalog-card-height: 300px;
+    --catalog-rail-height: 430px;
+    min-height: var(--catalog-rail-height);
+    align-items: center;
+    padding-top: 34px;
+    padding-bottom: 54px;
+}
+
+.catalogo-grid .produto-card {
+    display: flex;
+    flex-direction: column;
+    height: var(--catalog-card-height);
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.catalogo-grid .produto-card img {
+    flex: 0 0 210px;
+}
+
+.catalogo-grid .produto-card h3 {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+@media (max-width: 1024px), (pointer: coarse), (prefers-reduced-data: reduce) {
+    .catalogo-grid {
+        --catalog-card-height: 318px;
+        --catalog-rail-height: 384px;
+        padding-top: 24px;
+        padding-bottom: 42px;
+    }
+}
+
+@media (max-width: 768px) {
+    .catalogo-grid {
+        --catalog-card-height: 304px;
+        --catalog-rail-height: 358px;
+        padding-top: 20px;
+        padding-bottom: 34px;
     }
 }
 
