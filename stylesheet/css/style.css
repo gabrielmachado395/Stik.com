@@ -2456,10 +2456,10 @@ body.veja-tambem-grid .produto-card {
     .produto-card[style], .article-card[style] { transform: none !important; }
     
     /* Layout lateral fixo para mobile (substitui usos de clamp) */
-    .main-content {
+    /* .main-content {
         padding-left: 16px;
         padding-right: 16px;
-    }
+    } */
     .highlight-grid {
         padding: 80px 16px;
     }
@@ -2481,11 +2481,11 @@ body.veja-tambem-grid .produto-card {
     .newsletter-section {
         height: 320px;
     }
-
+/* 
     .main-content {
         padding-left: 32px;
         padding-right: 32px;
-    }
+    } */
     .highlight-grid {
         padding: 80px 32px;
     }
@@ -2519,10 +2519,10 @@ body.veja-tambem-grid .produto-card {
 
 /* Notebooks / small desktops: entre 1025px e 1366px */
 @media (min-width: 1025px) and (max-width: 1366px) {
-    .main-content {
+    /* .main-content {
         padding-left: 48px;
         padding-right: 48px;
-    }
+    } */
     .highlight-grid {
         padding: 100px 48px;
     }
@@ -4982,6 +4982,18 @@ a,
         --catalog-rail-height: 358px;
         padding-top: 20px;
         padding-bottom: 34px;
+    }
+}
+
+/* --- Mobile catalog download: taller carousel background behind fixed form --- */
+@media (max-width: 768px) {
+    .newsletter-section {
+        height: 430px;
+        min-height: 430px;
+    }
+
+    .newsletter-section .carousel-bg {
+        height: 100%;
     }
 }
 
