@@ -3,36 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novo Artigo</title>
+    <title>Novo Artigo - Stik</title>
     <link rel="stylesheet" href="stylesheet/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.0/dist/trix.css">
-    <script type="text/javascript" src="https://unpkg.com/trix@2.0.0/dist/trix.umd.min.js"></script>
 </head>
 <body>
     <div id="header-placeholder"></div>
     <div id="sidebar-placeholder"></div>
     <div id="overlay"></div>
-    
-    <main class="create-main">
-        <section class="container">
-            <h1 class="page-title">Criar Novo Artigo</h1>
-            <form id="article-form" class="article-form">
-                <div class="form-group">
-                    <label for="article-title">Título do Artigo</label>
-                    <input type="text" id="article-title" placeholder="Digite aqui..." required>
+
+    <main class="create-main blog-editor-page">
+        <section class="blog-editor-shell">
+            <nav class="blog-breadcrumb blog-editor-breadcrumb" aria-label="Caminho da página">
+                <a href="index.html">Home</a>
+                <a href="blog.html">Blog</a>
+                <span>Novo artigo</span>
+            </nav>
+
+            <header class="blog-editor-header">
+                <div>
+                    <span>Editor do blog</span>
+                    <h1>Novo artigo</h1>
+                </div>
+                <div class="blog-editor-actions">
+                    <button type="button" class="blog-editor-btn blog-editor-btn-light" data-editor-action="preview">
+                        <i class="fas fa-eye"></i>
+                        Visualizar
+                    </button>
+                    <button type="button" class="blog-editor-btn blog-editor-btn-outline" data-editor-action="draft">
+                        <i class="fas fa-save"></i>
+                        Salvar rascunho
+                    </button>
+                    <button type="submit" form="article-form" class="blog-editor-btn blog-editor-btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Publicar
+                    </button>
+                </div>
+            </header>
+
+            <form id="article-form" class="blog-editor-layout blog-editor-layout-simple">
+                <div class="blog-editor-main">
+                    <section class="blog-editor-panel blog-editor-identity">
+                        <div class="blog-editor-panel-head">
+                            <h2>Dados principais</h2>
+                            <span>Rascunho</span>
+                        </div>
+
+                        <div class="blog-field-grid">
+                            <label class="blog-field blog-field-wide" for="article-title">
+                                <span>Título</span>
+                                <input type="text" id="article-title" name="titulo" value="Tendência loungewear e elásticos indicados" required>
+                            </label>
+
+                            <label class="blog-field" for="article-slug">
+                                <span>Slug</span>
+                                <input type="text" id="article-slug" name="slug" value="tendencia-loungewear-elasticos-indicados">
+                            </label>
+
+                            <label class="blog-field" for="article-author">
+                                <span>Autor</span>
+                                <input type="text" id="article-author" name="autor" value="Equipe Stik">
+                            </label>
+
+                            <label class="blog-field blog-field-wide" for="article-summary">
+                                <span>Resumo</span>
+                                <textarea id="article-summary" name="resumo" rows="3">Do sofá para as ruas, explore a tendência loungewear e confira dicas valiosas para acertar nas suas coleções.</textarea>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="blog-editor-panel blog-editor-cover">
+                        <div class="blog-editor-panel-head">
+                            <h2>Imagem de capa</h2>
+                            <button type="button" class="blog-icon-btn" aria-label="Trocar imagem de capa">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+
+                        <div class="blog-cover-editor">
+                            <figure>
+                                <img src="img - Copia/thumb-blog-17-1.jpg" alt="Mulher usando conjunto loungewear" loading="lazy" decoding="async">
+                            </figure>
+                            <div class="blog-cover-fields">
+                                <label class="blog-field" for="cover-alt">
+                                    <span>Texto alternativo</span>
+                                    <input type="text" id="cover-alt" value="Mulher usando conjunto loungewear em ambiente interno">
+                                </label>
+                                <label class="blog-field" for="cover-credit">
+                                    <span>Crédito</span>
+                                    <input type="text" id="cover-credit" value="Ref: Envato">
+                                </label>
+                                <div class="blog-cover-actions">
+                                    <button type="button" class="blog-editor-btn blog-editor-btn-light">
+                                        <i class="fas fa-upload"></i>
+                                        Enviar imagem
+                                    </button>
+                                    <button type="button" class="blog-editor-btn blog-editor-btn-light">
+                                        <i class="fas fa-images"></i>
+                                        Biblioteca
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="blog-editor-panel blog-word-panel">
+                        <div class="blog-editor-panel-head">
+                            <h2>Conteúdo</h2>
+                            <span>Editor livre</span>
+                        </div>
+
+                        <div class="blog-word-editor">
+                            <div class="blog-word-toolbar" aria-label="Ferramentas de edição">
+                                <select id="article-format-select" aria-label="Formato do texto">
+                                    <option value="p">Parágrafo</option>
+                                    <option value="h2">Título de seção</option>
+                                    <option value="h3">Subtítulo</option>
+                                </select>
+                                <button type="button" data-editor-command="bold" aria-label="Negrito">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button type="button" data-editor-command="italic" aria-label="Itálico">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button type="button" data-editor-command="insertUnorderedList" aria-label="Lista">
+                                    <i class="fas fa-list-ul"></i>
+                                </button>
+                                <button type="button" data-editor-command="createLink" aria-label="Inserir link">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                                <button type="button" data-editor-command="insertImage" aria-label="Inserir imagem">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                            </div>
+
+                            <div id="article-free-content" class="blog-word-canvas" contenteditable="true">
+                                <p><em>Do sofá para as ruas, explore a tendência loungewear e confira algumas dicas valiosas para acertar nas suas coleções!</em></p>
+                                <p>Por muito tempo, a tendência loungewear ficou restrita ao conforto íntimo da vida doméstica. No entanto, esse cenário mudou nos últimos anos.</p>
+                                <p>Com um foco renovado no conforto, no bem-estar e na versatilidade, o <a href="blog.html">loungewear</a> evoluiu para abraçar a moda casual, tornando-se um pilar fundamental no guarda-roupa moderno.</p>
+                                <h2>A ascensão da tendência loungewear</h2>
+                                <figure>
+                                    <img src="img - Copia/thumb-blog-09-1024x683.jpg" alt="Referência de moda confortável" loading="lazy" decoding="async">
+                                    <figcaption>Ref: Envato</figcaption>
+                                </figure>
+                                <p>A crescente adoção do trabalho remoto e a valorização do bem-estar têm redefinido o que as pessoas buscam em suas vestimentas diárias.</p>
+                                <h2>Tipos de elásticos recomendados</h2>
+                                <ul>
+                                    <li>Elásticos embutidos para cós, shorts e saias.</li>
+                                    <li>Bases macias para peças de contato direto com a pele.</li>
+                                    <li>Elásticos com boa recuperação para coleções de uso prolongado.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
                 </div>
 
-                <div class="form-group">
-                    <label for="article-content">Conteúdo do Artigo</label>
-                    <input id="article=content" type="hidden"  name="content">
-                    <trix-editor input="article-content" placeholder="Digite aqui..." class="trix-content"></trix-editor>
-                </div>
-                <button type="submit" class="submit-btn">Salvar</button>
+                <aside class="blog-editor-sidebar blog-editor-sidebar-simple">
+                    <section class="blog-editor-panel blog-tag-panel">
+                        <h2>Tags</h2>
+                        <div id="selected-tags" class="blog-selected-tags">
+                            <button type="button" data-tag="Dicas">Dicas <i class="fas fa-times"></i></button>
+                            <button type="button" data-tag="Produtos">Produtos <i class="fas fa-times"></i></button>
+                            <button type="button" data-tag="Tendências">Tendências <i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="blog-tag-entry">
+                            <input type="text" id="tag-input" placeholder="Nova tag">
+                            <button type="button" id="add-tag-btn" aria-label="Adicionar tag"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div id="available-tags" class="blog-available-tags" aria-label="Tags disponíveis">
+                            <button type="button" data-tag="Moda">Moda</button>
+                            <button type="button" data-tag="Lançamentos">Lançamentos</button>
+                            <button type="button" data-tag="Negócios">Negócios</button>
+                            <button type="button" data-tag="Consumidor">Consumidor</button>
+                        </div>
+                    </section>
+
+                    <section class="blog-editor-panel blog-keyword-panel">
+                        <h2>Palavras-chave</h2>
+                        <label class="blog-field" for="article-keywords">
+                            <span>Termos</span>
+                            <textarea id="article-keywords" rows="5">loungewear, elásticos, moda íntima, conforto, tendências</textarea>
+                        </label>
+                    </section>
+                </aside>
             </form>
         </section>
     </main>
+
     <div id="footer-placeholder"></div>
     <script src="stylesheet/script.js"></script>
 </body>

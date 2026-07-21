@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artigo - Stik</title>
     <link rel="stylesheet" href="stylesheet/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
@@ -11,19 +12,34 @@
     <div id="sidebar-placeholder"></div>
     <div id="overlay"></div>
 
-    <main class="main-content article-detail-page">
-        <section class="article-header animate-on-scroll">
-            <h1 id="article-title"></h1>
-            <p id="article-meta"></p>
-        </section>
+    <main class="main-content article-detail-page blog-article-page">
+        <section class="blog-article-shell">
+            <nav class="blog-breadcrumb blog-article-breadcrumb" aria-label="Caminho da página">
+                <a href="index.html">Home</a>
+                <a href="blog.html">Blog</a>
+                <span>Post</span>
+                <strong id="article-breadcrumb-title">Artigo</strong>
+            </nav>
 
-        <section class="article-image-container animate-on-scroll">
-            <img id="article-image" src="#" alt="Imagem Principal do Artigo" loading="lazy" decoding="async">
-        </section>
+            <figure class="blog-article-cover animate-on-scroll">
+                <img id="article-image" src="#" alt="Imagem principal do artigo" loading="eager" decoding="async" fetchpriority="high">
+            </figure>
 
-        <section class="article-content animate-on-scroll" id="article-content">
+            <header class="blog-article-header animate-on-scroll">
+                <div id="article-tags" class="blog-article-tags"></div>
+                <h1 id="article-title"></h1>
+                <div id="article-meta" class="blog-article-meta"></div>
+            </header>
+
+            <article class="article-content blog-article-body animate-on-scroll" id="article-content"></article>
+
+            <section class="blog-related-section animate-on-scroll" aria-labelledby="blog-related-title">
+                <div class="blog-section-heading">
+                    <h2 id="blog-related-title">Continue lendo</h2>
+                </div>
+                <div id="blog-related-grid" class="blog-related-grid"></div>
             </section>
-        
+        </section>
     </main>
 
     <div id="footer-placeholder"></div>

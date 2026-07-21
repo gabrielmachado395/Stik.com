@@ -12,15 +12,52 @@
     <div id="sidebar-placeholder"></div>
     <div id="overlay"></div>
 
-    <main class="blog-main animate-on-scroll">
-        <section class="container">
-            <h1 class="page-title"></h1>
-            <div id="artigos-container" class="artigos-grid">
+    <main class="blog-main blog-showcase-page">
+        <section class="blog-showcase-hero">
+            <div class="blog-container">
+                <nav class="blog-breadcrumb" aria-label="Caminho da página">
+                    <a href="index.html">Home</a>
+                    <span>Blog</span>
+                </nav>
+
+                <div class="blog-hero-grid">
+                    <div class="blog-title-group">
+                        <span>Conteúdo</span>
+                        <h1>Blog</h1>
+                    </div>
+                    <p>Confira as últimas notícias sobre a Stik e o universo da moda com tendências, lançamentos, dicas e muito mais.</p>
+                    <form class="blog-search-panel" id="blog-search-form" role="search">
+                        <label class="sr-only" for="blog-search-input">Buscar notícias</label>
+                        <input type="search" id="blog-search-input" placeholder="Buscar notícias">
+                        <button type="submit" aria-label="Buscar notícias">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
                 </div>
-            <!-- <button id="create-article-btn" class="create-btn">
-                <i class="fas fa-plus"></i> Novo Artigo
-            </button> -->
+
+                <div id="blog-featured-grid" class="blog-featured-grid" aria-live="polite"></div>
+            </div>
         </section>
+
+        <section class="blog-section blog-most-read-section">
+            <div class="blog-container">
+                <div class="blog-section-heading">
+                    <h2>Mais lidas</h2>
+                </div>
+                <div id="blog-most-read-grid" class="blog-most-read-grid" aria-live="polite"></div>
+            </div>
+        </section>
+
+        <section class="blog-category-filter-section">
+            <div class="blog-container">
+                <div class="blog-section-heading">
+                    <h2>Confira nossas categorias</h2>
+                </div>
+                <div id="blog-category-chips" class="blog-category-chips" aria-label="Categorias do blog"></div>
+            </div>
+        </section>
+
+        <section id="blog-category-sections" class="blog-category-sections" aria-live="polite"></section>
     </main>
 
     <div id="footer-placeholder"></div>

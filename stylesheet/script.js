@@ -1821,165 +1821,672 @@ function initMicroInteractions() {
     initNewsletterCarouselEffects();
 }
 
-// Função que direciona para a tela de criação de artigos do o blog
+// Função que direciona para a tela de criação de artigos do blog.
 function createNewArticle() {
     window.location.href = 'create-article.html';
 }
 
-// Função que cria os card's dos artigos na tela do blog
-function createArticleCard(article) {
-    const card = document.createElement('a');
-    card.href = `article.html?id=${article.id}`;
-    card.classList.add('article-card');
+const BLOG_SCREEN_ARTICLES = [
+    {
+        id: 101,
+        slug: 'tendencia-loungewear-elasticos-indicados',
+        titulo: 'Tendência loungewear e elásticos indicados',
+        resumo: 'Do sofá para as ruas, explore a tendência loungewear e confira dicas valiosas para acertar nas suas coleções.',
+        imagem: 'img - Copia/thumb-blog-17-1.jpg',
+        data: '29 maio, 2026',
+        autor: 'Equipe Stik',
+        leitura: '7 min',
+        tags: ['Dicas', 'Produtos', 'Tendências'],
+        destaque: true,
+        blocos: [
+            { tipo: 'lead', html: 'Do sofá para as ruas, explore a tendência loungewear e confira algumas dicas valiosas para acertar nas suas coleções!' },
+            { tipo: 'paragrafo', html: 'Por muito tempo, a tendência loungewear ficou restrita ao conforto íntimo da vida doméstica. No entanto, esse cenário mudou nos últimos anos.' },
+            { tipo: 'paragrafo', html: 'Com um foco renovado no conforto, no bem-estar e na versatilidade, o <a href="blog.html">loungewear</a> evoluiu para abraçar a moda casual, tornando-se um pilar fundamental no guarda-roupa moderno.' },
+            { tipo: 'titulo', nivel: 2, texto: 'A ascensão da tendência loungewear' },
+            { tipo: 'imagem', src: 'img - Copia/thumb-blog-09-1024x683.jpg', alt: 'Referência de moda confortável', legenda: 'Ref: Envato' },
+            { tipo: 'paragrafo', html: 'A crescente adoção do <a href="blog.html">trabalho remoto</a> e a valorização do bem-estar têm redefinido o que as pessoas buscam em suas vestimentas diárias.' },
+            { tipo: 'titulo', nivel: 2, texto: 'Tendências atuais em loungewear' },
+            { tipo: 'imagem', src: 'img - Copia/thumb-blog-19.jpg', alt: 'Paleta de tons suaves para moda íntima', legenda: 'Ref: Envato' },
+            { tipo: 'titulo', nivel: 3, texto: 'Estilos híbridos e adaptação ao home office' },
+            { tipo: 'paragrafo', html: 'Com o aumento do trabalho remoto, essa tendência responde à necessidade de peças apropriadas para videoconferências, mas confortáveis o suficiente para relaxar em casa.' },
+            { tipo: 'titulo', nivel: 3, texto: 'Tecidos sustentáveis e confortáveis' },
+            { tipo: 'paragrafo', html: 'Materiais sustentáveis estão cada vez mais em voga. Além de oferecer conforto, reforçam práticas de moda consciente e valorizam a percepção da coleção.' },
+            { tipo: 'titulo', nivel: 3, texto: 'Detalhes e acabamentos' },
+            { tipo: 'paragrafo', html: 'Acabamentos de alta qualidade, botões decorativos e <a href="produto.html?id=1">elásticos</a> estilizados melhoram a aparência das peças e elevam a experiência geral de uso.' },
+            { tipo: 'titulo', nivel: 2, texto: 'A importância do conforto' },
+            { tipo: 'imagem', src: 'img - Copia/thumb-blog-20-01-1024x480.jpg', alt: 'Peça confortável com acabamento macio', legenda: 'Ref: Envato' },
+            { tipo: 'paragrafo', html: 'A escolha do elástico é decisiva para garantir conforto e estética. Elásticos bem escolhidos ajudam no caimento e mantêm a forma da peça após uso e lavagens frequentes.' },
+            { tipo: 'titulo', nivel: 2, texto: 'Tipos de elásticos recomendados' },
+            { tipo: 'lista', itens: ['Elásticos embutidos para cós, shorts e saias.', 'Bases macias para peças de contato direto com a pele.', 'Elásticos com boa recuperação para coleções de uso prolongado.'] }
+        ]
+    },
+    {
+        id: 102,
+        slug: 'melhores-aviamentos-roupas-esportivas',
+        titulo: 'Os melhores aviamentos para roupas esportivas',
+        resumo: 'Funcionalidade, resistência e conforto para coleções fitness de alta performance.',
+        imagem: 'img/tumb-blog-01.jpg',
+        data: '12 junho, 2026',
+        autor: 'Equipe Stik',
+        leitura: '5 min',
+        tags: ['Produtos'],
+        destaque: true
+    },
+    {
+        id: 103,
+        slug: 'analise-coloracao-pessoal',
+        titulo: 'Análise de coloração pessoal: o que é e como funciona',
+        resumo: 'Como as cartelas de cor influenciam moda, produto e comunicação visual.',
+        imagem: 'img - Copia/IMG_9257-Editar-1024x683.jpg',
+        data: '06 junho, 2026',
+        autor: 'Equipe Stik',
+        leitura: '4 min',
+        tags: ['Dicas', 'Moda']
+    },
+    {
+        id: 104,
+        slug: 'elasticos-de-bico-zanotti',
+        titulo: 'Elásticos de bico Zanotti: adicione charme à sua coleção!',
+        resumo: 'Acabamento delicado para peças com mais identidade e valor percebido.',
+        imagem: 'img - Copia/thumb-blog-09-1024x683.jpg',
+        data: '21 maio, 2026',
+        autor: 'Equipe Stik',
+        leitura: '3 min',
+        tags: ['Produtos']
+    },
+    {
+        id: 105,
+        slug: 'moda-nos-anos-70',
+        titulo: 'Moda nos anos 70',
+        resumo: 'Referências de cor, forma e expressão para coleções contemporâneas.',
+        imagem: 'img - Copia/thumb-blog-03-300x200.jpg',
+        data: '18 abril, 2026',
+        autor: 'Equipe Stik',
+        leitura: '6 min',
+        tags: ['Estilo', 'Moda', 'Tendências']
+    },
+    {
+        id: 106,
+        slug: 'glossario-de-moda',
+        titulo: 'Glossário de moda: termos mais usados e seus significados',
+        resumo: 'Vocabulário essencial para criação, comunicação e desenvolvimento de produto.',
+        imagem: 'img - Copia/thumb-blog-14-300x200.jpg',
+        data: '09 abril, 2026',
+        autor: 'Equipe Stik',
+        leitura: '8 min',
+        tags: ['Dicas', 'Moda', 'Tendências']
+    },
+    {
+        id: 107,
+        slug: 'gola-em-destaque',
+        titulo: 'Gola em destaque: tendência inverno 2027',
+        resumo: 'Volumes, textura e acabamento ganham força nas coleções de inverno.',
+        imagem: 'img - Copia/thumb-blog-19.jpg',
+        data: '02 abril, 2026',
+        autor: 'Equipe Stik',
+        leitura: '5 min',
+        tags: ['Moda', 'Tendências']
+    },
+    {
+        id: 108,
+        slug: 'footballcore-tendencia-moda',
+        titulo: 'Footballcore: o futebol como tendência de moda',
+        resumo: 'Uma leitura esportiva e urbana para cores, elásticos e acabamentos.',
+        imagem: 'img - Copia/tumb-blog-01.jpg',
+        data: '25 março, 2026',
+        autor: 'Equipe Stik',
+        leitura: '4 min',
+        tags: ['Dicas', 'Tendências']
+    },
+    {
+        id: 109,
+        slug: 'brownie-nova-cor-cartela',
+        titulo: 'Brownie: conheça a nova cor na cartela da Stik',
+        resumo: 'Uma tonalidade elegante para bases, alças, rendas e detalhes.',
+        imagem: 'img - Copia/thumb-blog-20-01-1024x480.jpg',
+        data: '16 março, 2026',
+        autor: 'Equipe Stik',
+        leitura: '4 min',
+        tags: ['Lançamentos']
+    },
+    {
+        id: 110,
+        slug: 'maximalismo-moda-intima',
+        titulo: 'Maximalismo: das passarelas à moda íntima!',
+        resumo: 'Como excesso controlado, textura e cor entram no desenvolvimento de peças.',
+        imagem: 'img - Copia/thumb-blog-11-300x200.jpg',
+        data: '03 março, 2026',
+        autor: 'Equipe Stik',
+        leitura: '6 min',
+        tags: ['Lançamentos']
+    },
+    {
+        id: 111,
+        slug: 'ampliar-vendas-foco-cliente',
+        titulo: 'Quer ampliar suas vendas? Confira estratégias com foco no cliente',
+        resumo: 'Caminhos para conectar produto, atendimento e coleção de forma consistente.',
+        imagem: 'img - Copia/thumb-blog-10-300x200.jpg',
+        data: '20 fevereiro, 2026',
+        autor: 'Equipe Stik',
+        leitura: '5 min',
+        tags: ['Lançamentos', 'Negócios']
+    },
+    {
+        id: 112,
+        slug: 'tendencias-fitness-inverno',
+        titulo: '3 tendências fitness confirmadas para o Inverno 2027',
+        resumo: 'Cores, modelagens e aviamentos que fortalecem o visual esportivo.',
+        imagem: 'img - Copia/thumb-blog-17-1.jpg',
+        data: '08 fevereiro, 2026',
+        autor: 'Equipe Stik',
+        leitura: '5 min',
+        tags: ['Lançamentos', 'Produtos']
+    }
+];
 
-    const firstImage = article.content.match(/<img[^>]+src="([^">]+)"/);
-    const imageUrl = firstImage ? firstImage[1] : './img/default-blog.png';
-    
-    const contentWithoutHtml = new DOMParser().parseFromString(article.content, 'text/html').body.textContent;
-    const trimmedContent = contentWithoutHtml.length > 150 ? contentWithoutHtml.substring(0, 150) + '...' : contentWithoutHtml;
-    
-    card.innerHTML = `
-    ${optimizedImageMarkup(imageUrl, article.title)}
-    <div class="article-card-content">
-            <h2>${article.title}</h2>
-            <p>${trimmedContent}</p>
-        </div>
-    `;
-    return card;
+const BLOG_SCREEN_CATEGORIES = [
+    'Consumidor',
+    'Dicas',
+    'E-book Grátis',
+    'Estilo',
+    'Institucional',
+    'Lançamentos',
+    'Moda',
+    'Negócios',
+    'Notícia',
+    'Produtos',
+    'Tendências',
+    'Tutoriais'
+];
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
+function getBlogScreenArticles() {
+    return BLOG_SCREEN_ARTICLES;
+}
+
+function getBlogTags(article) {
+    if (Array.isArray(article.tags)) return article.tags;
+    if (typeof article.tags === 'string') {
+        return article.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+    }
+    return [];
+}
+
+function normalizeBlogSearch(value) {
+    return String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+function renderBlogTags(tags) {
+    return tags.map(tag => `<span class="blog-card-tag">${escapeHtml(tag)}</span>`).join('');
+}
+
+function renderBlogCard(article, options = {}) {
+    if (!article) return '';
+    const className = options.className || 'blog-mini-card';
+    const headingTag = options.headingTag || 'h3';
+    const loading = options.loading || 'lazy';
+    const title = escapeHtml(article.titulo);
+    const tags = renderBlogTags(getBlogTags(article));
+
+    return `
+        <a class="${className}" href="artigo.html?id=${escapeAttribute(article.id)}">
+            ${optimizedImageMarkup(article.imagem, article.titulo, { loading })}
+            <div class="blog-card-content">
+                <div class="blog-card-tags">${tags}</div>
+                <${headingTag}>${title}</${headingTag}>
+            </div>
+        </a>
+    `;
+}
+
+function renderBlogNewsletterCard() {
+    return `
+        <aside class="blog-newsletter-card">
+            <span>Newsletter</span>
+            <h3>Receba nossas atualizações</h3>
+            <form>
+                <input type="text" placeholder="Nome completo" aria-label="Nome completo">
+                <input type="email" placeholder="E-mail" aria-label="E-mail">
+                <input type="text" placeholder="Profissão / Empresa" aria-label="Profissão ou empresa">
+                <label>
+                    <input type="checkbox">
+                    <span>Eu concordo com o uso dos meus dados para envio de novidades, informações sobre produtos e comunicações personalizadas da Stik.</span>
+                </label>
+                <button type="button">Fazer meu cadastro</button>
+            </form>
+        </aside>
+    `;
+}
+
+function renderBlogCategorySection(category, articles, includeNewsletter = false) {
+    const [first, second, third, fourth] = articles;
+    const sideCard = includeNewsletter
+        ? renderBlogNewsletterCard()
+        : renderBlogCard(fourth || third || second || first, { className: 'blog-category-card is-tall' });
+
+    return `
+        <section class="blog-category-block" data-blog-category="${escapeAttribute(category)}">
+            <div class="blog-container">
+                <h2 class="blog-category-title">${escapeHtml(category)}</h2>
+                <div class="blog-category-layout">
+                    ${renderBlogCard(first, { className: 'blog-category-card is-tall' })}
+                    <div class="blog-category-stack">
+                        ${renderBlogCard(second || first, { className: 'blog-category-card is-medium' })}
+                        ${renderBlogCard(third || second || first, { className: 'blog-category-card is-medium' })}
+                    </div>
+                    ${sideCard}
+                </div>
+            </div>
+        </section>
+    `;
+}
+
+function filterBlogArticles(articles, searchTerm = '', activeCategory = '') {
+    const term = normalizeBlogSearch(searchTerm);
+    const category = normalizeBlogSearch(activeCategory);
+
+    return articles.filter(article => {
+        const tags = getBlogTags(article);
+        const text = normalizeBlogSearch([
+            article.titulo,
+            article.resumo,
+            article.autor,
+            tags.join(' ')
+        ].join(' '));
+        const matchesTerm = !term || text.includes(term);
+        const matchesCategory = !category || tags.some(tag => normalizeBlogSearch(tag) === category);
+        return matchesTerm && matchesCategory;
+    });
+}
 
 async function displayArticles() {
-    const container = document.getElementById('artigos-container');
-    if (!container) return;
+    const featuredGrid = document.getElementById('blog-featured-grid');
+    const mostReadGrid = document.getElementById('blog-most-read-grid');
+    const chipsContainer = document.getElementById('blog-category-chips');
+    const categorySections = document.getElementById('blog-category-sections');
+    const searchForm = document.getElementById('blog-search-form');
+    const searchInput = document.getElementById('blog-search-input');
 
-    // carrega só quando necessário
-    const lista = await loadArtigos();
+    if (!featuredGrid || !mostReadGrid || !chipsContainer || !categorySections) return;
 
-    // limpa rapidamente sem forçar reflow por cada append
-    container.innerHTML = '';
+    const articles = getBlogScreenArticles();
+    let activeCategory = '';
 
-    if (!lista || lista.length === 0) {
-        container.innerHTML = '<p class="no-results">Nenhum artigo encontrado.</p>';
-        return;
+    const render = () => {
+        const searchTerm = searchInput ? searchInput.value : '';
+        const filtered = filterBlogArticles(articles, searchTerm, activeCategory);
+
+        if (!filtered.length) {
+            featuredGrid.innerHTML = '<p class="blog-empty-state">Nenhum artigo encontrado.</p>';
+            mostReadGrid.innerHTML = '';
+            categorySections.innerHTML = '';
+            return;
+        }
+
+        const [featured, sideOne, sideTwo] = filtered;
+        featuredGrid.innerHTML = `
+            ${renderBlogCard(featured, { className: 'blog-feature-card is-large', headingTag: 'h2', loading: 'eager' })}
+            <div class="blog-feature-side">
+                ${renderBlogCard(sideOne || featured, { className: 'blog-feature-card' })}
+                ${renderBlogCard(sideTwo || sideOne || featured, { className: 'blog-feature-card' })}
+            </div>
+        `;
+
+        mostReadGrid.innerHTML = filtered
+            .slice(3, 7)
+            .concat(filtered.slice(0, Math.max(0, 4 - filtered.slice(3, 7).length)))
+            .slice(0, 4)
+            .map(article => renderBlogCard(article, { className: 'blog-mini-card' }))
+            .join('');
+
+        chipsContainer.querySelectorAll('button').forEach(button => {
+            button.classList.toggle('is-active', normalizeBlogSearch(button.dataset.category) === normalizeBlogSearch(activeCategory));
+        });
+
+        const sectionCategories = activeCategory ? [activeCategory] : ['Tendências', 'Lançamentos', 'Produtos'];
+        categorySections.innerHTML = sectionCategories.map((category, index) => {
+            const sectionArticles = filterBlogArticles(articles, searchTerm, category);
+            const list = sectionArticles.length ? sectionArticles : filtered;
+            return renderBlogCategorySection(category, list, index === 0 && !activeCategory);
+        }).join('');
+    };
+
+    if (!chipsContainer.dataset.bound) {
+        chipsContainer.dataset.bound = 'true';
+        chipsContainer.innerHTML = BLOG_SCREEN_CATEGORIES.map(category => `
+            <button type="button" data-category="${escapeAttribute(category)}">${escapeHtml(category)}</button>
+        `).join('');
+
+        chipsContainer.addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-category]');
+            if (!button) return;
+            const nextCategory = button.dataset.category || '';
+            activeCategory = normalizeBlogSearch(activeCategory) === normalizeBlogSearch(nextCategory) ? '' : nextCategory;
+            render();
+        });
     }
 
-    const fragment = document.createDocumentFragment();
+    if (searchForm && !searchForm.dataset.bound) {
+        searchForm.dataset.bound = 'true';
+        searchForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            render();
+        });
+    }
 
-    lista.forEach(artigo => {
-        const articleEl = document.createElement('article');
-        articleEl.className = 'blog-post';
+    if (searchInput && !searchInput.dataset.bound) {
+        searchInput.dataset.bound = 'true';
+        searchInput.addEventListener('input', () => render());
+    }
 
-        const thumbDiv = document.createElement('div');
-        thumbDiv.className = 'post-thumb';
-        const linkThumb = document.createElement('a');
-        linkThumb.href = `artigo.html?id=${artigo.id}`;
-        const img = document.createElement('img');
-        img.src = artigo.imagem;
-        img.alt = artigo.titulo;
-        img.loading = 'lazy';
-        img.decoding = 'async';
-        linkThumb.appendChild(img);
-        thumbDiv.appendChild(linkThumb);
-
-        const metaDiv = document.createElement('div');
-        metaDiv.className = 'post-meta';
-        metaDiv.innerHTML = `<span><i class="fas fa-user"></i> ${artigo.autor}</span>
-                             <span><i class="fas fa-calendar-alt"></i> ${artigo.data}</span>`;
-
-        const titleH2 = document.createElement('h2');
-        titleH2.className = 'post-title';
-        titleH2.innerHTML = `<a href="artigo.html?id=${artigo.id}">${artigo.titulo}</a>`;
-
-        const excerptP = document.createElement('p');
-        excerptP.className = 'post-excerpt';
-        excerptP.textContent = artigo.resumo;
-
-        const readMore = document.createElement('a');
-        readMore.className = 'read-more';
-        readMore.href = `artigo.html?id=${artigo.id}`;
-        readMore.innerHTML = 'Leia mais <i class="fas fa-arrow-right"></i>';
-
-        articleEl.appendChild(thumbDiv);
-        articleEl.appendChild(metaDiv);
-        articleEl.appendChild(titleH2);
-        articleEl.appendChild(excerptP);
-        articleEl.appendChild(readMore);
-
-        fragment.appendChild(articleEl);
-    });
-
-    container.appendChild(fragment);
+    render();
 }
 
+function renderArticleContent(article) {
+    if (Array.isArray(article.blocos)) {
+        return article.blocos.map(block => {
+            if (block.tipo === 'lead') {
+                return `<p class="is-lead">${block.html}</p>`;
+            }
+            if (block.tipo === 'paragrafo') {
+                return `<p>${block.html}</p>`;
+            }
+            if (block.tipo === 'titulo') {
+                const level = block.nivel === 3 ? 3 : 2;
+                return `<h${level}>${escapeHtml(block.texto)}</h${level}>`;
+            }
+            if (block.tipo === 'imagem') {
+                return `
+                    <figure>
+                        ${optimizedImageMarkup(block.src, block.alt || article.titulo)}
+                        ${block.legenda ? `<figcaption>${escapeHtml(block.legenda)}</figcaption>` : ''}
+                    </figure>
+                `;
+            }
+            if (block.tipo === 'lista') {
+                return `<ul>${(block.itens || []).map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+            }
+            if (block.tipo === 'citacao') {
+                return `<blockquote>${escapeHtml(block.texto)}</blockquote>`;
+            }
+            return '';
+        }).join('');
+    }
+
+    return article.conteudoCompleto || `<p>${escapeHtml(article.resumo || '')}</p>`;
+}
 
 async function carregarArtigo() {
     const params = new URLSearchParams(window.location.search);
-    const id = parseInt(params.get('id'));
-
-    // garante dados carregados
-    await loadArtigos();
-
-    const artigo = (artigos || []).find(a => a.id === id);
+    const id = Number(params.get('id'));
+    const slug = params.get('slug');
+    const screenArticles = getBlogScreenArticles();
+    const artigo = screenArticles.find(item => item.id === id || item.slug === slug) || screenArticles[0];
 
     const articleTitleEl = document.getElementById('article-title');
     const articleMetaEl = document.getElementById('article-meta');
     const articleImageEl = document.getElementById('article-image');
     const articleContentEl = document.getElementById('article-content');
+    const articleTagsEl = document.getElementById('article-tags');
+    const breadcrumbTitleEl = document.getElementById('article-breadcrumb-title');
+    const relatedGrid = document.getElementById('blog-related-grid');
 
     if (!artigo) {
-        if (articleContentEl) articleContentEl.innerHTML = "<h2>Artigo não encontrado.</h2>";
+        if (articleContentEl) articleContentEl.innerHTML = '<h2>Artigo não encontrado.</h2>';
         return;
     }
 
+    document.title = `${artigo.titulo} - Stik`;
+
     if (articleTitleEl) articleTitleEl.textContent = artigo.titulo;
-    if (articleMetaEl) articleMetaEl.innerHTML = `Publicado por <span>${artigo.autor}</span> em ${artigo.data}`;
+    if (breadcrumbTitleEl) breadcrumbTitleEl.textContent = artigo.titulo;
+    if (articleTagsEl) {
+        articleTagsEl.innerHTML = getBlogTags(artigo)
+            .map(tag => `<span>${escapeHtml(tag)}</span>`)
+            .join('');
+    }
+    if (articleMetaEl) {
+        articleMetaEl.innerHTML = `
+            <span>${escapeHtml(artigo.data)}</span>
+            <span><i class="far fa-clock"></i> ${escapeHtml(artigo.leitura || '5 min')} (tempo estimado de leitura)</span>
+        `;
+    }
     if (articleImageEl) {
-        articleImageEl.setAttribute('loading', 'lazy');
-        articleImageEl.decoding = 'async';
+        optimizeImageElement(articleImageEl, { loading: 'eager', fetchPriority: 'high' });
         articleImageEl.src = artigo.imagem;
         articleImageEl.alt = artigo.titulo;
-        // tentar decodificar sem bloquear
-        if (articleImageEl.decode) articleImageEl.decode().catch(()=>{/* ignore */});
+        if (articleImageEl.decode) articleImageEl.decode().catch(() => {/* ignore */});
     }
-    if (articleContentEl) articleContentEl.innerHTML = artigo.conteudoCompleto;
+    if (articleContentEl) articleContentEl.innerHTML = renderArticleContent(artigo);
 
-    // adia inits pesados de visibilidade/animations
+    if (relatedGrid) {
+        const currentTags = getBlogTags(artigo).map(normalizeBlogSearch);
+        relatedGrid.innerHTML = getBlogScreenArticles()
+            .filter(item => item.id !== artigo.id && getBlogTags(item).some(tag => currentTags.includes(normalizeBlogSearch(tag))))
+            .slice(0, 3)
+            .map(item => renderBlogCard(item, { className: 'blog-mini-card' }))
+            .join('');
+    }
+
     deferInit(() => {
         if (typeof inicializarAnimateOnScroll === 'function') inicializarAnimateOnScroll();
     });
 }
 
-// Cria o formulário de criação do artigo
+function createEditorBlock(type) {
+    const blockLabels = {
+        paragraph: 'Parágrafo',
+        heading: 'Subtítulo',
+        image: 'Imagem',
+        quote: 'Citação',
+        list: 'Lista'
+    };
+    const label = blockLabels[type] || 'Bloco';
+    const controls = `
+        <div class="blog-block-controls">
+            <span>${label}</span>
+            <button type="button" data-move-block="up" aria-label="Mover bloco para cima"><i class="fas fa-arrow-up"></i></button>
+            <button type="button" data-move-block="down" aria-label="Mover bloco para baixo"><i class="fas fa-arrow-down"></i></button>
+            <button type="button" data-remove-block aria-label="Remover bloco"><i class="fas fa-times"></i></button>
+        </div>
+    `;
+
+    if (type === 'heading') {
+        return `<article class="blog-content-block" data-block-type="heading">${controls}<input class="blog-block-heading-input" type="text" value="Novo subtítulo"></article>`;
+    }
+    if (type === 'image') {
+        return `
+            <article class="blog-content-block blog-content-block-image" data-block-type="image">
+                ${controls}
+                <figure>${optimizedImageMarkup('img - Copia/thumb-blog-14-300x200.jpg', 'Imagem do artigo')}</figure>
+                <div class="blog-image-meta">
+                    <input type="text" value="Crédito" aria-label="Crédito da imagem">
+                    <input type="text" value="Texto alternativo" aria-label="Texto alternativo da imagem">
+                </div>
+            </article>
+        `;
+    }
+    if (type === 'quote') {
+        return `<article class="blog-content-block" data-block-type="quote">${controls}<div class="blog-rich-text" contenteditable="true">Uma citação ou destaque editorial para o artigo.</div></article>`;
+    }
+    if (type === 'list') {
+        return `<article class="blog-content-block" data-block-type="list">${controls}<ul class="blog-editable-list" contenteditable="true"><li>Novo item da lista.</li></ul></article>`;
+    }
+
+    return `<article class="blog-content-block" data-block-type="paragraph">${controls}<div class="blog-rich-text" contenteditable="true">Novo parágrafo do artigo.</div></article>`;
+}
+
+function updateEditorBlockCount() {
+    const countEl = document.getElementById('blog-block-count');
+    const blockList = document.getElementById('article-blocks');
+    if (!countEl || !blockList) return;
+    const count = blockList.querySelectorAll('.blog-content-block').length;
+    countEl.textContent = `${count} ${count === 1 ? 'bloco' : 'blocos'}`;
+}
+
+function showEditorFeedback(message) {
+    let toast = document.querySelector('.blog-editor-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'blog-editor-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('is-visible');
+    window.clearTimeout(showEditorFeedback.timeout);
+    showEditorFeedback.timeout = window.setTimeout(() => {
+        toast.classList.remove('is-visible');
+    }, 2200);
+}
+
+// Inicializa a tela visual de criação de artigo. Nesta fase não há persistência em API.
 function setupArticleForm() {
     const form = document.getElementById('article-form');
     if (!form) return;
-    
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const titleInput = document.getElementById('article-title');
-        const contentInput = document.getElementById('article-content');
-        
-        if (!titleInput.value || !contentInput.value) {
-            alert('Por favor, preencha o título e o conteúdo.');
-            return;
-        }
-        
-        const newArticle = {
-            id: Date.now(),
-            title: titleInput.value,
-            content: contentInput.value,
-            date: new Date().toISOString()
-        };
-        
-        const articles = JSON.parse(localStorage.getItem('blogArticles')) || [];
-        articles.push(newArticle);
-        localStorage.setItem('blogArticles', JSON.stringify(articles));
-        
-        alert('Artigo salvo com sucesso!');
-        window.location.href = 'blog.html';
+
+    const blockList = document.getElementById('article-blocks');
+    const selectedTags = document.getElementById('selected-tags');
+    const availableTags = document.getElementById('available-tags');
+    const tagInput = document.getElementById('tag-input');
+    const addTagBtn = document.getElementById('add-tag-btn');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        showEditorFeedback('Artigo publicado no protótipo visual.');
     });
+
+    document.querySelectorAll('[data-editor-action]').forEach(button => {
+        button.addEventListener('click', () => {
+            const action = button.dataset.editorAction;
+            if (action === 'preview') {
+                window.open('artigo.html?id=101', '_blank', 'noopener');
+                return;
+            }
+            showEditorFeedback(action === 'draft' ? 'Rascunho salvo no protótipo visual.' : 'Ação registrada.');
+        });
+    });
+
+    const freeEditor = document.getElementById('article-free-content');
+    const formatSelect = document.getElementById('article-format-select');
+
+    const focusFreeEditor = () => {
+        if (freeEditor) freeEditor.focus();
+    };
+
+    if (formatSelect && freeEditor) {
+        formatSelect.addEventListener('change', () => {
+            focusFreeEditor();
+            document.execCommand('formatBlock', false, formatSelect.value);
+        });
+    }
+
+    document.querySelectorAll('[data-editor-command]').forEach(button => {
+        button.addEventListener('click', () => {
+            if (!freeEditor) return;
+            const command = button.dataset.editorCommand;
+            focusFreeEditor();
+
+            if (command === 'createLink') {
+                const url = window.prompt('Cole o link que será aplicado ao texto selecionado:');
+                if (url) document.execCommand('createLink', false, url);
+                return;
+            }
+
+            if (command === 'insertImage') {
+                const src = window.prompt('Cole o caminho da imagem:');
+                if (!src) return;
+                const alt = window.prompt('Texto alternativo da imagem:') || 'Imagem do artigo';
+                const html = `
+                    <figure>
+                        <img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" loading="lazy" decoding="async">
+                        <figcaption>Crédito ou legenda</figcaption>
+                    </figure>
+                `;
+                document.execCommand('insertHTML', false, html);
+                return;
+            }
+
+            document.execCommand(command, false, null);
+        });
+    });
+
+    document.querySelectorAll('[data-add-block]').forEach(button => {
+        button.addEventListener('click', () => {
+            if (!blockList) return;
+            blockList.insertAdjacentHTML('beforeend', createEditorBlock(button.dataset.addBlock));
+            updateEditorBlockCount();
+        });
+    });
+
+    if (blockList) {
+        blockList.addEventListener('click', (event) => {
+            const removeButton = event.target.closest('[data-remove-block]');
+            const moveButton = event.target.closest('[data-move-block]');
+            const block = event.target.closest('.blog-content-block');
+            if (!block) return;
+
+            if (removeButton) {
+                block.remove();
+                updateEditorBlockCount();
+                return;
+            }
+
+            if (moveButton && moveButton.dataset.moveBlock === 'up' && block.previousElementSibling) {
+                blockList.insertBefore(block, block.previousElementSibling);
+            } else if (moveButton && moveButton.dataset.moveBlock === 'down' && block.nextElementSibling) {
+                blockList.insertBefore(block.nextElementSibling, block);
+            }
+        });
+    }
+
+    const addSelectedTag = (tag) => {
+        if (!selectedTags || !tag) return;
+        const exists = Array.from(selectedTags.querySelectorAll('[data-tag]'))
+            .some(button => normalizeBlogSearch(button.dataset.tag) === normalizeBlogSearch(tag));
+        if (exists) return;
+        selectedTags.insertAdjacentHTML('beforeend', `<button type="button" data-tag="${escapeAttribute(tag)}">${escapeHtml(tag)} <i class="fas fa-times"></i></button>`);
+    };
+
+    if (availableTags) {
+        availableTags.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-tag]');
+            if (!button) return;
+            addSelectedTag(button.dataset.tag);
+        });
+    }
+
+    if (selectedTags) {
+        selectedTags.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-tag]');
+            if (button) button.remove();
+        });
+    }
+
+    if (addTagBtn && tagInput) {
+        addTagBtn.addEventListener('click', () => {
+            const tag = tagInput.value.trim();
+            if (!tag) return;
+            addSelectedTag(tag);
+            if (availableTags) {
+                availableTags.insertAdjacentHTML('beforeend', `<button type="button" data-tag="${escapeAttribute(tag)}">${escapeHtml(tag)}</button>`);
+            }
+            tagInput.value = '';
+        });
+    }
+
+    updateEditorBlockCount();
 }
 
 function carregarDetalhesDoProduto() {
