@@ -5729,6 +5729,17 @@ a,
     line-height: 1.55;
 }
 
+.blog-editor-page #article-title {
+    min-height: 58px;
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+    resize: vertical;
+    white-space: pre-wrap;
+    font-size: inherit;
+    line-height: 1.45;
+    color: #243041;
+}
+
 .blog-field input:focus,
 .blog-field textarea:focus,
 .blog-field select:focus,
@@ -5991,6 +6002,17 @@ a,
     outline: none;
 }
 
+.blog-word-canvas.is-tiptap-ready {
+    padding: 0;
+}
+
+.blog-word-canvas .ProseMirror,
+.blog-word-canvas .tiptap {
+    min-height: 760px;
+    padding: 36px min(46px, 6vw);
+    outline: none;
+}
+
 .blog-word-canvas:focus {
     box-shadow: inset 0 0 0 3px rgba(216, 180, 109, 0.12);
 }
@@ -5998,12 +6020,18 @@ a,
 .blog-word-canvas p,
 .blog-word-canvas ul,
 .blog-word-canvas ol,
-.blog-word-canvas figure {
+.blog-word-canvas figure,
+.blog-word-canvas .ProseMirror p,
+.blog-word-canvas .ProseMirror ul,
+.blog-word-canvas .ProseMirror ol,
+.blog-word-canvas .ProseMirror figure {
     margin: 0 0 22px;
 }
 
 .blog-word-canvas h2,
-.blog-word-canvas h3 {
+.blog-word-canvas h3,
+.blog-word-canvas .ProseMirror h2,
+.blog-word-canvas .ProseMirror h3 {
     margin: 30px 0 14px;
     color: #112b62;
     line-height: 1.25;
@@ -6046,6 +6074,14 @@ a,
 .blog-word-canvas figcaption {
     color: #64748b;
     font-size: 0.82rem;
+}
+
+.blog-word-canvas .is-empty::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    color: #9aa4b2;
+    pointer-events: none;
 }
 
 .blog-publish-panel,

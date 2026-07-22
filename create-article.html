@@ -43,35 +43,6 @@
 
             <form id="article-form" class="blog-editor-layout blog-editor-layout-simple">
                 <div class="blog-editor-main">
-                    <section class="blog-editor-panel blog-editor-identity">
-                        <div class="blog-editor-panel-head">
-                            <h2>Dados principais</h2>
-                            <span>Rascunho</span>
-                        </div>
-
-                        <div class="blog-field-grid">
-                            <label class="blog-field blog-field-wide" for="article-title">
-                                <span>Título</span>
-                                <input type="text" id="article-title" name="titulo" value="Tendência loungewear e elásticos indicados" required>
-                            </label>
-
-                            <label class="blog-field" for="article-slug">
-                                <span>Slug</span>
-                                <input type="text" id="article-slug" name="slug" value="tendencia-loungewear-elasticos-indicados">
-                            </label>
-
-                            <label class="blog-field" for="article-author">
-                                <span>Autor</span>
-                                <input type="text" id="article-author" name="autor" value="Equipe Stik">
-                            </label>
-
-                            <label class="blog-field blog-field-wide" for="article-summary">
-                                <span>Resumo</span>
-                                <textarea id="article-summary" name="resumo" rows="3">Do sofá para as ruas, explore a tendência loungewear e confira dicas valiosas para acertar nas suas coleções.</textarea>
-                            </label>
-                        </div>
-                    </section>
-
                     <section class="blog-editor-panel blog-editor-cover">
                         <div class="blog-editor-panel-head">
                             <h2>Imagem de capa</h2>
@@ -81,29 +52,39 @@
                         </div>
 
                         <div class="blog-cover-editor">
-                            <figure>
-                                <img src="img - Copia/thumb-blog-17-1.jpg" alt="Mulher usando conjunto loungewear" loading="lazy" decoding="async">
-                            </figure>
+                            <figure class="is-empty" aria-label="Nenhuma imagem de capa selecionada"></figure>
                             <div class="blog-cover-fields">
-                                <label class="blog-field" for="cover-alt">
-                                    <span>Texto alternativo</span>
-                                    <input type="text" id="cover-alt" value="Mulher usando conjunto loungewear em ambiente interno">
-                                </label>
-                                <label class="blog-field" for="cover-credit">
-                                    <span>Crédito</span>
-                                    <input type="text" id="cover-credit" value="Ref: Envato">
-                                </label>
                                 <div class="blog-cover-actions">
-                                    <button type="button" class="blog-editor-btn blog-editor-btn-light">
+                                    <button type="button" class="blog-editor-btn blog-editor-btn-light" id="cover-upload-btn">
                                         <i class="fas fa-upload"></i>
                                         Enviar imagem
                                     </button>
-                                    <button type="button" class="blog-editor-btn blog-editor-btn-light">
+                                    <button type="button" class="blog-editor-btn blog-editor-btn-light" id="cover-library-btn">
                                         <i class="fas fa-images"></i>
                                         Biblioteca
                                     </button>
+                                    <input type="file" id="cover-file-input" accept="image/*" hidden>
                                 </div>
                             </div>
+                        </div>
+                    </section>
+
+                    <section class="blog-editor-panel blog-editor-identity">
+                        <div class="blog-editor-panel-head">
+                            <h2>Dados principais</h2>
+                            <span id="article-status-pill">Rascunho</span>
+                        </div>
+
+                        <div class="blog-field-grid">
+                            <label class="blog-field blog-field-wide" for="article-title">
+                                <span>Título</span>
+                                <textarea id="article-title" name="titulo" rows="2" placeholder="Digite o título do artigo" required></textarea>
+                            </label>
+
+                            <label class="blog-field blog-field-wide" for="article-summary">
+                                <span>Resumo</span>
+                                <textarea id="article-summary" name="resumo" rows="3" placeholder="Escreva um resumo curto para o card do blog"></textarea>
+                            </label>
                         </div>
                     </section>
 
@@ -137,23 +118,8 @@
                                 </button>
                             </div>
 
-                            <div id="article-free-content" class="blog-word-canvas" contenteditable="true">
-                                <p><em>Do sofá para as ruas, explore a tendência loungewear e confira algumas dicas valiosas para acertar nas suas coleções!</em></p>
-                                <p>Por muito tempo, a tendência loungewear ficou restrita ao conforto íntimo da vida doméstica. No entanto, esse cenário mudou nos últimos anos.</p>
-                                <p>Com um foco renovado no conforto, no bem-estar e na versatilidade, o <a href="blog.html">loungewear</a> evoluiu para abraçar a moda casual, tornando-se um pilar fundamental no guarda-roupa moderno.</p>
-                                <h2>A ascensão da tendência loungewear</h2>
-                                <figure>
-                                    <img src="img - Copia/thumb-blog-09-1024x683.jpg" alt="Referência de moda confortável" loading="lazy" decoding="async">
-                                    <figcaption>Ref: Envato</figcaption>
-                                </figure>
-                                <p>A crescente adoção do trabalho remoto e a valorização do bem-estar têm redefinido o que as pessoas buscam em suas vestimentas diárias.</p>
-                                <h2>Tipos de elásticos recomendados</h2>
-                                <ul>
-                                    <li>Elásticos embutidos para cós, shorts e saias.</li>
-                                    <li>Bases macias para peças de contato direto com a pele.</li>
-                                    <li>Elásticos com boa recuperação para coleções de uso prolongado.</li>
-                                </ul>
-                            </div>
+                            <div id="article-free-content" class="blog-word-canvas" contenteditable="true"></div>
+                            <input type="file" id="article-inline-image-input" accept="image/*" hidden>
                         </div>
                     </section>
                 </div>
@@ -161,11 +127,7 @@
                 <aside class="blog-editor-sidebar blog-editor-sidebar-simple">
                     <section class="blog-editor-panel blog-tag-panel">
                         <h2>Tags</h2>
-                        <div id="selected-tags" class="blog-selected-tags">
-                            <button type="button" data-tag="Dicas">Dicas <i class="fas fa-times"></i></button>
-                            <button type="button" data-tag="Produtos">Produtos <i class="fas fa-times"></i></button>
-                            <button type="button" data-tag="Tendências">Tendências <i class="fas fa-times"></i></button>
-                        </div>
+                        <div id="selected-tags" class="blog-selected-tags"></div>
                         <div class="blog-tag-entry">
                             <input type="text" id="tag-input" placeholder="Nova tag">
                             <button type="button" id="add-tag-btn" aria-label="Adicionar tag"><i class="fas fa-plus"></i></button>
@@ -177,20 +139,13 @@
                             <button type="button" data-tag="Consumidor">Consumidor</button>
                         </div>
                     </section>
-
-                    <section class="blog-editor-panel blog-keyword-panel">
-                        <h2>Palavras-chave</h2>
-                        <label class="blog-field" for="article-keywords">
-                            <span>Termos</span>
-                            <textarea id="article-keywords" rows="5">loungewear, elásticos, moda íntima, conforto, tendências</textarea>
-                        </label>
-                    </section>
                 </aside>
             </form>
         </section>
     </main>
 
     <div id="footer-placeholder"></div>
+    <script src="stylesheet/blogApi.js"></script>
     <script src="stylesheet/script.js"></script>
 </body>
 </html>

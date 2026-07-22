@@ -2012,6 +2012,43 @@ function getBlogScreenArticles() {
     return BLOG_SCREEN_ARTICLES;
 }
 
+function normalizeBlogArticle(article) {
+    if (!article) return null;
+
+    return {
+        id: article.id,
+        slug: article.slug,
+        titulo: article.titulo || article.title || 'Artigo sem título',
+        resumo: article.resumo || article.summary || '',
+        imagem: article.imagem || article.coverUrl || article.cover_url || 'img - Copia/thumb-blog-17-1.jpg',
+        data: article.data || article.publishedAt || article.published_at || article.createdAt || article.created_at || '',
+        autor: article.autor || article.author || 'Equipe Stik',
+        leitura: article.leitura || `${article.readingTime || article.reading_time || 1} min`,
+        tags: getBlogTags(article),
+        destaque: article.destaque || false,
+        blocos: article.blocos,
+        contentHtml: article.contentHtml || article.content_html || article.conteudoCompleto || '',
+        contentJson: article.contentJson || article.content_json || null,
+        status: article.status || 'published'
+    };
+}
+
+async function getBlogArticlesForScreen() {
+    const savedArticles = window.blogApi
+        ? await window.blogApi.listArticles().catch(() => [])
+        : [];
+
+    const normalizedSaved = (savedArticles || []).map(normalizeBlogArticle).filter(Boolean);
+    const normalizedSeed = getBlogScreenArticles().map(normalizeBlogArticle).filter(Boolean);
+    const savedIds = new Set(normalizedSaved.map(article => String(article.id)));
+    const savedSlugs = new Set(normalizedSaved.map(article => article.slug).filter(Boolean));
+
+    return [
+        ...normalizedSaved,
+        ...normalizedSeed.filter(article => !savedIds.has(String(article.id)) && !savedSlugs.has(article.slug))
+    ];
+}
+
 function getBlogTags(article) {
     if (Array.isArray(article.tags)) return article.tags;
     if (typeof article.tags === 'string') {
@@ -2121,7 +2158,7 @@ async function displayArticles() {
 
     if (!featuredGrid || !mostReadGrid || !chipsContainer || !categorySections) return;
 
-    const articles = getBlogScreenArticles();
+    const articles = (await getBlogArticlesForScreen()).filter(article => article.status !== 'draft');
     let activeCategory = '';
 
     const render = () => {
@@ -2195,6 +2232,10 @@ async function displayArticles() {
 }
 
 function renderArticleContent(article) {
+    if (article.contentHtml) {
+        return article.contentHtml;
+    }
+
     if (Array.isArray(article.blocos)) {
         return article.blocos.map(block => {
             if (block.tipo === 'lead') {
@@ -2232,7 +2273,7 @@ async function carregarArtigo() {
     const params = new URLSearchParams(window.location.search);
     const id = Number(params.get('id'));
     const slug = params.get('slug');
-    const screenArticles = getBlogScreenArticles();
+    const screenArticles = await getBlogArticlesForScreen();
     const artigo = screenArticles.find(item => item.id === id || item.slug === slug) || screenArticles[0];
 
     const articleTitleEl = document.getElementById('article-title');
@@ -2352,102 +2393,313 @@ function showEditorFeedback(message) {
 }
 
 // Inicializa a tela visual de criação de artigo. Nesta fase não há persistência em API.
-function setupArticleForm() {
-    const form = document.getElementById('article-form');
-    if (!form) return;
+async function createTipTapArticleEditor(element) {
+    const initialContent = element.innerHTML;
 
-    const blockList = document.getElementById('article-blocks');
+    try {
+        const [
+            coreModule,
+            starterKitModule,
+            linkModule,
+            imageModule,
+            placeholderModule
+        ] = await Promise.all([
+            import('https://esm.sh/@tiptap/core@2'),
+            import('https://esm.sh/@tiptap/starter-kit@2'),
+            import('https://esm.sh/@tiptap/extension-link@2'),
+            import('https://esm.sh/@tiptap/extension-image@2'),
+            import('https://esm.sh/@tiptap/extension-placeholder@2')
+        ]);
+
+        const editor = new coreModule.Editor({
+            element,
+            content: initialContent,
+            extensions: [
+                starterKitModule.default,
+                linkModule.default.configure({
+                    autolink: true,
+                    openOnClick: false,
+                    HTMLAttributes: {
+                        rel: 'noopener noreferrer'
+                    }
+                }),
+                imageModule.default.configure({
+                    inline: false,
+                    allowBase64: false
+                }),
+                placeholderModule.default.configure({
+                    placeholder: 'Escreva o artigo aqui...'
+                })
+            ]
+        });
+
+        element.classList.add('is-tiptap-ready');
+
+        return {
+            type: 'tiptap',
+            focus: () => editor.chain().focus().run(),
+            getHTML: () => editor.getHTML(),
+            getJSON: () => editor.getJSON(),
+            setFormat: (format) => {
+                const chain = editor.chain().focus();
+                if (format === 'h2') return chain.toggleHeading({ level: 2 }).run();
+                if (format === 'h3') return chain.toggleHeading({ level: 3 }).run();
+                return chain.setParagraph().run();
+            },
+            runCommand: (command) => {
+                const chain = editor.chain().focus();
+                if (command === 'bold') return chain.toggleBold().run();
+                if (command === 'italic') return chain.toggleItalic().run();
+                if (command === 'insertUnorderedList') return chain.toggleBulletList().run();
+                return false;
+            },
+            setLink: (href) => editor.chain().focus().extendMarkRange('link').setLink({ href }).run(),
+            insertImage: ({ src, alt, title }) => editor.chain().focus().setImage({ src, alt, title }).run()
+        };
+    } catch (error) {
+        console.warn('TipTap não carregou. Usando editor nativo como fallback.', error);
+        element.setAttribute('contenteditable', 'true');
+
+        return {
+            type: 'fallback',
+            focus: () => element.focus(),
+            getHTML: () => element.innerHTML,
+            getJSON: () => ({ type: 'html', html: element.innerHTML }),
+            setFormat: (format) => {
+                element.focus();
+                document.execCommand('formatBlock', false, format);
+            },
+            runCommand: (command) => {
+                element.focus();
+                document.execCommand(command, false, null);
+            },
+            setLink: (href) => {
+                element.focus();
+                document.execCommand('createLink', false, href);
+            },
+            insertImage: ({ src, alt }) => {
+                element.focus();
+                document.execCommand('insertHTML', false, `
+                    <figure>
+                        <img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt || 'Imagem do artigo')}" loading="lazy" decoding="async">
+                        <figcaption>Crédito ou legenda</figcaption>
+                    </figure>
+                `);
+            }
+        };
+    }
+}
+
+function collectSelectedTags(selectedTags) {
+    if (!selectedTags) return [];
+    return Array.from(selectedTags.querySelectorAll('[data-tag]'))
+        .map(button => button.dataset.tag)
+        .filter(Boolean);
+}
+
+function buildArticlePayload(editorController, status = 'draft', coverState = {}) {
+    const titleInput = document.getElementById('article-title');
+    const summaryInput = document.getElementById('article-summary');
+    const coverImage = document.querySelector('.blog-cover-editor img');
+    const title = titleInput ? titleInput.value.trim() : '';
+
+    return {
+        title,
+        summary: summaryInput ? summaryInput.value.trim() : '',
+        coverUrl: coverState.url || (coverImage ? coverImage.getAttribute('src') : ''),
+        tags: collectSelectedTags(document.getElementById('selected-tags')),
+        status,
+        contentJson: editorController.getJSON(),
+        contentHtml: editorController.getHTML()
+    };
+}
+
+// Versão final para testes locais: rascunho, visualização e publicação usam localStorage via blogApi.
+async function setupArticleForm() {
+    const form = document.getElementById('article-form');
+    const freeEditor = document.getElementById('article-free-content');
+    if (!form || !freeEditor || form.dataset.articleFormReady === 'true') return;
+    form.dataset.articleFormReady = 'true';
+
     const selectedTags = document.getElementById('selected-tags');
     const availableTags = document.getElementById('available-tags');
     const tagInput = document.getElementById('tag-input');
     const addTagBtn = document.getElementById('add-tag-btn');
+    const coverUploadBtn = document.getElementById('cover-upload-btn');
+    const coverLibraryBtn = document.getElementById('cover-library-btn');
+    const coverFileInput = document.getElementById('cover-file-input');
+    const inlineImageInput = document.getElementById('article-inline-image-input');
+    const formatSelect = document.getElementById('article-format-select');
+    const statusPill = document.getElementById('article-status-pill');
+    const coverFigure = document.querySelector('.blog-cover-editor figure');
+    let coverImage = document.querySelector('.blog-cover-editor img');
+    const coverState = {
+        url: coverImage ? coverImage.getAttribute('src') : ''
+    };
+    let currentArticleId = null;
+    let currentStatus = 'draft';
 
-    form.addEventListener('submit', (event) => {
+    const editorController = await createTipTapArticleEditor(freeEditor);
+
+    const updateStatusPill = (status) => {
+        currentStatus = status || currentStatus;
+        if (!statusPill) return;
+        statusPill.textContent = currentStatus === 'published' ? 'Publicado' : 'Rascunho';
+        statusPill.dataset.status = currentStatus;
+    };
+
+    const saveArticle = async (status) => {
+        const titleInput = document.getElementById('article-title');
+        if (!titleInput || !titleInput.value.trim()) {
+            showEditorFeedback('Preencha o título antes de salvar.');
+            titleInput?.focus();
+            return null;
+        }
+
+        try {
+            const payload = buildArticlePayload(editorController, status, coverState);
+            const saved = window.blogApi
+                ? (currentArticleId
+                    ? await window.blogApi.updateArticle(currentArticleId, payload)
+                    : await window.blogApi.createArticle(payload))
+                : { ...payload, id: currentArticleId || Date.now() };
+
+            currentArticleId = saved.id || currentArticleId;
+            updateStatusPill(saved.status || status);
+            showEditorFeedback(status === 'published'
+                ? 'Artigo publicado localmente. Ele já aparece no blog.'
+                : 'Rascunho salvo localmente.');
+
+            return saved;
+        } catch (error) {
+            console.error('Erro ao salvar artigo localmente:', error);
+            showEditorFeedback('Não foi possível salvar. Tente remover imagens muito grandes e salvar novamente.');
+            return null;
+        }
+    };
+
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        showEditorFeedback('Artigo publicado no protótipo visual.');
+        await saveArticle('published');
     });
 
     document.querySelectorAll('[data-editor-action]').forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
             const action = button.dataset.editorAction;
+
             if (action === 'preview') {
-                window.open('artigo.html?id=101', '_blank', 'noopener');
+                const saved = await saveArticle(currentStatus);
+                if (saved && saved.id) {
+                    window.open(`artigo.html?id=${encodeURIComponent(saved.id)}`, '_blank', 'noopener');
+                }
                 return;
             }
-            showEditorFeedback(action === 'draft' ? 'Rascunho salvo no protótipo visual.' : 'Ação registrada.');
+
+            if (action === 'draft') {
+                await saveArticle('draft');
+            }
         });
     });
 
-    const freeEditor = document.getElementById('article-free-content');
-    const formatSelect = document.getElementById('article-format-select');
-
-    const focusFreeEditor = () => {
-        if (freeEditor) freeEditor.focus();
-    };
-
-    if (formatSelect && freeEditor) {
+    if (formatSelect) {
         formatSelect.addEventListener('change', () => {
-            focusFreeEditor();
-            document.execCommand('formatBlock', false, formatSelect.value);
+            editorController.setFormat(formatSelect.value);
+            formatSelect.value = 'p';
         });
     }
 
     document.querySelectorAll('[data-editor-command]').forEach(button => {
         button.addEventListener('click', () => {
-            if (!freeEditor) return;
             const command = button.dataset.editorCommand;
-            focusFreeEditor();
 
             if (command === 'createLink') {
                 const url = window.prompt('Cole o link que será aplicado ao texto selecionado:');
-                if (url) document.execCommand('createLink', false, url);
+                if (url) editorController.setLink(url);
                 return;
             }
 
             if (command === 'insertImage') {
-                const src = window.prompt('Cole o caminho da imagem:');
-                if (!src) return;
-                const alt = window.prompt('Texto alternativo da imagem:') || 'Imagem do artigo';
-                const html = `
-                    <figure>
-                        <img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" loading="lazy" decoding="async">
-                        <figcaption>Crédito ou legenda</figcaption>
-                    </figure>
-                `;
-                document.execCommand('insertHTML', false, html);
+                inlineImageInput?.click();
                 return;
             }
 
-            document.execCommand(command, false, null);
+            editorController.runCommand(command);
         });
     });
 
-    document.querySelectorAll('[data-add-block]').forEach(button => {
-        button.addEventListener('click', () => {
-            if (!blockList) return;
-            blockList.insertAdjacentHTML('beforeend', createEditorBlock(button.dataset.addBlock));
-            updateEditorBlockCount();
+    if (inlineImageInput) {
+        inlineImageInput.addEventListener('change', async () => {
+            const file = inlineImageInput.files && inlineImageInput.files[0];
+            if (!file) return;
+
+            try {
+                const media = window.blogApi
+                    ? await window.blogApi.uploadBlogImage(file)
+                    : { url: URL.createObjectURL(file) };
+                editorController.insertImage({ src: media.url, alt: file.name, title: file.name });
+                inlineImageInput.value = '';
+                showEditorFeedback('Imagem inserida no conteúdo.');
+            } catch (error) {
+                showEditorFeedback('Não foi possível inserir a imagem.');
+            }
         });
-    });
+    }
 
-    if (blockList) {
-        blockList.addEventListener('click', (event) => {
-            const removeButton = event.target.closest('[data-remove-block]');
-            const moveButton = event.target.closest('[data-move-block]');
-            const block = event.target.closest('.blog-content-block');
-            if (!block) return;
+    const applyCoverMedia = (media, fallbackName = 'Imagem de capa') => {
+        if (!media || !media.url || !coverFigure) return;
+        if (!coverImage) {
+            coverImage = document.createElement('img');
+            coverImage.loading = 'lazy';
+            coverImage.decoding = 'async';
+            coverFigure.appendChild(coverImage);
+        }
+        coverImage.src = media.url;
+        coverImage.alt = media.filename || fallbackName;
+        coverFigure.classList.remove('is-empty');
+        coverState.mediaId = media.id || null;
+        coverState.url = media.url;
+    };
 
-            if (removeButton) {
-                block.remove();
-                updateEditorBlockCount();
+    if (coverUploadBtn && coverFileInput) {
+        coverUploadBtn.addEventListener('click', () => coverFileInput.click());
+        coverFileInput.addEventListener('change', async () => {
+            const file = coverFileInput.files && coverFileInput.files[0];
+            if (!file) return;
+
+            try {
+                const media = window.blogApi
+                    ? await window.blogApi.uploadBlogImage(file)
+                    : { id: Date.now(), filename: file.name, url: URL.createObjectURL(file) };
+                applyCoverMedia(media, file.name);
+                coverFileInput.value = '';
+                showEditorFeedback('Imagem de capa adicionada.');
+            } catch (error) {
+                showEditorFeedback('Não foi possível enviar a imagem de capa.');
+            }
+        });
+    }
+
+    if (coverLibraryBtn) {
+        coverLibraryBtn.addEventListener('click', async () => {
+            const mediaItems = window.blogApi && window.blogApi.listMedia
+                ? await window.blogApi.listMedia().catch(() => [])
+                : [];
+
+            if (!mediaItems.length) {
+                showEditorFeedback('Envie uma imagem primeiro para testar a biblioteca.');
                 return;
             }
 
-            if (moveButton && moveButton.dataset.moveBlock === 'up' && block.previousElementSibling) {
-                blockList.insertBefore(block, block.previousElementSibling);
-            } else if (moveButton && moveButton.dataset.moveBlock === 'down' && block.nextElementSibling) {
-                blockList.insertBefore(block.nextElementSibling, block);
-            }
+            const options = mediaItems.slice(0, 8);
+            const message = options
+                .map((item, index) => `${index + 1}. ${item.filename || `Imagem ${index + 1}`}`)
+                .join('\n');
+            const selectedIndex = Number(window.prompt(`Escolha a imagem da biblioteca:\n${message}`)) - 1;
+            const selectedMedia = options[selectedIndex];
+
+            if (!selectedMedia) return;
+            applyCoverMedia(selectedMedia);
+            showEditorFeedback('Imagem da biblioteca aplicada como capa.');
         });
     }
 
@@ -2460,6 +2712,18 @@ function setupArticleForm() {
     };
 
     if (availableTags) {
+        if (window.blogApi) {
+            const tags = await window.blogApi.listTags().catch(() => []);
+            if (tags.length) {
+                availableTags.innerHTML = tags
+                    .map(tag => {
+                        const name = typeof tag === 'string' ? tag : tag.name;
+                        return `<button type="button" data-tag="${escapeAttribute(name)}">${escapeHtml(name)}</button>`;
+                    })
+                    .join('');
+            }
+        }
+
         availableTags.addEventListener('click', (event) => {
             const button = event.target.closest('[data-tag]');
             if (!button) return;
@@ -2475,18 +2739,34 @@ function setupArticleForm() {
     }
 
     if (addTagBtn && tagInput) {
-        addTagBtn.addEventListener('click', () => {
+        const createAndSelectTag = async () => {
             const tag = tagInput.value.trim();
             if (!tag) return;
+
+            if (window.blogApi) await window.blogApi.createTag(tag).catch(() => null);
             addSelectedTag(tag);
+
             if (availableTags) {
-                availableTags.insertAdjacentHTML('beforeend', `<button type="button" data-tag="${escapeAttribute(tag)}">${escapeHtml(tag)}</button>`);
+                const exists = Array.from(availableTags.querySelectorAll('[data-tag]'))
+                    .some(button => normalizeBlogSearch(button.dataset.tag) === normalizeBlogSearch(tag));
+                if (!exists) {
+                    availableTags.insertAdjacentHTML('beforeend', `<button type="button" data-tag="${escapeAttribute(tag)}">${escapeHtml(tag)}</button>`);
+                }
             }
+
             tagInput.value = '';
+            tagInput.focus();
+        };
+
+        addTagBtn.addEventListener('click', createAndSelectTag);
+        tagInput.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            createAndSelectTag();
         });
     }
 
-    updateEditorBlockCount();
+    updateStatusPill(currentStatus);
 }
 
 function carregarDetalhesDoProduto() {
