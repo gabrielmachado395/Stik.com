@@ -2065,6 +2065,30 @@ function normalizeBlogSearch(value) {
         .trim();
 }
 
+function formatBlogDate(value) {
+    if (!value) return '';
+
+    const rawDate = String(value).trim();
+    const parsedDate = new Date(rawDate);
+
+    if (!Number.isNaN(parsedDate.getTime())) {
+        return new Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            timeZone: 'America/Sao_Paulo'
+        }).format(parsedDate);
+    }
+
+    const writtenDate = rawDate.match(/^(\d{1,2})\s+([^,]+),?\s+(\d{4})$/);
+    if (writtenDate) {
+        const [, day, month, year] = writtenDate;
+        return `${day.padStart(2, '0')} de ${month.trim()} de ${year}`;
+    }
+
+    return rawDate;
+}
+
 function renderBlogTags(tags) {
     return tags.map(tag => `<span class="blog-card-tag">${escapeHtml(tag)}</span>`).join('');
 }
@@ -2088,6 +2112,68 @@ function renderBlogCard(article, options = {}) {
     `;
 }
 
+function renderBlogPagination(totalItems, currentPage, itemsPerPage) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) return '';
+
+    const pages = new Set([1, totalPages]);
+    for (let page = currentPage - 1; page <= currentPage + 1; page += 1) {
+        if (page > 1 && page < totalPages) pages.add(page);
+    }
+
+    const orderedPages = Array.from(pages).sort((a, b) => a - b);
+    const items = [];
+    let previousPage = 0;
+
+    orderedPages.forEach(page => {
+        if (page - previousPage > 1) {
+            items.push('<span class="blog-results-pagination-gap">...</span>');
+        }
+
+        items.push(`
+            <button type="button" data-results-page="${page}" ${page === currentPage ? 'class="is-active" aria-current="page"' : ''}>
+                ${page}
+            </button>
+        `);
+        previousPage = page;
+    });
+
+    if (currentPage < totalPages) {
+        items.push(`
+            <button type="button" data-results-page="${currentPage + 1}" aria-label="Próxima página">
+                »
+            </button>
+        `);
+    }
+
+    return `<nav class="blog-results-pagination" aria-label="Paginação dos resultados">${items.join('')}</nav>`;
+}
+
+function getExistingBlogCategories(articles) {
+    const tagMap = new Map();
+
+    articles.forEach(article => {
+        getBlogTags(article).forEach(tag => {
+            const normalizedTag = normalizeBlogSearch(tag);
+            if (!normalizedTag || tagMap.has(normalizedTag)) return;
+            tagMap.set(normalizedTag, tag);
+        });
+    });
+
+    const preferredCategories = BLOG_SCREEN_CATEGORIES
+        .map(category => {
+            const normalizedCategory = normalizeBlogSearch(category);
+            return tagMap.get(normalizedCategory) || null;
+        })
+        .filter(Boolean);
+    const preferredSet = new Set(preferredCategories.map(normalizeBlogSearch));
+    const remainingCategories = Array.from(tagMap.values())
+        .filter(tag => !preferredSet.has(normalizeBlogSearch(tag)))
+        .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    return [...preferredCategories, ...remainingCategories];
+}
+
 function renderBlogNewsletterCard() {
     return `
         <aside class="blog-newsletter-card">
@@ -2108,10 +2194,26 @@ function renderBlogNewsletterCard() {
 }
 
 function renderBlogCategorySection(category, articles, includeNewsletter = false) {
-    const [first, second, third, fourth] = articles;
+    const uniqueArticles = [];
+    const seenArticles = new Set();
+
+    (articles || []).forEach(article => {
+        const key = String(article?.id || article?.slug || article?.titulo || '');
+        if (!article || !key || seenArticles.has(key)) return;
+        seenArticles.add(key);
+        uniqueArticles.push(article);
+    });
+
+    if (!uniqueArticles.length) return '';
+
+    const [first, second, third, fourth] = uniqueArticles;
+    const stackCards = [second, third]
+        .filter(Boolean)
+        .map(article => renderBlogCard(article, { className: 'blog-category-card is-medium' }))
+        .join('');
     const sideCard = includeNewsletter
         ? renderBlogNewsletterCard()
-        : renderBlogCard(fourth || third || second || first, { className: 'blog-category-card is-tall' });
+        : (fourth ? renderBlogCard(fourth, { className: 'blog-category-card is-tall' }) : '');
 
     return `
         <section class="blog-category-block" data-blog-category="${escapeAttribute(category)}">
@@ -2119,10 +2221,7 @@ function renderBlogCategorySection(category, articles, includeNewsletter = false
                 <h2 class="blog-category-title">${escapeHtml(category)}</h2>
                 <div class="blog-category-layout">
                     ${renderBlogCard(first, { className: 'blog-category-card is-tall' })}
-                    <div class="blog-category-stack">
-                        ${renderBlogCard(second || first, { className: 'blog-category-card is-medium' })}
-                        ${renderBlogCard(third || second || first, { className: 'blog-category-card is-medium' })}
-                    </div>
+                    ${stackCards ? `<div class="blog-category-stack">${stackCards}</div>` : ''}
                     ${sideCard}
                 </div>
             </div>
@@ -2148,6 +2247,24 @@ function filterBlogArticles(articles, searchTerm = '', activeCategory = '') {
     });
 }
 
+function sortBlogSearchResults(articles, searchTerm) {
+    const term = normalizeBlogSearch(searchTerm);
+    if (!term) return articles;
+
+    const scoreArticle = (article) => {
+        const title = normalizeBlogSearch(article.titulo);
+        const tags = normalizeBlogSearch(getBlogTags(article).join(' '));
+        const summary = normalizeBlogSearch(article.resumo);
+
+        if (title.includes(term)) return 0;
+        if (tags.includes(term)) return 1;
+        if (summary.includes(term)) return 2;
+        return 3;
+    };
+
+    return [...articles].sort((a, b) => scoreArticle(a) - scoreArticle(b));
+}
+
 async function displayArticles() {
     const featuredGrid = document.getElementById('blog-featured-grid');
     const mostReadGrid = document.getElementById('blog-most-read-grid');
@@ -2155,19 +2272,95 @@ async function displayArticles() {
     const categorySections = document.getElementById('blog-category-sections');
     const searchForm = document.getElementById('blog-search-form');
     const searchInput = document.getElementById('blog-search-input');
+    const mostReadSection = mostReadGrid ? mostReadGrid.closest('.blog-most-read-section') : null;
+    const categoryFilterSection = chipsContainer ? chipsContainer.closest('.blog-category-filter-section') : null;
+    const blogHero = document.querySelector('.blog-showcase-hero');
+    const blogTitleLabel = document.querySelector('.blog-title-group span');
+    const blogTitle = document.querySelector('.blog-title-group h1');
+    const blogIntro = document.querySelector('.blog-hero-grid p');
+    const blogBreadcrumb = document.querySelector('.blog-showcase-hero .blog-breadcrumb');
 
     if (!featuredGrid || !mostReadGrid || !chipsContainer || !categorySections) return;
 
     const articles = (await getBlogArticlesForScreen()).filter(article => article.status !== 'draft');
+    const existingCategories = getExistingBlogCategories(articles);
     let activeCategory = '';
+    let submittedSearchTerm = '';
+    let currentResultsPage = 1;
+    const resultsPerPage = 10;
+
+    const setBlogHeroMode = (mode, searchTerm = '') => {
+        const isSearchMode = mode === 'search';
+        blogHero?.classList.toggle('is-search-results', isSearchMode);
+        featuredGrid.classList.toggle('blog-results-grid', isSearchMode);
+
+        if (blogTitleLabel) blogTitleLabel.textContent = isSearchMode ? 'Blog' : 'Conteúdo';
+        if (blogTitle) {
+            blogTitle.textContent = isSearchMode
+                ? `Resultado da busca por: "${searchTerm}"`
+                : 'Blog';
+        }
+        if (blogIntro) {
+            blogIntro.hidden = isSearchMode;
+        }
+        if (blogBreadcrumb) {
+            blogBreadcrumb.innerHTML = isSearchMode
+                ? `
+                    <a href="index.html">Home</a>
+                    <a href="blog.html">Blog</a>
+                    <span>Busca</span>
+                    <strong>${escapeHtml(searchTerm)}</strong>
+                `
+                : `
+                    <a href="index.html">Home</a>
+                    <span>Blog</span>
+                `;
+        }
+    };
+
+    const renderSearchResults = () => {
+        const filtered = sortBlogSearchResults(
+            filterBlogArticles(articles, submittedSearchTerm, ''),
+            submittedSearchTerm
+        );
+        setBlogHeroMode('search', submittedSearchTerm);
+        activeCategory = '';
+
+        if (mostReadSection) mostReadSection.hidden = true;
+        if (categoryFilterSection) categoryFilterSection.hidden = true;
+        categorySections.innerHTML = '';
+
+        if (!filtered.length) {
+            featuredGrid.innerHTML = '<p class="blog-empty-state">Nenhum artigo encontrado.</p>';
+            return;
+        }
+
+        const totalPages = Math.ceil(filtered.length / resultsPerPage);
+        currentResultsPage = Math.min(Math.max(currentResultsPage, 1), totalPages);
+        const pageStart = (currentResultsPage - 1) * resultsPerPage;
+        const pageArticles = filtered.slice(pageStart, pageStart + resultsPerPage);
+
+        featuredGrid.innerHTML = `
+            ${pageArticles.map(article => renderBlogCard(article, { className: 'blog-result-card' })).join('')}
+            ${renderBlogPagination(filtered.length, currentResultsPage, resultsPerPage)}
+        `;
+    };
 
     const render = () => {
-        const searchTerm = searchInput ? searchInput.value : '';
-        const filtered = filterBlogArticles(articles, searchTerm, activeCategory);
+        if (submittedSearchTerm) {
+            renderSearchResults();
+            return;
+        }
+
+        setBlogHeroMode('default');
+        if (categoryFilterSection) categoryFilterSection.hidden = false;
+
+        const filtered = filterBlogArticles(articles, '', activeCategory);
 
         if (!filtered.length) {
             featuredGrid.innerHTML = '<p class="blog-empty-state">Nenhum artigo encontrado.</p>';
             mostReadGrid.innerHTML = '';
+            if (mostReadSection) mostReadSection.hidden = true;
             categorySections.innerHTML = '';
             return;
         }
@@ -2175,16 +2368,17 @@ async function displayArticles() {
         const [featured, sideOne, sideTwo] = filtered;
         featuredGrid.innerHTML = `
             ${renderBlogCard(featured, { className: 'blog-feature-card is-large', headingTag: 'h2', loading: 'eager' })}
-            <div class="blog-feature-side">
-                ${renderBlogCard(sideOne || featured, { className: 'blog-feature-card' })}
-                ${renderBlogCard(sideTwo || sideOne || featured, { className: 'blog-feature-card' })}
-            </div>
+            ${sideOne || sideTwo ? `
+                <div class="blog-feature-side">
+                    ${renderBlogCard(sideOne, { className: 'blog-feature-card' })}
+                    ${renderBlogCard(sideTwo, { className: 'blog-feature-card' })}
+                </div>
+            ` : ''}
         `;
 
-        mostReadGrid.innerHTML = filtered
-            .slice(3, 7)
-            .concat(filtered.slice(0, Math.max(0, 4 - filtered.slice(3, 7).length)))
-            .slice(0, 4)
+        const mostReadArticles = filtered.slice(3, 7);
+        if (mostReadSection) mostReadSection.hidden = !mostReadArticles.length;
+        mostReadGrid.innerHTML = mostReadArticles
             .map(article => renderBlogCard(article, { className: 'blog-mini-card' }))
             .join('');
 
@@ -2192,26 +2386,43 @@ async function displayArticles() {
             button.classList.toggle('is-active', normalizeBlogSearch(button.dataset.category) === normalizeBlogSearch(activeCategory));
         });
 
-        const sectionCategories = activeCategory ? [activeCategory] : ['Tendências', 'Lançamentos', 'Produtos'];
+        if (activeCategory) {
+            categorySections.innerHTML = '';
+            return;
+        }
+
+        const sectionCategories = existingCategories.slice(0, 3);
         categorySections.innerHTML = sectionCategories.map((category, index) => {
-            const sectionArticles = filterBlogArticles(articles, searchTerm, category);
-            const list = sectionArticles.length ? sectionArticles : filtered;
-            return renderBlogCategorySection(category, list, index === 0 && !activeCategory);
+            const sectionArticles = filterBlogArticles(articles, '', category);
+            return renderBlogCategorySection(category, sectionArticles, index === 0 && !activeCategory);
         }).join('');
     };
 
     if (!chipsContainer.dataset.bound) {
         chipsContainer.dataset.bound = 'true';
-        chipsContainer.innerHTML = BLOG_SCREEN_CATEGORIES.map(category => `
+        chipsContainer.innerHTML = existingCategories.map(category => `
             <button type="button" data-category="${escapeAttribute(category)}">${escapeHtml(category)}</button>
         `).join('');
 
         chipsContainer.addEventListener('click', (event) => {
             const button = event.target.closest('button[data-category]');
             if (!button) return;
+            submittedSearchTerm = '';
+            currentResultsPage = 1;
             const nextCategory = button.dataset.category || '';
             activeCategory = normalizeBlogSearch(activeCategory) === normalizeBlogSearch(nextCategory) ? '' : nextCategory;
             render();
+        });
+    }
+
+    if (!featuredGrid.dataset.paginationBound) {
+        featuredGrid.dataset.paginationBound = 'true';
+        featuredGrid.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-results-page]');
+            if (!button) return;
+            currentResultsPage = Number(button.dataset.resultsPage) || 1;
+            renderSearchResults();
+            blogHero?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     }
 
@@ -2219,13 +2430,21 @@ async function displayArticles() {
         searchForm.dataset.bound = 'true';
         searchForm.addEventListener('submit', (event) => {
             event.preventDefault();
+            submittedSearchTerm = searchInput ? searchInput.value.trim() : '';
+            currentResultsPage = 1;
+            activeCategory = '';
             render();
         });
     }
 
     if (searchInput && !searchInput.dataset.bound) {
         searchInput.dataset.bound = 'true';
-        searchInput.addEventListener('input', () => render());
+        searchInput.addEventListener('input', () => {
+            if (searchInput.value.trim()) return;
+            submittedSearchTerm = '';
+            currentResultsPage = 1;
+            render();
+        });
     }
 
     render();
@@ -2300,7 +2519,7 @@ async function carregarArtigo() {
     }
     if (articleMetaEl) {
         articleMetaEl.innerHTML = `
-            <span>${escapeHtml(artigo.data)}</span>
+            <span>${escapeHtml(formatBlogDate(artigo.data))}</span>
             <span><i class="far fa-clock"></i> ${escapeHtml(artigo.leitura || '5 min')} (tempo estimado de leitura)</span>
         `;
     }
@@ -2392,7 +2611,58 @@ function showEditorFeedback(message) {
     }, 2200);
 }
 
-// Inicializa a tela visual de criação de artigo. Nesta fase não há persistência em API.
+// Mostra as decisões quando uma alteração de tag pode afetar outros artigos.
+function showBlogTagImpactDialog({ title, message, actions }) {
+    return new Promise(resolve => {
+        const previousModal = document.querySelector('.blog-tag-impact-modal');
+        if (previousModal) previousModal.remove();
+
+        const modal = document.createElement('div');
+        modal.className = 'blog-tag-impact-modal';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.innerHTML = `
+            <div class="blog-tag-impact-card">
+                <h2>${escapeHtml(title)}</h2>
+                <p>${escapeHtml(message)}</p>
+                <div class="blog-tag-impact-actions">
+                    ${actions.map(action => `
+                        <button type="button" class="blog-editor-btn ${escapeAttribute(action.className || 'blog-editor-btn-light')}" data-modal-action="${escapeAttribute(action.value)}">
+                            ${escapeHtml(action.label)}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        let isClosed = false;
+        let handleKeydown;
+        const close = (value) => {
+            if (isClosed) return;
+            isClosed = true;
+            document.removeEventListener('keydown', handleKeydown);
+            modal.remove();
+            resolve(value);
+        };
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) close('cancel');
+
+            const actionButton = event.target.closest('[data-modal-action]');
+            if (actionButton) close(actionButton.dataset.modalAction);
+        });
+
+        handleKeydown = (event) => {
+            if (event.key === 'Escape') close('cancel');
+        };
+
+        document.addEventListener('keydown', handleKeydown);
+        document.body.appendChild(modal);
+        modal.querySelector('button')?.focus();
+    });
+}
+
+// Inicializa o editor visual de criação de artigo.
 async function createTipTapArticleEditor(element) {
     const initialContent = element.innerHTML;
 
@@ -2711,20 +2981,178 @@ async function setupArticleForm() {
         selectedTags.insertAdjacentHTML('beforeend', `<button type="button" data-tag="${escapeAttribute(tag)}">${escapeHtml(tag)} <i class="fas fa-times"></i></button>`);
     };
 
-    if (availableTags) {
-        if (window.blogApi) {
-            const tags = await window.blogApi.listTags().catch(() => []);
-            if (tags.length) {
-                availableTags.innerHTML = tags
-                    .map(tag => {
-                        const name = typeof tag === 'string' ? tag : tag.name;
-                        return `<button type="button" data-tag="${escapeAttribute(name)}">${escapeHtml(name)}</button>`;
-                    })
-                    .join('');
-            }
+    const removeSelectedTag = (tag) => {
+        if (!selectedTags || !tag) return;
+        selectedTags.querySelectorAll('[data-tag]').forEach(button => {
+            if (normalizeBlogSearch(button.dataset.tag) === normalizeBlogSearch(tag)) button.remove();
+        });
+    };
+
+    const replaceSelectedTag = (oldTag, nextTag) => {
+        if (!selectedTags || !oldTag || !nextTag) return;
+        let replaced = false;
+        selectedTags.querySelectorAll('[data-tag]').forEach(button => {
+            if (normalizeBlogSearch(button.dataset.tag) !== normalizeBlogSearch(oldTag)) return;
+            button.dataset.tag = nextTag;
+            button.innerHTML = `${escapeHtml(nextTag)} <i class="fas fa-times"></i>`;
+            replaced = true;
+        });
+        if (!replaced) addSelectedTag(nextTag);
+    };
+
+    const getTagDisplayName = (tag) => typeof tag === 'string' ? tag : (tag && (tag.name || tag.title)) || '';
+    const getTagKey = (tag) => {
+        const name = getTagDisplayName(tag);
+        return typeof tag === 'string' ? name : (tag && (tag.id || tag.slug || name)) || name;
+    };
+
+    const renderAvailableTag = (tag) => {
+        const name = getTagDisplayName(tag).trim();
+        if (!name) return '';
+        const key = getTagKey(tag);
+
+        return `
+            <span class="blog-tag-item" data-tag-item="${escapeAttribute(name)}" data-tag-key="${escapeAttribute(key)}">
+                <button type="button" class="blog-tag-name" data-tag="${escapeAttribute(name)}">${escapeHtml(name)}</button>
+                <span class="blog-tag-item-actions" aria-label="Ações da tag ${escapeAttribute(name)}">
+                    <button type="button" data-tag-action="rename" data-tag-name="${escapeAttribute(name)}" data-tag-key="${escapeAttribute(key)}" aria-label="Editar tag ${escapeAttribute(name)}">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button type="button" data-tag-action="delete" data-tag-name="${escapeAttribute(name)}" data-tag-key="${escapeAttribute(key)}" aria-label="Excluir tag ${escapeAttribute(name)}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </span>
+            </span>
+        `;
+    };
+
+    const renderAvailableTags = (tags) => {
+        if (!availableTags) return;
+        availableTags.innerHTML = (tags || []).map(renderAvailableTag).join('');
+    };
+
+    const loadAvailableTags = async () => {
+        if (!availableTags || !window.blogApi) return;
+        const tags = await window.blogApi.listTags().catch(() => []);
+        if (tags.length) renderAvailableTags(tags);
+    };
+
+    const addAvailableTag = (tag) => {
+        if (!availableTags || !tag) return;
+        const exists = Array.from(availableTags.querySelectorAll('[data-tag]'))
+            .some(button => normalizeBlogSearch(button.dataset.tag) === normalizeBlogSearch(tag));
+        if (!exists) availableTags.insertAdjacentHTML('beforeend', renderAvailableTag(tag));
+    };
+
+    const removeAvailableTag = (tag) => {
+        if (!availableTags || !tag) return;
+        availableTags.querySelectorAll('[data-tag-item]').forEach(item => {
+            if (normalizeBlogSearch(item.dataset.tagItem) === normalizeBlogSearch(tag)) item.remove();
+        });
+    };
+
+    const replaceAvailableTag = (oldTag, nextTag) => {
+        if (!availableTags || !oldTag || !nextTag) return;
+        const item = Array.from(availableTags.querySelectorAll('[data-tag-item]'))
+            .find(element => normalizeBlogSearch(element.dataset.tagItem) === normalizeBlogSearch(oldTag));
+        if (item) {
+            item.outerHTML = renderAvailableTag(nextTag);
+            return;
+        }
+        addAvailableTag(nextTag);
+    };
+
+    const getTagUsage = async (tag) => {
+        if (!window.blogApi || !window.blogApi.getTagUsage) {
+            return { count: 0, articles: [] };
+        }
+        return window.blogApi.getTagUsage(tag).catch(() => ({ count: 0, articles: [] }));
+    };
+
+    const renameExistingTag = async (oldTag, tagKey = oldTag) => {
+        if (!oldTag) return;
+        const nextTag = window.prompt(`Novo nome para a tag "${oldTag}":`, oldTag);
+        if (!nextTag || normalizeBlogSearch(nextTag) === normalizeBlogSearch(oldTag)) return;
+
+        const usage = await getTagUsage(tagKey);
+        let scope = 'global';
+
+        if (usage.count > 0) {
+            scope = await showBlogTagImpactDialog({
+                title: 'Tag em uso',
+                message: `A tag "${oldTag}" está sendo usada em ${usage.count} artigo${usage.count === 1 ? '' : 's'}.`,
+                actions: [
+                    { value: 'global', label: 'Alterar em todos', className: 'blog-editor-btn-primary' },
+                    { value: 'current', label: 'Criar só neste artigo', className: 'blog-editor-btn-outline' },
+                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+                ]
+            });
         }
 
+        if (!scope || scope === 'cancel') return;
+
+        if (scope === 'current') {
+            const createdTag = window.blogApi ? await window.blogApi.createTag(nextTag).catch(() => null) : null;
+            replaceSelectedTag(oldTag, nextTag);
+            addAvailableTag(createdTag || nextTag);
+            showEditorFeedback('Nova tag criada para este artigo. Os artigos existentes foram mantidos.');
+            return;
+        }
+
+        let updatedTag = null;
+        if (window.blogApi && window.blogApi.updateTag) {
+            updatedTag = await window.blogApi.updateTag(tagKey, { name: nextTag, scope: 'global' }).catch(() => null);
+        }
+
+        replaceAvailableTag(oldTag, updatedTag || nextTag);
+        replaceSelectedTag(oldTag, nextTag);
+        showEditorFeedback('Tag alterada nos artigos existentes.');
+    };
+
+    const deleteExistingTag = async (tag, tagKey = tag) => {
+        if (!tag) return;
+        const usage = await getTagUsage(tagKey);
+        let scope = 'catalog';
+
+        if (usage.count > 0) {
+            scope = await showBlogTagImpactDialog({
+                title: 'Excluir tag em uso',
+                message: `A tag "${tag}" está sendo usada em ${usage.count} artigo${usage.count === 1 ? '' : 's'}.`,
+                actions: [
+                    { value: 'catalog', label: 'Deixar nos artigos existentes', className: 'blog-editor-btn-outline' },
+                    { value: 'global', label: 'Remover de todos', className: 'blog-editor-btn-primary' },
+                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+                ]
+            });
+        }
+
+        if (!scope || scope === 'cancel') return;
+
+        if (window.blogApi) await window.blogApi.deleteTag(tagKey, { scope }).catch(() => null);
+        removeAvailableTag(tag);
+
+        if (scope === 'global') {
+            removeSelectedTag(tag);
+            showEditorFeedback('Tag removida de todos os artigos.');
+            return;
+        }
+
+        showEditorFeedback('Tag removida da biblioteca. Artigos existentes foram mantidos.');
+    };
+
+    if (availableTags) {
+        await loadAvailableTags();
+
         availableTags.addEventListener('click', (event) => {
+            const actionButton = event.target.closest('[data-tag-action]');
+            if (actionButton) {
+                const tag = actionButton.dataset.tagName;
+                const tagKey = actionButton.dataset.tagKey || tag;
+                if (actionButton.dataset.tagAction === 'rename') renameExistingTag(tag, tagKey);
+                if (actionButton.dataset.tagAction === 'delete') deleteExistingTag(tag, tagKey);
+                return;
+            }
+
             const button = event.target.closest('[data-tag]');
             if (!button) return;
             addSelectedTag(button.dataset.tag);
@@ -2743,16 +3171,9 @@ async function setupArticleForm() {
             const tag = tagInput.value.trim();
             if (!tag) return;
 
-            if (window.blogApi) await window.blogApi.createTag(tag).catch(() => null);
+            const createdTag = window.blogApi ? await window.blogApi.createTag(tag).catch(() => null) : null;
             addSelectedTag(tag);
-
-            if (availableTags) {
-                const exists = Array.from(availableTags.querySelectorAll('[data-tag]'))
-                    .some(button => normalizeBlogSearch(button.dataset.tag) === normalizeBlogSearch(tag));
-                if (!exists) {
-                    availableTags.insertAdjacentHTML('beforeend', `<button type="button" data-tag="${escapeAttribute(tag)}">${escapeHtml(tag)}</button>`);
-                }
-            }
+            addAvailableTag(createdTag || tag);
 
             tagInput.value = '';
             tagInput.focus();

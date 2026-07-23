@@ -123,9 +123,54 @@ Payload:
 }
 ```
 
+### `GET /api/tags/:id/usage`
+
+Retorna quantos artigos usam a tag antes de renomear ou excluir.
+
+Resposta:
+
+```json
+{
+  "id": 1,
+  "name": "Tendências",
+  "count": 3,
+  "articles": [
+    { "id": 10, "title": "Título do artigo", "status": "published" }
+  ]
+}
+```
+
+### `PATCH /api/tags/:id`
+
+Renomeia a tag.
+
+Payload:
+
+```json
+{
+  "name": "Nova tag",
+  "scope": "global"
+}
+```
+
+`scope: "global"` deve alterar a tag também nos artigos existentes que usam essa tag.
+
 ### `DELETE /api/tags/:id`
 
-Remove tag.
+Remove tag com escopo.
+
+Payload:
+
+```json
+{
+  "scope": "catalog"
+}
+```
+
+Escopos:
+
+- `catalog`: remove a tag da biblioteca/lista de tags, mas mantém a tag nos artigos existentes.
+- `global`: remove a tag da biblioteca e de todos os artigos existentes.
 
 ## Mídia
 

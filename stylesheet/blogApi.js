@@ -56,6 +56,18 @@
             .replace(/(^-|-$)/g, '') || `artigo-${Date.now()}`;
     }
 
+    function normalizeTag(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
+    function getTagName(tag) {
+        return typeof tag === 'string' ? tag : (tag && (tag.name || tag.title)) || '';
+    }
+
     function estimateReadingTime(html) {
         const text = String(html || '').replace(/<[^>]+>/g, ' ');
         const words = text.trim().split(/\s+/).filter(Boolean).length;
@@ -223,10 +235,83 @@
         return { id: slugify(name), name };
     }
 
-    async function deleteTag(idOrName) {
-        if (!USE_MOCKS) return request(`/tags/${encodeURIComponent(idOrName)}`, { method: 'DELETE' });
-        const tags = readStorage(STORAGE_KEYS.tags, DEFAULT_TAGS).filter(tag => tag !== idOrName);
+    async function getTagUsage(idOrName) {
+        if (!USE_MOCKS) return request(`/tags/${encodeURIComponent(idOrName)}/usage`);
+
+        const normalizedTag = normalizeTag(idOrName);
+        const articles = listMockArticles()
+            .filter(article => Array.isArray(article.tags) && article.tags.some(tag => normalizeTag(tag) === normalizedTag))
+            .map(article => ({
+                id: article.id,
+                title: article.title || article.titulo || 'Artigo sem título',
+                status: article.status || 'draft'
+            }));
+
+        return {
+            id: slugify(idOrName),
+            name: idOrName,
+            count: articles.length,
+            articles
+        };
+    }
+
+    async function updateTag(idOrName, payload = {}) {
+        if (!USE_MOCKS) {
+            return request(`/tags/${encodeURIComponent(idOrName)}`, {
+                method: 'PATCH',
+                body: JSON.stringify(payload)
+            });
+        }
+
+        const nextName = String(payload.name || '').trim();
+        if (!nextName) throw new Error('Nome da tag inválido.');
+
+        const normalizedOld = normalizeTag(idOrName);
+        const normalizedNext = normalizeTag(nextName);
+        const tags = readStorage(STORAGE_KEYS.tags, DEFAULT_TAGS);
+        const nextTags = tags
+            .map(tag => normalizeTag(getTagName(tag)) === normalizedOld ? nextName : tag)
+            .filter((tag, index, list) => list.findIndex(item => normalizeTag(getTagName(item)) === normalizeTag(getTagName(tag))) === index);
+
+        if (!nextTags.some(tag => normalizeTag(getTagName(tag)) === normalizedNext)) nextTags.push(nextName);
+        writeStorage(STORAGE_KEYS.tags, nextTags);
+
+        if (payload.scope === 'global') {
+            const articles = listMockArticles().map(article => ({
+                ...article,
+                tags: Array.isArray(article.tags)
+                    ? article.tags.map(tag => normalizeTag(tag) === normalizedOld ? nextName : tag)
+                    : []
+            }));
+            writeStorage(STORAGE_KEYS.articles, articles);
+        }
+
+        return { id: slugify(nextName), name: nextName };
+    }
+
+    async function deleteTag(idOrName, payload = {}) {
+        if (!USE_MOCKS) {
+            return request(`/tags/${encodeURIComponent(idOrName)}`, {
+                method: 'DELETE',
+                body: JSON.stringify(payload)
+            });
+        }
+
+        const normalizedTag = normalizeTag(idOrName);
+        const tags = readStorage(STORAGE_KEYS.tags, DEFAULT_TAGS)
+            .filter(tag => normalizeTag(getTagName(tag)) !== normalizedTag);
         writeStorage(STORAGE_KEYS.tags, tags);
+
+        if (payload.scope === 'global') {
+            const articles = listMockArticles().map(article => ({
+                ...article,
+                tags: Array.isArray(article.tags)
+                    ? article.tags.filter(tag => normalizeTag(tag) !== normalizedTag)
+                    : []
+            }));
+            writeStorage(STORAGE_KEYS.articles, articles);
+        }
+
         return { ok: true };
     }
 
@@ -277,6 +362,7 @@
             articleBySlug: '/api/articles/slug/:slug',
             articleStatus: '/api/articles/:id/status',
             tags: '/api/tags',
+            tagUsage: '/api/tags/:id/usage',
             media: '/api/media/blog'
         },
         listArticles,
@@ -287,6 +373,8 @@
         deleteArticle,
         listTags,
         createTag,
+        getTagUsage,
+        updateTag,
         deleteTag,
         listMedia,
         uploadBlogImage,
