@@ -3069,11 +3069,8 @@ async function setupArticleForm() {
         return window.blogApi.getTagUsage(tag).catch(() => ({ count: 0, articles: [] }));
     };
 
-    const renameExistingTag = async (oldTag, tagKey = oldTag) => {
-        if (!oldTag) return;
-        const nextTag = window.prompt(`Novo nome para a tag "${oldTag}":`, oldTag);
-        if (!nextTag || normalizeBlogSearch(nextTag) === normalizeBlogSearch(oldTag)) return;
-
+    const commitTagRename = async (oldTag, nextTag, tagKey = oldTag) => {
+        if (!oldTag || !nextTag || normalizeBlogSearch(nextTag) === normalizeBlogSearch(oldTag)) return false;
         const usage = await getTagUsage(tagKey);
         let scope = 'global';
 
@@ -3089,14 +3086,14 @@ async function setupArticleForm() {
             });
         }
 
-        if (!scope || scope === 'cancel') return;
+        if (!scope || scope === 'cancel') return false;
 
         if (scope === 'current') {
             const createdTag = window.blogApi ? await window.blogApi.createTag(nextTag).catch(() => null) : null;
             replaceSelectedTag(oldTag, nextTag);
             addAvailableTag(createdTag || nextTag);
             showEditorFeedback('Nova tag criada para este artigo. Os artigos existentes foram mantidos.');
-            return;
+            return true;
         }
 
         let updatedTag = null;
@@ -3107,24 +3104,79 @@ async function setupArticleForm() {
         replaceAvailableTag(oldTag, updatedTag || nextTag);
         replaceSelectedTag(oldTag, nextTag);
         showEditorFeedback('Tag alterada nos artigos existentes.');
+        return true;
+    };
+
+    const renameExistingTag = (oldTag, tagKey = oldTag, tagItem = null) => {
+        if (!oldTag || !tagItem) return;
+
+        const nameButton = tagItem.querySelector('.blog-tag-name');
+        if (!nameButton || tagItem.querySelector('.blog-tag-inline-input')) return;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'blog-tag-inline-input';
+        input.value = oldTag;
+        input.setAttribute('aria-label', `Editar tag ${oldTag}`);
+
+        let isFinishing = false;
+        const restoreTag = () => {
+            if (!tagItem.isConnected) return;
+            tagItem.outerHTML = renderAvailableTag({ id: tagKey, name: oldTag });
+        };
+
+        const finish = async (shouldSave) => {
+            if (isFinishing) return;
+            isFinishing = true;
+
+            const nextTag = input.value.trim();
+            if (!shouldSave || !nextTag || normalizeBlogSearch(nextTag) === normalizeBlogSearch(oldTag)) {
+                restoreTag();
+                return;
+            }
+
+            const didCommit = await commitTagRename(oldTag, nextTag, tagKey);
+            if (!didCommit) restoreTag();
+        };
+
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                finish(true);
+            }
+
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                finish(false);
+            }
+        });
+
+        input.addEventListener('blur', () => finish(true));
+
+        nameButton.replaceWith(input);
+        input.focus();
+        input.select();
     };
 
     const deleteExistingTag = async (tag, tagKey = tag) => {
         if (!tag) return;
         const usage = await getTagUsage(tagKey);
-        let scope = 'catalog';
-
-        if (usage.count > 0) {
-            scope = await showBlogTagImpactDialog({
-                title: 'Excluir tag em uso',
-                message: `A tag "${tag}" está sendo usada em ${usage.count} artigo${usage.count === 1 ? '' : 's'}.`,
-                actions: [
+        const scope = await showBlogTagImpactDialog({
+            title: usage.count > 0 ? 'Excluir tag em uso' : 'Excluir tag',
+            message: usage.count > 0
+                ? `A tag "${tag}" está sendo usada em ${usage.count} artigo${usage.count === 1 ? '' : 's'}.`
+                : `Deseja excluir a tag "${tag}" da biblioteca?`,
+            actions: usage.count > 0
+                ? [
                     { value: 'catalog', label: 'Deixar nos artigos existentes', className: 'blog-editor-btn-outline' },
                     { value: 'global', label: 'Remover de todos', className: 'blog-editor-btn-primary' },
                     { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
                 ]
-            });
-        }
+                : [
+                    { value: 'catalog', label: 'Excluir tag', className: 'blog-editor-btn-primary' },
+                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+                ]
+        });
 
         if (!scope || scope === 'cancel') return;
 
@@ -3148,7 +3200,8 @@ async function setupArticleForm() {
             if (actionButton) {
                 const tag = actionButton.dataset.tagName;
                 const tagKey = actionButton.dataset.tagKey || tag;
-                if (actionButton.dataset.tagAction === 'rename') renameExistingTag(tag, tagKey);
+                const tagItem = actionButton.closest('[data-tag-item]');
+                if (actionButton.dataset.tagAction === 'rename') renameExistingTag(tag, tagKey, tagItem);
                 if (actionButton.dataset.tagAction === 'delete') deleteExistingTag(tag, tagKey);
                 return;
             }
@@ -3160,9 +3213,21 @@ async function setupArticleForm() {
     }
 
     if (selectedTags) {
-        selectedTags.addEventListener('click', (event) => {
+        selectedTags.addEventListener('click', async (event) => {
             const button = event.target.closest('[data-tag]');
-            if (button) button.remove();
+            if (!button) return;
+
+            const tag = button.dataset.tag;
+            const decision = await showBlogTagImpactDialog({
+                title: 'Remover tag do artigo',
+                message: `Deseja remover a tag "${tag}" deste artigo?`,
+                actions: [
+                    { value: 'remove', label: 'Remover deste artigo', className: 'blog-editor-btn-primary' },
+                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+                ]
+            });
+
+            if (decision === 'remove') button.remove();
         });
     }
 
