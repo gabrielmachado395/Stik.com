@@ -68,10 +68,27 @@
         return typeof tag === 'string' ? tag : (tag && (tag.name || tag.title)) || '';
     }
 
+    function extractReadableText(html) {
+        const cleanHtml = removeEmbeddedImageData(html);
+
+        if (typeof document !== 'undefined') {
+            const container = document.createElement('div');
+            container.innerHTML = cleanHtml;
+            container.querySelectorAll('script, style, noscript, svg, img, iframe, video, audio, canvas').forEach(element => element.remove());
+            return container.textContent || '';
+        }
+
+        return cleanHtml
+            .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+            .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+            .replace(/<[^>]+>/g, ' ');
+    }
+
     function estimateReadingTime(html) {
-        const text = String(html || '').replace(/<[^>]+>/g, ' ');
-        const words = text.trim().split(/\s+/).filter(Boolean).length;
-        return Math.max(1, Math.ceil(words / 220));
+        const text = extractReadableText(html);
+        const words = text.match(/[A-Za-zÀ-ÖØ-öø-ÿ0-9]+(?:[-'][A-Za-zÀ-ÖØ-öø-ÿ0-9]+)*/g) || [];
+        const wordCount = words.length;
+        return Math.max(1, Math.ceil(wordCount / 220));
     }
 
     function removeEmbeddedImageData(value) {
@@ -110,6 +127,7 @@
         const now = new Date().toISOString();
         const contentHtml = removeEmbeddedImageData(payload.contentHtml || payload.content_html || '');
         const title = payload.title || payload.titulo || 'Novo artigo';
+        const readingTime = estimateReadingTime(contentHtml);
 
         return {
             id: payload.id || Date.now(),
@@ -121,7 +139,7 @@
             status: payload.status || 'draft',
             contentJson: compactContentJson(payload.contentJson || payload.content_json || null),
             contentHtml,
-            readingTime: payload.readingTime || payload.reading_time || estimateReadingTime(contentHtml),
+            readingTime,
             createdAt: payload.createdAt || payload.created_at || now,
             updatedAt: now,
             publishedAt: payload.status === 'published' ? (payload.publishedAt || payload.published_at || now) : (payload.publishedAt || payload.published_at || null)
@@ -130,6 +148,17 @@
 
     function listMockArticles() {
         return readStorage(STORAGE_KEYS.articles, []);
+    }
+
+    function withEstimatedReadingTime(article) {
+        if (!article) return article;
+        const contentHtml = removeEmbeddedImageData(article.contentHtml || article.content_html || '');
+
+        return {
+            ...article,
+            contentHtml,
+            readingTime: estimateReadingTime(contentHtml)
+        };
     }
 
     function saveMockArticle(payload) {
@@ -159,7 +188,7 @@
             return request(`/articles${query ? `?${query}` : ''}`);
         }
 
-        return listMockArticles();
+        return listMockArticles().map(withEstimatedReadingTime);
     }
 
     async function getArticle(idOrSlug) {
@@ -167,7 +196,8 @@
             return request(`/articles/${encodeURIComponent(idOrSlug)}`);
         }
 
-        return listMockArticles().find(article => String(article.id) === String(idOrSlug) || article.slug === idOrSlug) || null;
+        const article = listMockArticles().find(item => String(item.id) === String(idOrSlug) || item.slug === idOrSlug) || null;
+        return withEstimatedReadingTime(article);
     }
 
     async function createArticle(payload) {
