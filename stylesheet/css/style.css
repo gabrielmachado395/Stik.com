@@ -6539,11 +6539,11 @@ a,
     .blog-showcase-hero,
     .blog-editor-page.create-main,
     .blog-article-page.article-detail-page {
-        padding-top: 92px;
+        padding-top: 124px;
     }
 
     .blog-showcase-hero.is-search-results {
-        padding: 92px 0 82px;
+        padding: 124px 0 82px;
         background:
             linear-gradient(180deg, var(--color-contrast-surface) 0 270px, #fff 270px 100%);
     }
