@@ -336,6 +336,7 @@ body.sidebar-open .top-header .main-header{
     width: 100%;
     height: 100%;
     overflow: hidden;
+    background: #000 url("../../img/banner/banner-site-8_Prancheta-1-scaled (1).jpg") center / cover no-repeat;
 }
 
 #institutionalVideo {
@@ -4498,8 +4499,7 @@ a,
     color: #fff;
 }
 
-.product-breadcrumb span::before,
-.product-breadcrumb-current::before {
+.product-breadcrumb > * + *::before {
     content: "/";
     margin-right: 8px;
     color: rgba(248, 248, 255, 0.45);
@@ -7222,10 +7222,15 @@ a,
     --admin-product-thumb-size: 124px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--admin-product-thumb-size);
+    min-height: 48px;
     min-width: 0;
     align-items: flex-start;
     gap: 12px;
     margin: 6px 0 4px;
+}
+
+.admin-product-image-strip.is-empty {
+    display: none;
 }
 
 .admin-product-image-list {
@@ -7304,6 +7309,33 @@ a,
     font-weight: 800;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.admin-product-image-title {
+    display: grid;
+    gap: 4px;
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.admin-product-image-title input {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    border: 1px solid rgba(36, 48, 65, 0.14);
+    border-radius: 8px;
+    padding: 0 8px;
+    color: var(--color-text);
+    background: #fff;
+    font: inherit;
+    font-weight: 700;
+}
+
+.admin-product-image-title input:focus {
+    border-color: rgba(233, 198, 130, 0.72);
+    box-shadow: 0 0 0 3px rgba(233, 198, 130, 0.14);
+    outline: none;
 }
 
 .admin-product-image-item.is-selected .admin-product-image-thumb {

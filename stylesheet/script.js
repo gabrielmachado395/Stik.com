@@ -566,19 +566,32 @@ const productStore = (() => {
 
     const cleanCategory = (value) => normalizeCategoria(String(value || '').trim());
 
+    const normalizeProductImageItem = (item) => {
+        const source = typeof item === 'string' ? { url: item } : (item || {});
+        const url = String(source.url || source.src || source.imagem || source.image || '').trim();
+        const titulo = String(source.titulo || source.title || source.label || '').trim();
+        const alt = String(source.alt || source.filename || source.name || titulo || '').trim();
+
+        return { url, titulo, alt };
+    };
+
     const normalizeProductImages = (items) => {
         const source = Array.isArray(items) ? items : [items];
-        const seen = new Set();
+        const map = new Map();
 
-        return source
-            .map(item => (typeof item === 'string' ? item : (item && (item.url || item.src || item.imagem || item.image)) || ''))
-            .map(item => String(item || '').trim())
-            .filter(Boolean)
-            .filter(item => {
-                if (seen.has(item)) return false;
-                seen.add(item);
-                return true;
+        source
+            .map(normalizeProductImageItem)
+            .filter(item => item.url)
+            .forEach(item => {
+                const current = map.get(item.url);
+                map.set(item.url, {
+                    url: item.url,
+                    titulo: item.titulo || current?.titulo || '',
+                    alt: item.alt || current?.alt || item.titulo || ''
+                });
             });
+
+        return Array.from(map.values());
     };
 
     const normalizeProduct = (payload) => {
@@ -591,7 +604,7 @@ const productStore = (() => {
         id: Number(payload.id) || Date.now(),
         nome: String(payload.nome || payload.name || '').trim(),
         categoria: cleanCategory(payload.categoria || payload.category || ''),
-        imagem: imagens[0] || '',
+        imagem: imagens[0]?.url || '',
         imagens,
         descricao: String(payload.descricao || payload.description || '').trim(),
         material: String(payload.material || '').trim() || 'Elástico'
@@ -3696,20 +3709,33 @@ function getProductGalleryImages(produto, fallbackLabel = 'Imagem do produto') {
         produto?.imagem || '',
         ...(Array.isArray(produto?.imagens) ? produto.imagens : [])
     ];
-    const seen = new Set();
+    const map = new Map();
 
-    return rawImages
-        .map((item, index) => ({
-            url: String(typeof item === 'string' ? item : (item && (item.url || item.src || item.imagem || item.image)) || '').trim(),
-            label: index === 0 ? 'Principal' : `Imagem ${index + 1}`,
-            alt: fallbackLabel
-        }))
+    rawImages
+        .map(item => {
+            const source = typeof item === 'string' ? { url: item } : (item || {});
+            const titulo = String(source.titulo || source.title || source.label || '').trim();
+            const alt = String(source.alt || source.filename || source.name || titulo || fallbackLabel).trim();
+            return {
+                url: String(source.url || source.src || source.imagem || source.image || '').trim(),
+                titulo,
+                alt
+            };
+        })
         .filter(item => item.url)
-        .filter(item => {
-            if (seen.has(item.url)) return false;
-            seen.add(item.url);
-            return true;
+        .forEach(item => {
+            const current = map.get(item.url);
+            map.set(item.url, {
+                url: item.url,
+                titulo: item.titulo || current?.titulo || '',
+                alt: item.alt || current?.alt || fallbackLabel
+            });
         });
+
+    return Array.from(map.values()).map((item, index) => ({
+        ...item,
+        label: item.titulo || (index === 0 ? 'Principal' : `Imagem ${index + 1}`)
+    }));
 }
 
 function setupProductImageGallery(images, productName) {
@@ -4225,6 +4251,60 @@ function inicializarPaginaFaleConosco() {
     console.log("Página Fale Conosco inicializada.");
 }
 
+function inicializarHeroVideo() {
+    const video = document.getElementById('institutionalVideo');
+    if (!video || video.dataset.heroVideoReady === 'true') return;
+    video.dataset.heroVideoReady = 'true';
+
+    const getVideoSrc = () => {
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        return isMobile ? video.dataset.mobileSrc : video.dataset.desktopSrc;
+    };
+
+    const applyVideoSource = () => {
+        const nextSrc = getVideoSrc();
+        if (!nextSrc || video.getAttribute('src') === nextSrc) return;
+        video.setAttribute('src', nextSrc);
+        video.load();
+    };
+
+    const playVideo = () => {
+        video.muted = true;
+        video.defaultMuted = true;
+        video.setAttribute('muted', '');
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        video.play?.().catch(() => {
+            video.closest('.video-hero-section')?.classList.add('video-autoplay-blocked');
+        });
+    };
+
+    applyVideoSource();
+    playVideo();
+    video.addEventListener('loadeddata', () => {
+        video.closest('.video-hero-section')?.classList.add('video-ready');
+    }, { once: true });
+    video.addEventListener('error', () => {
+        video.closest('.video-hero-section')?.classList.add('video-autoplay-blocked');
+    });
+
+    document.addEventListener('touchstart', playVideo, { once: true, passive: true });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) playVideo();
+    });
+
+    let resizeTimer = 0;
+    window.addEventListener('resize', () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => {
+        const currentTime = video.currentTime || 0;
+        applyVideoSource();
+        video.currentTime = Math.min(currentTime, video.duration || currentTime);
+        playVideo();
+        }, 180);
+    });
+}
+
 
 // Função principal de inicialização da página
 async function inicializarPagina() {
@@ -4269,6 +4349,7 @@ async function inicializarPagina() {
     }
     
     if (isIndexPage) {
+        inicializarHeroVideo();
         inicializarHeaderIndex();
         exibirCategorias(produtos);
         initBannerCarousel();
@@ -5059,10 +5140,11 @@ function setupAdminProducts() {
         document.getElementById('admin-product-id').value = '';
         document.getElementById('admin-product-name').value = '';
         clearAdminProductImage();
-        document.getElementById('admin-product-material').value = 'Elástico';
+        document.getElementById('admin-product-material').value = '';
         document.getElementById('admin-product-description').value = '';
         document.getElementById('admin-product-form-title').textContent = 'Cadastrar produto';
         refreshAdminCategoryOptions();
+        setAdminProductCategory('');
     };
 
     document.getElementById('admin-new-product')?.addEventListener('click', resetProductForm);
@@ -5105,7 +5187,7 @@ function setupAdminProducts() {
             nome: document.getElementById('admin-product-name').value,
             categoria: document.getElementById('admin-product-category').value,
             imagem: document.getElementById('admin-product-image').value,
-            imagens: getAdminProductImages().map(item => item.url),
+            imagens: getAdminProductImages(),
             material: document.getElementById('admin-product-material').value,
             descricao: document.getElementById('admin-product-description').value
         };
@@ -5176,11 +5258,14 @@ function setupAdminProducts() {
 }
 
 function normalizeAdminProductImageItem(item, fallbackLabel = 'Imagem do produto') {
-    const url = typeof item === 'string' ? item : (item && (item.url || item.src || item.imagem || item.image)) || '';
-    const alt = typeof item === 'string' ? fallbackLabel : (item && (item.alt || item.label || item.filename || item.name)) || fallbackLabel;
+    const source = typeof item === 'string' ? { url: item } : (item || {});
+    const url = source.url || source.src || source.imagem || source.image || '';
+    const titulo = source.titulo || source.title || '';
+    const alt = source.alt || source.label || source.filename || source.name || titulo || fallbackLabel;
 
     return {
         url: String(url || '').trim(),
+        titulo: String(titulo || '').trim(),
         alt: String(alt || fallbackLabel).trim()
     };
 }
@@ -5211,6 +5296,9 @@ let adminProductImageSuppressClick = false;
 let adminProductSelectedImageUrl = '';
 
 function formatAdminProductImageLabel(image, index) {
+    const title = String(image?.titulo || '').trim();
+    if (title) return title;
+
     const rawLabel = String(image?.alt || '').trim();
     const rawUrl = String(image?.url || '').trim();
     const genericLabels = new Set([
@@ -5233,8 +5321,10 @@ function formatAdminProductImageLabel(image, index) {
 function renderAdminProductImageList(images) {
     const list = document.getElementById('admin-product-image-list');
     if (!list) return;
+    const strip = list.closest('.admin-product-image-strip');
     const selectedUrl = getAdminProductSelectedImage(images)?.url || '';
 
+    strip?.classList.toggle('is-empty', !images.length);
     list.classList.toggle('has-scroll', images.length >= 3);
     list.classList.toggle('is-empty', !images.length);
     list.innerHTML = images
@@ -5244,6 +5334,10 @@ function renderAdminProductImageList(images) {
                     <img src="${escapeAttribute(image.url)}" alt="${escapeAttribute(image.alt || `Imagem ${index + 1}`)}" loading="lazy" decoding="async" draggable="false">
                     <span>${escapeHtml(formatAdminProductImageLabel(image, index))}</span>
                 </button>
+                <label class="admin-product-image-title">
+                    <span>Título</span>
+                    <input type="text" value="${escapeAttribute(image.titulo || '')}" placeholder="${escapeAttribute(formatAdminProductImageLabel(image, index))}" maxlength="40" data-product-image-title="${index}" aria-label="Título da imagem ${index + 1}">
+                </label>
                 <button type="button" class="admin-product-image-handle" data-product-image-handle="${index}" aria-label="Arrastar para reordenar imagem ${index + 1}">
                     <span aria-hidden="true">⋮⋮</span>
                 </button>
@@ -5258,6 +5352,7 @@ function renderAdminProductImageList(images) {
         item.addEventListener('click', (event) => {
             if (event.target.closest('[data-product-image-remove]')) return;
             if (event.target.closest('[data-product-image-handle]')) return;
+            if (event.target.closest('.admin-product-image-title')) return;
             if (adminProductImageSuppressClick) {
                 event.preventDefault();
                 return;
@@ -5269,6 +5364,12 @@ function renderAdminProductImageList(images) {
     list.querySelectorAll('[data-product-image-remove]').forEach(button => {
         button.addEventListener('click', () => {
             removeAdminProductImage(Number(button.dataset.productImageRemove));
+        });
+    });
+
+    list.querySelectorAll('[data-product-image-title]').forEach(input => {
+        input.addEventListener('input', () => {
+            updateAdminProductImageTitle(Number(input.dataset.productImageTitle), input.value);
         });
     });
 
@@ -5497,6 +5598,23 @@ function addAdminProductImages(items) {
     setAdminProductImages([...getAdminProductImages(), ...(Array.isArray(items) ? items : [items])]);
 }
 
+function updateAdminProductImageTitle(index, title) {
+    const imageInput = document.getElementById('admin-product-image');
+    const imagesInput = document.getElementById('admin-product-images');
+    const images = getAdminProductImages();
+    const image = images[index];
+    if (!image) return;
+
+    image.titulo = String(title || '').trim();
+    if (imageInput) imageInput.value = images[0]?.url || '';
+    if (imagesInput) imagesInput.value = JSON.stringify(images);
+    updateAdminProductPreview(getAdminProductSelectedImage(images), images.length);
+
+    const titleInput = document.querySelector(`[data-product-image-title="${index}"]`);
+    const label = titleInput?.closest('[data-product-image-index]')?.querySelector('.admin-product-image-thumb span');
+    if (label) label.textContent = formatAdminProductImageLabel(image, index);
+}
+
 function removeAdminProductImage(index) {
     const images = getAdminProductImages();
     images.splice(index, 1);
@@ -5547,6 +5665,7 @@ function renderAdminCategorySelectMenu() {
     if (!select || !menu) return;
 
     menu.innerHTML = Array.from(select.options)
+        .filter(option => option.value)
         .map(option => `
             <button type="button" class="admin-category-select-option" role="option" data-admin-category-option="${escapeAttribute(option.value)}">
                 ${escapeHtml(option.textContent)}
@@ -5616,10 +5735,13 @@ function setupAdminCategorySelect() {
 function refreshAdminCategoryOptions() {
     const select = document.getElementById('admin-product-category');
     if (!select || !window.productStore) return;
+    const currentValue = select.value;
+    const categories = productStore.listCategories();
 
-    select.innerHTML = productStore.listCategories()
+    select.innerHTML = '<option value="" disabled selected hidden>Selecione uma categoria</option>' + categories
         .map(category => `<option value="${escapeAttribute(category)}">${escapeHtml(category)}</option>`)
         .join('');
+    select.value = categories.includes(currentValue) ? currentValue : '';
     renderAdminCategorySelectMenu();
 }
 
