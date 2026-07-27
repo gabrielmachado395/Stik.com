@@ -537,6 +537,202 @@ const produtos = [
         material: "Elástico"
     },
 ];
+const produtosPadrao = produtos.map(produto => ({ ...produto }));
+
+const productStore = (() => {
+    const STORAGE_KEYS = {
+        products: 'stik.catalog.products',
+        categories: 'stik.catalog.categories'
+    };
+
+    const readStorage = (key, fallback) => {
+        try {
+            const value = localStorage.getItem(key);
+            return value ? JSON.parse(value) : fallback;
+        } catch (error) {
+            return fallback;
+        }
+    };
+
+    const writeStorage = (key, value) => {
+        localStorage.setItem(key, JSON.stringify(value));
+    };
+
+    const normalizeKey = (value) => String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+    const cleanCategory = (value) => normalizeCategoria(String(value || '').trim());
+
+    const normalizeProductImages = (items) => {
+        const source = Array.isArray(items) ? items : [items];
+        const seen = new Set();
+
+        return source
+            .map(item => (typeof item === 'string' ? item : (item && (item.url || item.src || item.imagem || item.image)) || ''))
+            .map(item => String(item || '').trim())
+            .filter(Boolean)
+            .filter(item => {
+                if (seen.has(item)) return false;
+                seen.add(item);
+                return true;
+            });
+    };
+
+    const normalizeProduct = (payload) => {
+        const imagens = normalizeProductImages([
+            payload.imagem || payload.image || '',
+            ...(Array.isArray(payload.imagens || payload.images) ? (payload.imagens || payload.images) : [])
+        ]);
+
+        return {
+        id: Number(payload.id) || Date.now(),
+        nome: String(payload.nome || payload.name || '').trim(),
+        categoria: cleanCategory(payload.categoria || payload.category || ''),
+        imagem: imagens[0] || '',
+        imagens,
+        descricao: String(payload.descricao || payload.description || '').trim(),
+        material: String(payload.material || '').trim() || 'Elástico'
+        };
+    };
+
+    const uniqueCategories = (categories) => {
+        const map = new Map();
+        categories
+            .map(cleanCategory)
+            .filter(Boolean)
+            .forEach(category => {
+                const key = normalizeKey(category);
+                if (!map.has(key)) map.set(key, category);
+            });
+        return Array.from(map.values()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    };
+
+    const getStoredProducts = () => {
+        const stored = readStorage(STORAGE_KEYS.products, null);
+        return Array.isArray(stored)
+            ? stored.map(normalizeProduct).filter(product => product.nome && product.categoria)
+            : produtosPadrao.map(normalizeProduct);
+    };
+
+    const getStoredCategories = () => {
+        const stored = readStorage(STORAGE_KEYS.categories, null);
+        const source = Array.isArray(stored) ? stored : [];
+        return uniqueCategories([
+            ...source,
+            ...getStoredProducts().map(product => product.categoria)
+        ]);
+    };
+
+    const saveProducts = (items) => {
+        const normalized = items.map(normalizeProduct).filter(product => product.nome && product.categoria);
+        writeStorage(STORAGE_KEYS.products, normalized);
+        hydrate();
+        window.dispatchEvent(new CustomEvent('stik:products-updated', { detail: normalized }));
+        return normalized;
+    };
+
+    const saveCategories = (items) => {
+        const categories = uniqueCategories(items);
+        writeStorage(STORAGE_KEYS.categories, categories);
+        window.dispatchEvent(new CustomEvent('stik:categories-updated', { detail: categories }));
+        return categories;
+    };
+
+    function hydrate() {
+        const activeProducts = getStoredProducts();
+        produtos.splice(0, produtos.length, ...activeProducts);
+        return activeProducts;
+    }
+
+    const listProducts = () => getStoredProducts();
+    const listCategories = () => getStoredCategories();
+    const getProduct = (id) => listProducts().find(product => String(product.id) === String(id)) || null;
+    const countProductsByCategory = (category) => {
+        const target = normalizeKey(cleanCategory(category));
+        return listProducts().filter(product => normalizeKey(cleanCategory(product.categoria)) === target).length;
+    };
+
+    const createProduct = (payload) => {
+        const items = listProducts();
+        const product = normalizeProduct({ ...payload, id: Date.now() });
+        saveCategories([...listCategories(), product.categoria]);
+        saveProducts([product, ...items]);
+        return product;
+    };
+
+    const updateProduct = (id, payload) => {
+        const items = listProducts();
+        const index = items.findIndex(product => String(product.id) === String(id));
+        if (index < 0) return null;
+        const updated = normalizeProduct({ ...items[index], ...payload, id: items[index].id });
+        items[index] = updated;
+        saveCategories([...listCategories(), updated.categoria]);
+        saveProducts(items);
+        return updated;
+    };
+
+    const deleteProduct = (id) => {
+        const items = listProducts().filter(product => String(product.id) !== String(id));
+        saveProducts(items);
+        return { ok: true };
+    };
+
+    const createCategory = (name) => {
+        const category = cleanCategory(name);
+        if (!category) return null;
+        saveCategories([...listCategories(), category]);
+        return category;
+    };
+
+    const renameCategory = (oldName, nextName) => {
+        const oldCategory = cleanCategory(oldName);
+        const nextCategory = cleanCategory(nextName);
+        if (!oldCategory || !nextCategory) return null;
+        const oldKey = normalizeKey(oldCategory);
+        const products = listProducts().map(product => (
+            normalizeKey(cleanCategory(product.categoria)) === oldKey
+                ? { ...product, categoria: nextCategory }
+                : product
+        ));
+        const categories = listCategories().map(category => (
+            normalizeKey(category) === oldKey ? nextCategory : category
+        ));
+        saveCategories(categories);
+        saveProducts(products);
+        return nextCategory;
+    };
+
+    const deleteCategory = (name) => {
+        const category = cleanCategory(name);
+        const target = normalizeKey(category);
+        if (countProductsByCategory(category) > 0) {
+            return { ok: false, reason: 'category-in-use' };
+        }
+        saveCategories(listCategories().filter(item => normalizeKey(item) !== target));
+        return { ok: true };
+    };
+
+    return {
+        hydrate,
+        listProducts,
+        listCategories,
+        getProduct,
+        createProduct,
+        updateProduct,
+        deleteProduct,
+        createCategory,
+        renameCategory,
+        deleteCategory,
+        countProductsByCategory,
+        normalizeProduct
+    };
+})();
+
+productStore.hydrate();
+window.productStore = productStore;
 let artigos = null;
 
 function mediaMatches(query) {
@@ -1007,6 +1203,134 @@ function exibirCategorias(produtosParaExibir) {
         const card = criarCategoriaCard(cat, produtoRepresentativo.imagem);
         listaProdutosContainer.appendChild(card);
     });
+}
+
+function renderAdminSelectedCategoryProducts() {
+    const container = document.getElementById('admin-category-selected-products');
+    const title = document.getElementById('admin-selected-category-title');
+    if (!container || !window.productStore) return;
+
+    const categories = productStore.listCategories();
+    if (!adminSelectedCategory || !categories.some(category => normalizeBlogSearch(category) === normalizeBlogSearch(adminSelectedCategory))) {
+        adminSelectedCategory = categories[0] || '';
+    }
+
+    if (title) {
+        title.textContent = adminSelectedCategory ? `Produtos em ${adminSelectedCategory}` : 'Produtos da categoria';
+    }
+
+    if (!adminSelectedCategory) {
+        container.innerHTML = '<p class="admin-empty">Cadastre uma categoria para visualizar seus produtos.</p>';
+        return;
+    }
+
+    const products = productStore.listProducts()
+        .filter(product => normalizeBlogSearch(product.categoria) === normalizeBlogSearch(adminSelectedCategory))
+        .sort((a, b) => formatNome(a.nome).localeCompare(formatNome(b.nome), 'pt-BR'));
+
+    if (!products.length) {
+        container.innerHTML = '<p class="admin-empty">Nenhum produto nesta categoria.</p>';
+        return;
+    }
+
+    container.innerHTML = products
+        .map(product => `
+            <article class="admin-category-selected-product">
+                <img src="${escapeAttribute(encodeURI(product.imagem))}" alt="${escapeAttribute(formatNome(product.nome))}" loading="lazy" decoding="async">
+                <div>
+                    <strong>${escapeHtml(formatNome(product.nome))}</strong>
+                    <span>${escapeHtml(product.material || 'Material não informado')}</span>
+                </div>
+                <div class="admin-list-actions">
+                    <a class="admin-icon-btn" href="produto.html?id=${escapeAttribute(product.id)}" target="_blank" rel="noopener" aria-label="Abrir produto">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                    <button type="button" class="admin-icon-btn" data-admin-edit-product-from-category="${escapeAttribute(product.id)}" aria-label="Editar produto">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                </div>
+            </article>
+        `)
+        .join('');
+
+    container.querySelectorAll('[data-admin-edit-product-from-category]').forEach(button => {
+        button.addEventListener('click', () => {
+            loadAdminProductIntoForm(button.dataset.adminEditProductFromCategory);
+        });
+    });
+}
+
+async function renameAdminCategory(oldName, nextName) {
+    if (!nextName || normalizeBlogSearch(oldName) === normalizeBlogSearch(nextName)) {
+        adminEditingCategory = '';
+        renderAdminCategoryList();
+        return;
+    }
+
+    const alreadyExists = productStore.listCategories()
+        .some(category => normalizeBlogSearch(category) === normalizeBlogSearch(nextName) && normalizeBlogSearch(category) !== normalizeBlogSearch(oldName));
+    if (alreadyExists) {
+        showEditorFeedback('Essa categoria já existe.');
+        renderAdminCategoryList();
+        return;
+    }
+
+    const count = productStore.countProductsByCategory(oldName);
+    const action = await showBlogTagImpactDialog({
+        title: count > 0 ? 'Alterar categoria em uso' : 'Alterar categoria',
+        message: count > 0
+            ? `Esta categoria está vinculada a ${count} produto${count === 1 ? '' : 's'}. A alteração também será aplicada nesses produtos.`
+            : `Deseja renomear a categoria "${oldName}"?`,
+        actions: [
+            { value: 'rename', label: 'Alterar categoria', className: 'blog-editor-btn-primary' },
+            { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+        ]
+    });
+    if (action !== 'rename') {
+        adminEditingCategory = '';
+        renderAdminCategoryList();
+        return;
+    }
+
+    productStore.renameCategory(oldName, nextName);
+    if (normalizeBlogSearch(adminSelectedCategory) === normalizeBlogSearch(oldName)) {
+        adminSelectedCategory = nextName;
+    }
+    adminEditingCategory = '';
+    refreshAdminProductsUI();
+    renderDynamicSidebarCategories();
+    showEditorFeedback('Categoria atualizada.');
+}
+
+function loadAdminProductIntoForm(productId) {
+    const product = productStore.getProduct(productId);
+    if (!product) return;
+
+    activateAdminTab('products');
+    document.getElementById('admin-product-id').value = product.id;
+    document.getElementById('admin-product-name').value = product.nome;
+    setAdminProductImages(product.imagens && product.imagens.length ? product.imagens : [product.imagem], formatNome(product.nome));
+    document.getElementById('admin-product-material').value = product.material || 'Elástico';
+    document.getElementById('admin-product-description').value = product.descricao || '';
+    refreshAdminCategoryOptions();
+    setAdminProductCategory(normalizeCategoria(product.categoria));
+    document.getElementById('admin-product-form-title').textContent = 'Editar produto';
+    document.getElementById('admin-product-name').focus();
+}
+
+function renderDynamicSidebarCategories() {
+    const submenu = document.querySelector('[data-sidebar-route="produtos"] + .submenu');
+    if (!submenu || !window.productStore) return;
+
+    submenu.innerHTML = productStore.listCategories()
+        .map(category => `
+            <li>
+                <a href="categoria.html?categoria=${encodeURIComponent(category)}" class="sidebar-link" data-sidebar-category="${escapeAttribute(category)}">
+                    ${escapeHtml(category)}
+                </a>
+            </li>
+        `)
+        .join('');
 }
 
 // Lógica de pesquisa
@@ -2490,10 +2814,12 @@ function renderArticleContent(article) {
 
 async function carregarArtigo() {
     const params = new URLSearchParams(window.location.search);
-    const id = Number(params.get('id'));
+    const id = params.get('id');
     const slug = params.get('slug');
     const screenArticles = await getBlogArticlesForScreen();
-    const artigo = screenArticles.find(item => item.id === id || item.slug === slug) || screenArticles[0];
+    const artigo = screenArticles.find(item => (
+        (id && String(item.id) === String(id)) || (slug && item.slug === slug)
+    ));
 
     const articleTitleEl = document.getElementById('article-title');
     const articleMetaEl = document.getElementById('article-meta');
@@ -2504,7 +2830,22 @@ async function carregarArtigo() {
     const relatedGrid = document.getElementById('blog-related-grid');
 
     if (!artigo) {
-        if (articleContentEl) articleContentEl.innerHTML = '<h2>Artigo não encontrado.</h2>';
+        document.title = 'Artigo não encontrado - Stik';
+        if (articleTitleEl) articleTitleEl.textContent = 'Artigo não encontrado';
+        if (breadcrumbTitleEl) breadcrumbTitleEl.textContent = 'Artigo não encontrado';
+        if (articleMetaEl) articleMetaEl.innerHTML = '';
+        if (articleTagsEl) articleTagsEl.innerHTML = '';
+        if (articleImageEl) {
+            const cover = articleImageEl.closest('.blog-article-cover');
+            if (cover) cover.hidden = true;
+        }
+        if (relatedGrid) relatedGrid.innerHTML = '';
+        if (articleContentEl) {
+            articleContentEl.innerHTML = `
+                <p>Este artigo não está mais disponível ou foi removido.</p>
+                <p><a href="blog.html">Voltar para o blog</a></p>
+            `;
+        }
         return;
     }
 
@@ -2533,8 +2874,14 @@ async function carregarArtigo() {
 
     if (relatedGrid) {
         const currentTags = getBlogTags(artigo).map(normalizeBlogSearch);
-        relatedGrid.innerHTML = getBlogScreenArticles()
-            .filter(item => item.id !== artigo.id && getBlogTags(item).some(tag => currentTags.includes(normalizeBlogSearch(tag))))
+        const relatedCandidates = screenArticles
+            .filter(item => String(item.id) !== String(artigo.id) && item.status !== 'draft');
+        const relatedByTag = relatedCandidates
+            .filter(item => getBlogTags(item).some(tag => currentTags.includes(normalizeBlogSearch(tag))));
+        const fallbackArticles = relatedCandidates
+            .filter(item => !relatedByTag.some(related => String(related.id) === String(item.id)));
+
+        relatedGrid.innerHTML = [...relatedByTag, ...fallbackArticles]
             .slice(0, 3)
             .map(item => renderBlogCard(item, { className: 'blog-mini-card' }))
             .join('');
@@ -2710,6 +3057,7 @@ async function createTipTapArticleEditor(element) {
             focus: () => editor.chain().focus().run(),
             getHTML: () => editor.getHTML(),
             getJSON: () => editor.getJSON(),
+            setHTML: (html) => editor.commands.setContent(html || ''),
             setFormat: (format) => {
                 const chain = editor.chain().focus();
                 if (format === 'h2') return chain.toggleHeading({ level: 2 }).run();
@@ -2735,6 +3083,9 @@ async function createTipTapArticleEditor(element) {
             focus: () => element.focus(),
             getHTML: () => element.innerHTML,
             getJSON: () => ({ type: 'html', html: element.innerHTML }),
+            setHTML: (html) => {
+                element.innerHTML = html || '';
+            },
             setFormat: (format) => {
                 element.focus();
                 document.execCommand('formatBlock', false, format);
@@ -2795,8 +3146,6 @@ async function setupArticleForm() {
     const availableTags = document.getElementById('available-tags');
     const tagInput = document.getElementById('tag-input');
     const addTagBtn = document.getElementById('add-tag-btn');
-    const coverUploadBtn = document.getElementById('cover-upload-btn');
-    const coverLibraryBtn = document.getElementById('cover-library-btn');
     const coverFileInput = document.getElementById('cover-file-input');
     const inlineImageInput = document.getElementById('article-inline-image-input');
     const formatSelect = document.getElementById('article-format-select');
@@ -2808,6 +3157,7 @@ async function setupArticleForm() {
     };
     let currentArticleId = null;
     let currentStatus = 'draft';
+    let availableTagCache = [];
 
     const editorController = await createTipTapArticleEditor(freeEditor);
 
@@ -2836,6 +3186,7 @@ async function setupArticleForm() {
 
             currentArticleId = saved.id || currentArticleId;
             updateStatusPill(saved.status || status);
+            window.dispatchEvent(new CustomEvent('stik:article-saved', { detail: saved }));
             showEditorFeedback(status === 'published'
                 ? 'Artigo publicado localmente. Ele já aparece no blog.'
                 : 'Rascunho salvo localmente.');
@@ -2921,55 +3272,68 @@ async function setupArticleForm() {
             coverImage = document.createElement('img');
             coverImage.loading = 'lazy';
             coverImage.decoding = 'async';
-            coverFigure.appendChild(coverImage);
+            coverFigure.prepend(coverImage);
         }
         coverImage.src = media.url;
         coverImage.alt = media.filename || fallbackName;
         coverFigure.classList.remove('is-empty');
+        coverFigure.setAttribute('aria-label', `Imagem de capa selecionada: ${media.filename || fallbackName}. Clique ou arraste para trocar.`);
         coverState.mediaId = media.id || null;
         coverState.url = media.url;
     };
 
-    if (coverUploadBtn && coverFileInput) {
-        coverUploadBtn.addEventListener('click', () => coverFileInput.click());
-        coverFileInput.addEventListener('change', async () => {
-            const file = coverFileInput.files && coverFileInput.files[0];
-            if (!file) return;
+    const uploadCoverFile = async (file) => {
+        if (!file) return;
 
-            try {
-                const media = window.blogApi
-                    ? await window.blogApi.uploadBlogImage(file)
-                    : { id: Date.now(), filename: file.name, url: URL.createObjectURL(file) };
-                applyCoverMedia(media, file.name);
-                coverFileInput.value = '';
-                showEditorFeedback('Imagem de capa adicionada.');
-            } catch (error) {
-                showEditorFeedback('Não foi possível enviar a imagem de capa.');
+        if (!file.type || !file.type.startsWith('image/')) {
+            showEditorFeedback('Escolha um arquivo de imagem.');
+            return;
+        }
+
+        try {
+            coverFigure?.classList.add('is-uploading');
+            const media = window.blogApi
+                ? await window.blogApi.uploadBlogImage(file)
+                : { id: Date.now(), filename: file.name, url: URL.createObjectURL(file) };
+            applyCoverMedia(media, file.name);
+            showEditorFeedback('Imagem de capa adicionada.');
+        } catch (error) {
+            showEditorFeedback('Não foi possível enviar a imagem de capa.');
+        } finally {
+            coverFigure?.classList.remove('is-uploading');
+        }
+    };
+
+    if (coverFigure && coverFileInput) {
+        coverFigure.addEventListener('click', () => coverFileInput.click());
+        coverFigure.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            coverFileInput.click();
+        });
+
+        coverFigure.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            coverFigure.classList.add('is-dragover');
+        });
+
+        coverFigure.addEventListener('dragleave', (event) => {
+            if (!coverFigure.contains(event.relatedTarget)) {
+                coverFigure.classList.remove('is-dragover');
             }
         });
-    }
 
-    if (coverLibraryBtn) {
-        coverLibraryBtn.addEventListener('click', async () => {
-            const mediaItems = window.blogApi && window.blogApi.listMedia
-                ? await window.blogApi.listMedia().catch(() => [])
-                : [];
+        coverFigure.addEventListener('drop', async (event) => {
+            event.preventDefault();
+            coverFigure.classList.remove('is-dragover');
+            const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+            await uploadCoverFile(file);
+        });
 
-            if (!mediaItems.length) {
-                showEditorFeedback('Envie uma imagem primeiro para testar a biblioteca.');
-                return;
-            }
-
-            const options = mediaItems.slice(0, 8);
-            const message = options
-                .map((item, index) => `${index + 1}. ${item.filename || `Imagem ${index + 1}`}`)
-                .join('\n');
-            const selectedIndex = Number(window.prompt(`Escolha a imagem da biblioteca:\n${message}`)) - 1;
-            const selectedMedia = options[selectedIndex];
-
-            if (!selectedMedia) return;
-            applyCoverMedia(selectedMedia);
-            showEditorFeedback('Imagem da biblioteca aplicada como capa.');
+        coverFileInput.addEventListener('change', async () => {
+            const file = coverFileInput.files && coverFileInput.files[0];
+            await uploadCoverFile(file);
+            coverFileInput.value = '';
         });
     }
 
@@ -2979,6 +3343,7 @@ async function setupArticleForm() {
             .some(button => normalizeBlogSearch(button.dataset.tag) === normalizeBlogSearch(tag));
         if (exists) return;
         selectedTags.insertAdjacentHTML('beforeend', `<button type="button" data-tag="${escapeAttribute(tag)}">${escapeHtml(tag)} <i class="fas fa-times"></i></button>`);
+        renderAvailableTags(availableTagCache);
     };
 
     const removeSelectedTag = (tag) => {
@@ -2986,6 +3351,7 @@ async function setupArticleForm() {
         selectedTags.querySelectorAll('[data-tag]').forEach(button => {
             if (normalizeBlogSearch(button.dataset.tag) === normalizeBlogSearch(tag)) button.remove();
         });
+        renderAvailableTags(availableTagCache);
     };
 
     const replaceSelectedTag = (oldTag, nextTag) => {
@@ -3018,8 +3384,8 @@ async function setupArticleForm() {
                     <button type="button" data-tag-action="rename" data-tag-name="${escapeAttribute(name)}" data-tag-key="${escapeAttribute(key)}" aria-label="Editar tag ${escapeAttribute(name)}">
                         <i class="fas fa-pen"></i>
                     </button>
-                    <button type="button" data-tag-action="delete" data-tag-name="${escapeAttribute(name)}" data-tag-key="${escapeAttribute(key)}" aria-label="Excluir tag ${escapeAttribute(name)}">
-                        <i class="fas fa-trash-alt"></i>
+                    <button type="button" class="blog-tag-remove" data-tag-action="delete" data-tag-name="${escapeAttribute(name)}" data-tag-key="${escapeAttribute(key)}" aria-label="Excluir tag ${escapeAttribute(name)}">
+                        <span aria-hidden="true">×</span>
                     </button>
                 </span>
             </span>
@@ -3028,38 +3394,114 @@ async function setupArticleForm() {
 
     const renderAvailableTags = (tags) => {
         if (!availableTags) return;
-        availableTags.innerHTML = (tags || []).map(renderAvailableTag).join('');
+        const selectedTagNames = selectedTags
+            ? Array.from(selectedTags.querySelectorAll('[data-tag]')).map(button => normalizeBlogSearch(button.dataset.tag))
+            : [];
+        availableTags.innerHTML = (tags || [])
+            .filter(tag => !selectedTagNames.includes(normalizeBlogSearch(getTagDisplayName(tag))))
+            .map(renderAvailableTag)
+            .join('');
     };
 
     const loadAvailableTags = async () => {
         if (!availableTags || !window.blogApi) return;
         const tags = await window.blogApi.listTags().catch(() => []);
-        if (tags.length) renderAvailableTags(tags);
+        availableTagCache = tags;
+        if (tags.length) renderAvailableTags(availableTagCache);
+    };
+
+    const resetArticleEditor = () => {
+        currentArticleId = null;
+        updateStatusPill('draft');
+
+        const titleInput = document.getElementById('article-title');
+        const summaryInput = document.getElementById('article-summary');
+        if (titleInput) titleInput.value = '';
+        if (summaryInput) summaryInput.value = '';
+        if (selectedTags) selectedTags.innerHTML = '';
+        editorController.setHTML('');
+
+        coverState.url = '';
+        coverState.mediaId = null;
+        if (coverImage) {
+            coverImage.remove();
+            coverImage = null;
+        }
+        if (coverFigure) {
+            coverFigure.classList.add('is-empty');
+            coverFigure.setAttribute('aria-label', 'Selecionar imagem de capa');
+        }
+
+        renderAvailableTags(availableTagCache);
+        titleInput?.focus();
+    };
+
+    const loadArticleIntoEditor = async (articleOrId) => {
+        const article = typeof articleOrId === 'object'
+            ? articleOrId
+            : (window.blogApi ? await window.blogApi.getArticle(articleOrId).catch(() => null) : null);
+        if (!article) return false;
+
+        resetArticleEditor();
+        currentArticleId = article.id;
+        updateStatusPill(article.status || 'draft');
+
+        const titleInput = document.getElementById('article-title');
+        const summaryInput = document.getElementById('article-summary');
+        if (titleInput) titleInput.value = article.title || article.titulo || '';
+        if (summaryInput) summaryInput.value = article.summary || article.resumo || '';
+        editorController.setHTML(renderArticleContent(article));
+
+        if (Array.isArray(article.tags)) {
+            article.tags.forEach(addSelectedTag);
+        }
+
+        if (article.coverUrl || article.imagem) {
+            applyCoverMedia({
+                id: article.coverMediaId || null,
+                filename: article.title || 'Imagem de capa',
+                url: article.coverUrl || article.imagem
+            });
+        }
+
+        showEditorFeedback('Artigo carregado para edição.');
+        return true;
+    };
+
+    window.stikArticleEditor = {
+        reset: resetArticleEditor,
+        load: loadArticleIntoEditor
     };
 
     const addAvailableTag = (tag) => {
         if (!availableTags || !tag) return;
-        const exists = Array.from(availableTags.querySelectorAll('[data-tag]'))
-            .some(button => normalizeBlogSearch(button.dataset.tag) === normalizeBlogSearch(tag));
-        if (!exists) availableTags.insertAdjacentHTML('beforeend', renderAvailableTag(tag));
+        const name = getTagDisplayName(tag).trim();
+        if (!name) return;
+
+        const exists = availableTagCache
+            .some(item => normalizeBlogSearch(getTagDisplayName(item)) === normalizeBlogSearch(name));
+        if (!exists) availableTagCache.push(tag);
+        renderAvailableTags(availableTagCache);
     };
 
     const removeAvailableTag = (tag) => {
         if (!availableTags || !tag) return;
-        availableTags.querySelectorAll('[data-tag-item]').forEach(item => {
-            if (normalizeBlogSearch(item.dataset.tagItem) === normalizeBlogSearch(tag)) item.remove();
-        });
+        availableTagCache = availableTagCache
+            .filter(item => normalizeBlogSearch(getTagDisplayName(item)) !== normalizeBlogSearch(tag));
+        renderAvailableTags(availableTagCache);
     };
 
     const replaceAvailableTag = (oldTag, nextTag) => {
         if (!availableTags || !oldTag || !nextTag) return;
-        const item = Array.from(availableTags.querySelectorAll('[data-tag-item]'))
-            .find(element => normalizeBlogSearch(element.dataset.tagItem) === normalizeBlogSearch(oldTag));
-        if (item) {
-            item.outerHTML = renderAvailableTag(nextTag);
-            return;
-        }
-        addAvailableTag(nextTag);
+        let didReplace = false;
+        availableTagCache = availableTagCache.map(item => {
+            if (normalizeBlogSearch(getTagDisplayName(item)) !== normalizeBlogSearch(oldTag)) return item;
+            didReplace = true;
+            return nextTag;
+        });
+
+        if (!didReplace) availableTagCache.push(nextTag);
+        renderAvailableTags(availableTagCache);
     };
 
     const getTagUsage = async (tag) => {
@@ -3151,7 +3593,7 @@ async function setupArticleForm() {
             }
         });
 
-        input.addEventListener('blur', () => finish(true));
+        input.addEventListener('blur', () => finish(false));
 
         nameButton.replaceWith(input);
         input.focus();
@@ -3213,21 +3655,11 @@ async function setupArticleForm() {
     }
 
     if (selectedTags) {
-        selectedTags.addEventListener('click', async (event) => {
+        selectedTags.addEventListener('click', (event) => {
             const button = event.target.closest('[data-tag]');
             if (!button) return;
 
-            const tag = button.dataset.tag;
-            const decision = await showBlogTagImpactDialog({
-                title: 'Remover tag do artigo',
-                message: `Deseja remover a tag "${tag}" deste artigo?`,
-                actions: [
-                    { value: 'remove', label: 'Remover deste artigo', className: 'blog-editor-btn-primary' },
-                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
-                ]
-            });
-
-            if (decision === 'remove') button.remove();
+            removeSelectedTag(button.dataset.tag);
         });
     }
 
@@ -3237,8 +3669,8 @@ async function setupArticleForm() {
             if (!tag) return;
 
             const createdTag = window.blogApi ? await window.blogApi.createTag(tag).catch(() => null) : null;
-            addSelectedTag(tag);
             addAvailableTag(createdTag || tag);
+            addSelectedTag(tag);
 
             tagInput.value = '';
             tagInput.focus();
@@ -3255,6 +3687,145 @@ async function setupArticleForm() {
     updateStatusPill(currentStatus);
 }
 
+function getProductGalleryImages(produto, fallbackLabel = 'Imagem do produto') {
+    const rawImages = [
+        produto?.imagem || '',
+        ...(Array.isArray(produto?.imagens) ? produto.imagens : [])
+    ];
+    const seen = new Set();
+
+    return rawImages
+        .map((item, index) => ({
+            url: String(typeof item === 'string' ? item : (item && (item.url || item.src || item.imagem || item.image)) || '').trim(),
+            label: index === 0 ? 'Principal' : `Imagem ${index + 1}`,
+            alt: fallbackLabel
+        }))
+        .filter(item => item.url)
+        .filter(item => {
+            if (seen.has(item.url)) return false;
+            seen.add(item.url);
+            return true;
+        });
+}
+
+function setupProductImageGallery(images, productName) {
+    const galleryImages = Array.isArray(images) && images.length ? images : [];
+    const imageCard = document.querySelector('.product-image-card');
+    const mainProductImage = document.getElementById('main-product-image');
+    const productThumbnails = document.querySelector('.product-thumbnails');
+    const variationOptions = document.querySelector('.variation-options');
+    if (!mainProductImage || !imageCard || !productThumbnails || !variationOptions) return;
+
+    let activeIndex = 0;
+
+    const renderState = () => {
+        const activeImage = galleryImages[activeIndex] || galleryImages[0];
+        if (!activeImage) return;
+
+        mainProductImage.src = encodeURI(activeImage.url);
+        mainProductImage.alt = activeImage.alt || productName;
+        imageCard.setAttribute('aria-label', `Abrir imagem ${activeIndex + 1} de ${galleryImages.length} do produto ${productName}`);
+
+        variationOptions.querySelectorAll('[data-product-gallery-index]').forEach(button => {
+            const isActive = Number(button.dataset.productGalleryIndex) === activeIndex;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-current', String(isActive));
+        });
+
+        productThumbnails.querySelectorAll('[data-product-gallery-dot]').forEach(button => {
+            const isActive = Number(button.dataset.productGalleryDot) === activeIndex;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-label', `${isActive ? 'Imagem atual' : 'Ver imagem'} ${Number(button.dataset.productGalleryDot) + 1}`);
+        });
+    };
+
+    imageCard.setAttribute('role', 'button');
+    imageCard.setAttribute('tabindex', '0');
+    imageCard.addEventListener('click', () => {
+        const activeImage = galleryImages[activeIndex] || galleryImages[0];
+        if (activeImage) openProductImageViewer(activeImage.url, activeImage.alt || productName);
+    });
+    imageCard.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        imageCard.click();
+    });
+
+    if (galleryImages.length <= 1) {
+        productThumbnails.classList.remove('is-visible');
+        variationOptions.innerHTML = '';
+        productThumbnails.querySelector('.product-gallery-dots')?.remove();
+        renderState();
+        return;
+    }
+
+    productThumbnails.classList.add('is-visible');
+    variationOptions.innerHTML = galleryImages
+        .map((image, index) => `
+            <button type="button" class="product-thumb-option" data-product-gallery-index="${index}" aria-label="Ver imagem ${index + 1}">
+                <img src="${escapeAttribute(encodeURI(image.url))}" alt="${escapeAttribute(image.alt || productName)}" loading="lazy" decoding="async">
+                <span>${escapeHtml(image.label || `Imagem ${index + 1}`)}</span>
+            </button>
+        `)
+        .join('');
+
+    let dots = productThumbnails.querySelector('.product-gallery-dots');
+    if (!dots) {
+        dots = document.createElement('div');
+        dots.className = 'product-gallery-dots';
+        productThumbnails.appendChild(dots);
+    }
+    dots.innerHTML = galleryImages
+        .map((_, index) => `<button type="button" data-product-gallery-dot="${index}" aria-label="Ver imagem ${index + 1}"></button>`)
+        .join('');
+
+    variationOptions.querySelectorAll('[data-product-gallery-index]').forEach(button => {
+        button.addEventListener('click', () => {
+            activeIndex = Number(button.dataset.productGalleryIndex);
+            renderState();
+        });
+    });
+
+    dots.querySelectorAll('[data-product-gallery-dot]').forEach(button => {
+        button.addEventListener('click', () => {
+            activeIndex = Number(button.dataset.productGalleryDot);
+            renderState();
+        });
+    });
+
+    renderState();
+}
+
+function openProductImageViewer(src, alt) {
+    if (!src) return;
+    let viewer = document.querySelector('.product-image-viewer');
+
+    if (!viewer) {
+        viewer = document.createElement('div');
+        viewer.className = 'product-image-viewer';
+        viewer.innerHTML = `
+            <button type="button" class="product-image-viewer-close" aria-label="Fechar imagem">×</button>
+            <img src="" alt="">
+        `;
+        document.body.appendChild(viewer);
+
+        viewer.addEventListener('click', (event) => {
+            if (event.target === viewer || event.target.closest('.product-image-viewer-close')) {
+                viewer.classList.remove('is-open');
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') viewer.classList.remove('is-open');
+        });
+    }
+
+    const image = viewer.querySelector('img');
+    image.src = encodeURI(src);
+    image.alt = alt || 'Imagem do produto';
+    viewer.classList.add('is-open');
+}
+
 function carregarDetalhesDoProduto() {
     const params = new URLSearchParams(window.location.search);
     const produtoId = parseInt(params.get('id'));
@@ -3264,12 +3835,14 @@ function carregarDetalhesDoProduto() {
         const nomeFormatado = formatNome(produto.nome);
         const categoriaFormatada = normalizeCategoria(produto.categoria);
         const materialFormatado = produto.material || 'Não informado';
+        const imagensProduto = getProductGalleryImages(produto, nomeFormatado);
         const mainProductImage = document.getElementById('main-product-image');
         if (mainProductImage) {
             optimizeImageElement(mainProductImage, { loading: 'eager', fetchPriority: 'high' });
-            mainProductImage.src = encodeURI(produto.imagem);
+            mainProductImage.src = encodeURI(imagensProduto[0]?.url || produto.imagem);
             mainProductImage.alt = nomeFormatado;
         }
+        setupProductImageGallery(imagensProduto, nomeFormatado);
         const productNameEl = document.querySelector('.product-name');
         if (productNameEl) productNameEl.textContent = nomeFormatado;
 
@@ -3343,8 +3916,12 @@ function carregarDetalhesDoProduto() {
         const grid = document.querySelector('.veja-tambem-grid');
         if (grid) {
             grid.innerHTML = '';
-            const outros = produtos.filter(p => normalizeCategoria(p.categoria) === categoriaFormatada && p.id !== produto.id);
-            outros.slice(0, 3).forEach(p => {
+            const mesmaCategoria = produtos
+                .filter(p => normalizeCategoria(p.categoria) === categoriaFormatada && p.id !== produto.id);
+            const outrasCategorias = produtos
+                .filter(p => normalizeCategoria(p.categoria) !== categoriaFormatada && p.id !== produto.id);
+
+            [...mesmaCategoria, ...outrasCategorias].slice(0, 3).forEach(p => {
                 const card = document.createElement('a');
                 card.classList.add('produto-card');
                 card.href = `produto.html?id=${p.id}`;
@@ -3353,10 +3930,6 @@ function carregarDetalhesDoProduto() {
             });
         }
 
-        const variationOptions = document.querySelector('.variation-options');
-        if (variationOptions) {
-            variationOptions.innerHTML = '';
-        }
     } else {
         console.error("Produto não encontrado.");
     }
@@ -3657,6 +4230,7 @@ async function inicializarPagina() {
         carregarComponente('sidebar-placeholder', 'sidebar.html'),
         carregarComponente('footer-placeholder', 'footer.html')
     ]);
+    renderDynamicSidebarCategories();
     inicializarPesquisa();
     inicializarMenu();
     restoreSidebarState();
@@ -3669,6 +4243,8 @@ async function inicializarPagina() {
     const isBlogPage = /\/blog(\.html)?$/.test(pathname);
     const isArticlePage = /\/artigo(\.html)?$/.test(pathname);
     const isCreateArticlePage = /\/create-article(\.html)?$/.test(pathname);
+    const isAdminPage = /\/admin(\.html)?$/.test(pathname);
+    document.body.classList.toggle('admin-active', isAdminPage);
     const isFaqPage = /\/faq(\.html)?$/.test(pathname);
     const isPoliticaPage = /\/politica_de_privacidade(\.html)?$/.test(pathname);
     const isTermosPage = /\/termos_de_uso(\.html)?$/.test(pathname);
@@ -3705,6 +4281,8 @@ async function inicializarPagina() {
         await carregarArtigo(); // Adicionado await
     } else if (isCreateArticlePage) {
         setupArticleForm();
+    } else if (isAdminPage) {
+        await setupAdminPage();
     } else if (isFaqPage) {
         inicializarPaginaFaq();
     } else if (isPoliticaPage) {
@@ -4297,3 +4875,935 @@ function renderCategoriaPage() {
     renderItems(sortEl ? sortEl.value : 'relevance');
 }
 
+function activateAdminTab(tab) {
+    if (!tab) return;
+    document.querySelectorAll('[data-admin-tab]').forEach(item => {
+        item.classList.toggle('is-active', item.dataset.adminTab === tab);
+    });
+    document.querySelectorAll('.admin-panel').forEach(panel => {
+        panel.classList.toggle('is-active', panel.id === `admin-tab-${tab}`);
+    });
+}
+
+async function setupAdminPage() {
+    const loginView = document.getElementById('admin-login-view');
+    const dashboardView = document.getElementById('admin-dashboard-view');
+    if (!loginView || !dashboardView || dashboardView.dataset.adminReady === 'true') return;
+    dashboardView.dataset.adminReady = 'true';
+
+    const SESSION_KEY = 'stik.admin.session';
+    const loginForm = document.getElementById('admin-login-form');
+    const logoutButton = document.getElementById('admin-logout');
+
+    const showDashboard = async () => {
+        loginView.hidden = true;
+        dashboardView.hidden = false;
+        await setupArticleForm();
+        await refreshAdminArticles();
+        setupAdminProducts();
+    };
+
+    const showLogin = () => {
+        dashboardView.hidden = true;
+        loginView.hidden = false;
+    };
+
+    loginForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ loggedAt: new Date().toISOString() }));
+        await showDashboard();
+    });
+
+    logoutButton?.addEventListener('click', () => {
+        localStorage.removeItem(SESSION_KEY);
+        showLogin();
+    });
+
+    document.querySelectorAll('[data-admin-tab]').forEach(button => {
+        button.addEventListener('click', () => {
+            activateAdminTab(button.dataset.adminTab);
+        });
+    });
+
+    const newArticleButton = document.getElementById('admin-new-article');
+    newArticleButton?.addEventListener('click', () => {
+        window.stikArticleEditor?.reset();
+        showEditorFeedback('Editor pronto para um novo artigo.');
+    });
+
+    window.addEventListener('stik:article-saved', refreshAdminArticles);
+
+    if (localStorage.getItem(SESSION_KEY)) {
+        await showDashboard();
+    } else {
+        showLogin();
+    }
+}
+
+async function refreshAdminArticles() {
+    const list = document.getElementById('admin-article-list');
+    if (!list || !window.blogApi) return;
+
+    const localArticles = await window.blogApi.listArticles().catch(() => []);
+    const localIds = new Set(localArticles.map(article => String(article.id)));
+    const articles = await getBlogArticlesForScreen();
+    if (!articles.length) {
+        list.innerHTML = '<p class="admin-empty">Nenhum artigo local cadastrado ainda.</p>';
+        return;
+    }
+
+    const articleMap = new Map(articles.map(article => [String(article.id), article]));
+
+    list.innerHTML = articles
+        .map(article => {
+            const isLocal = localIds.has(String(article.id));
+            return `
+            <article class="admin-list-item">
+                <div>
+                    <strong>${escapeHtml(article.titulo || article.title || 'Artigo sem título')}</strong>
+                    <span>${escapeHtml(isLocal ? (article.status === 'published' ? 'Publicado local' : 'Rascunho local') : 'Artigo inicial')}</span>
+                </div>
+                <div class="admin-list-actions">
+                    <button type="button" class="admin-icon-btn" data-admin-edit-article="${escapeAttribute(article.id)}" aria-label="Editar artigo">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button type="button" class="admin-icon-btn admin-icon-btn-danger" data-admin-delete-article="${escapeAttribute(article.id)}" aria-label="Excluir artigo"${isLocal ? '' : ' disabled'}>
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </article>
+        `;
+        })
+        .join('');
+
+    list.querySelectorAll('[data-admin-edit-article]').forEach(button => {
+        button.addEventListener('click', async () => {
+            const article = articleMap.get(String(button.dataset.adminEditArticle));
+            await window.stikArticleEditor?.load(article || button.dataset.adminEditArticle);
+        });
+    });
+
+    list.querySelectorAll('[data-admin-delete-article]:not([disabled])').forEach(button => {
+        button.addEventListener('click', async () => {
+            const action = await showBlogTagImpactDialog({
+                title: 'Excluir artigo',
+                message: 'Esta ação remove o artigo salvo localmente no painel administrativo.',
+                actions: [
+                    { value: 'delete', label: 'Excluir artigo', className: 'blog-editor-btn-primary' },
+                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+                ]
+            });
+            if (action !== 'delete') return;
+            await window.blogApi.deleteArticle(button.dataset.adminDeleteArticle);
+            window.stikArticleEditor?.reset();
+            await refreshAdminArticles();
+            showEditorFeedback('Artigo excluído.');
+        });
+    });
+}
+
+function setupAdminProducts() {
+    const form = document.getElementById('admin-product-form');
+    const categoryForm = document.getElementById('admin-category-form');
+    if (!form || !categoryForm || form.dataset.adminProductsReady === 'true') {
+        refreshAdminProductsUI();
+        return;
+    }
+    form.dataset.adminProductsReady = 'true';
+
+    const imageDropzone = document.getElementById('admin-product-image-dropzone');
+    const imageFileInput = document.getElementById('admin-product-image-file');
+    const imageAddButton = document.getElementById('admin-product-image-add');
+    const imageInput = document.getElementById('admin-product-image');
+    const imagePreview = document.getElementById('admin-product-image-preview');
+
+    const clearAdminProductImage = () => {
+        setAdminProductImages([]);
+        if (imageFileInput) imageFileInput.value = '';
+    };
+
+    const uploadAdminProductImages = async (files) => {
+        const selectedFiles = Array.from(files || []);
+        if (!selectedFiles.length) return;
+
+        if (selectedFiles.some(file => !file.type || !file.type.startsWith('image/'))) {
+            showEditorFeedback('Escolha um arquivo de imagem.');
+            return;
+        }
+
+        try {
+            imageDropzone?.classList.add('is-uploading');
+            const uploadedImages = [];
+
+            for (const file of selectedFiles) {
+                const media = window.blogApi
+                    ? await window.blogApi.uploadBlogImage(file)
+                    : { id: Date.now(), filename: file.name, url: URL.createObjectURL(file) };
+                uploadedImages.push({ url: media.url, alt: media.filename || file.name });
+            }
+
+            addAdminProductImages(uploadedImages);
+            showEditorFeedback(selectedFiles.length === 1 ? 'Imagem do produto adicionada.' : 'Imagens do produto adicionadas.');
+        } catch (error) {
+            showEditorFeedback('Não foi possível enviar a imagem do produto.');
+        } finally {
+            imageDropzone?.classList.remove('is-uploading');
+        }
+    };
+
+    const resetProductForm = () => {
+        document.getElementById('admin-product-id').value = '';
+        document.getElementById('admin-product-name').value = '';
+        clearAdminProductImage();
+        document.getElementById('admin-product-material').value = 'Elástico';
+        document.getElementById('admin-product-description').value = '';
+        document.getElementById('admin-product-form-title').textContent = 'Cadastrar produto';
+        refreshAdminCategoryOptions();
+    };
+
+    document.getElementById('admin-new-product')?.addEventListener('click', resetProductForm);
+    document.getElementById('admin-product-cancel')?.addEventListener('click', resetProductForm);
+    document.getElementById('admin-product-search')?.addEventListener('input', renderAdminProductList);
+    setupAdminCategorySelect();
+
+    if (imageDropzone && imageFileInput) {
+        imageDropzone.addEventListener('click', () => imageFileInput.click());
+        imageAddButton?.addEventListener('click', () => imageFileInput.click());
+        imageDropzone.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            imageFileInput.click();
+        });
+        imageDropzone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            imageDropzone.classList.add('is-dragover');
+        });
+        imageDropzone.addEventListener('dragleave', (event) => {
+            if (!imageDropzone.contains(event.relatedTarget)) {
+                imageDropzone.classList.remove('is-dragover');
+            }
+        });
+        imageDropzone.addEventListener('drop', async (event) => {
+            event.preventDefault();
+            imageDropzone.classList.remove('is-dragover');
+            await uploadAdminProductImages(event.dataTransfer && event.dataTransfer.files);
+        });
+        imageFileInput.addEventListener('change', async () => {
+            await uploadAdminProductImages(imageFileInput.files);
+            imageFileInput.value = '';
+        });
+    }
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const id = document.getElementById('admin-product-id').value;
+        const payload = {
+            nome: document.getElementById('admin-product-name').value,
+            categoria: document.getElementById('admin-product-category').value,
+            imagem: document.getElementById('admin-product-image').value,
+            imagens: getAdminProductImages().map(item => item.url),
+            material: document.getElementById('admin-product-material').value,
+            descricao: document.getElementById('admin-product-description').value
+        };
+
+        if (!payload.imagem) {
+            showEditorFeedback('Adicione uma imagem para o produto.');
+            imageDropzone?.focus();
+            return;
+        }
+
+        if (id) {
+            productStore.updateProduct(id, payload);
+            showEditorFeedback('Produto atualizado.');
+        } else {
+            productStore.createProduct(payload);
+            showEditorFeedback('Produto criado.');
+        }
+
+        resetProductForm();
+        refreshAdminProductsUI();
+        renderDynamicSidebarCategories();
+    });
+
+    categoryForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const originalInput = document.getElementById('admin-category-original');
+        const nameInput = document.getElementById('admin-category-name');
+        const original = originalInput.value;
+        const nextName = nameInput.value.trim();
+        if (!nextName) return;
+
+        if (!original) {
+            const alreadyExists = productStore.listCategories()
+                .some(category => normalizeBlogSearch(category) === normalizeBlogSearch(nextName));
+            if (alreadyExists) {
+                showEditorFeedback('Essa categoria já existe.');
+                nameInput.focus();
+                return;
+            }
+            const createdCategory = productStore.createCategory(nextName);
+            if (createdCategory) adminSelectedCategory = createdCategory;
+            showEditorFeedback('Categoria criada.');
+        } else if (normalizeBlogSearch(original) !== normalizeBlogSearch(nextName)) {
+            const count = productStore.countProductsByCategory(original);
+            const action = await showBlogTagImpactDialog({
+                title: count > 0 ? 'Alterar categoria em uso' : 'Alterar categoria',
+                message: count > 0
+                    ? `Esta categoria está vinculada a ${count} produto${count === 1 ? '' : 's'}. A alteração também será aplicada nesses produtos.`
+                    : `Deseja renomear a categoria "${original}"?`,
+                actions: [
+                    { value: 'rename', label: 'Alterar categoria', className: 'blog-editor-btn-primary' },
+                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+                ]
+            });
+            if (action !== 'rename') return;
+            productStore.renameCategory(original, nextName);
+            showEditorFeedback('Categoria atualizada.');
+        }
+
+        originalInput.value = '';
+        nameInput.value = '';
+        refreshAdminProductsUI();
+        renderDynamicSidebarCategories();
+    });
+
+    resetProductForm();
+    refreshAdminProductsUI();
+}
+
+function normalizeAdminProductImageItem(item, fallbackLabel = 'Imagem do produto') {
+    const url = typeof item === 'string' ? item : (item && (item.url || item.src || item.imagem || item.image)) || '';
+    const alt = typeof item === 'string' ? fallbackLabel : (item && (item.alt || item.label || item.filename || item.name)) || fallbackLabel;
+
+    return {
+        url: String(url || '').trim(),
+        alt: String(alt || fallbackLabel).trim()
+    };
+}
+
+function getAdminProductImages() {
+    const imageInput = document.getElementById('admin-product-image');
+    const imagesInput = document.getElementById('admin-product-images');
+    let images = [];
+
+    try {
+        images = JSON.parse(imagesInput?.value || '[]');
+    } catch (error) {
+        images = [];
+    }
+
+    if (!Array.isArray(images)) images = [];
+    if (imageInput?.value && !images.some(item => normalizeAdminProductImageItem(item).url === imageInput.value)) {
+        images.unshift({ url: imageInput.value, alt: 'Imagem principal do produto' });
+    }
+
+    return images
+        .map(item => normalizeAdminProductImageItem(item))
+        .filter(item => item.url);
+}
+
+let adminProductImageDragState = null;
+let adminProductImageSuppressClick = false;
+let adminProductSelectedImageUrl = '';
+
+function formatAdminProductImageLabel(image, index) {
+    const rawLabel = String(image?.alt || '').trim();
+    const rawUrl = String(image?.url || '').trim();
+    const genericLabels = new Set([
+        '',
+        'imagem do produto',
+        'imagem principal do produto'
+    ]);
+    const source = genericLabels.has(rawLabel.toLowerCase()) ? rawUrl : rawLabel;
+    const filename = source.split(/[\\/]/).pop() || '';
+    const cleaned = filename
+        .replace(/\.[a-z0-9]+$/i, '')
+        .replace(/\bstik\b/ig, '')
+        .replace(/[-_]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    return cleaned || (index === 0 ? 'Principal' : `Imagem ${index + 1}`);
+}
+
+function renderAdminProductImageList(images) {
+    const list = document.getElementById('admin-product-image-list');
+    if (!list) return;
+    const selectedUrl = getAdminProductSelectedImage(images)?.url || '';
+
+    list.classList.toggle('has-scroll', images.length >= 3);
+    list.classList.toggle('is-empty', !images.length);
+    list.innerHTML = images
+        .map((image, index) => `
+            <article class="admin-product-image-item ${image.url === selectedUrl ? 'is-selected' : ''}" data-product-image-index="${index}">
+                <button type="button" class="admin-product-image-thumb" data-product-image-select="${index}" aria-label="Mostrar imagem ${index + 1} no bloco principal">
+                    <img src="${escapeAttribute(image.url)}" alt="${escapeAttribute(image.alt || `Imagem ${index + 1}`)}" loading="lazy" decoding="async" draggable="false">
+                    <span>${escapeHtml(formatAdminProductImageLabel(image, index))}</span>
+                </button>
+                <button type="button" class="admin-product-image-remove" data-product-image-remove="${index}" aria-label="Remover imagem ${index + 1}">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </article>
+        `)
+        .join('');
+
+    list.querySelectorAll('[data-product-image-index]').forEach(item => {
+        item.addEventListener('click', (event) => {
+            if (event.target.closest('[data-product-image-remove]')) return;
+            if (adminProductImageSuppressClick) {
+                event.preventDefault();
+                return;
+            }
+            selectAdminProductImage(Number(item.dataset.productImageIndex));
+        });
+    });
+
+    list.querySelectorAll('[data-product-image-remove]').forEach(button => {
+        button.addEventListener('click', () => {
+            removeAdminProductImage(Number(button.dataset.productImageRemove));
+        });
+    });
+
+    setupAdminProductImageReorder(list);
+}
+
+function getAdminProductImageDragTargetIndex(state) {
+    const images = getAdminProductImages();
+    const listStyles = window.getComputedStyle(state.list);
+    const gap = parseFloat(listStyles.columnGap || listStyles.gap) || 0;
+    const itemWidth = state.item.getBoundingClientRect().width + gap;
+    const stepSize = Math.max(itemWidth, 1);
+    const steps = Math.round((state.deltaX || 0) / stepSize);
+    const targetIndex = state.startIndex + steps;
+
+    return Math.max(0, Math.min(images.length - 1, targetIndex));
+}
+
+function moveAdminProductImage(fromIndex, toIndex) {
+    const images = getAdminProductImages();
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= images.length || toIndex >= images.length) {
+        return;
+    }
+
+    const [selected] = images.splice(fromIndex, 1);
+    images.splice(toIndex, 0, selected);
+    setAdminProductImages(images);
+}
+
+function setupAdminProductImageReorder(list) {
+    list.querySelectorAll('[data-product-image-index]').forEach(item => {
+        const thumb = item.querySelector('[data-product-image-select]');
+        if (!thumb) return;
+
+        const beginReorder = (event, usePointerEvents) => {
+            if (adminProductImageDragState) return;
+            if (event.button !== undefined && event.button !== 0) return;
+            if (event.target.closest('[data-product-image-remove]')) return;
+
+            const startIndex = Number(item.dataset.productImageIndex);
+            if (!Number.isFinite(startIndex)) return;
+
+            const moveEventName = usePointerEvents ? 'pointermove' : 'mousemove';
+            const endEventName = usePointerEvents ? 'pointerup' : 'mouseup';
+            const cancelEventName = usePointerEvents ? 'pointercancel' : 'mouseleave';
+            const isTouchPointer = usePointerEvents && event.pointerType === 'touch';
+            const state = {
+                list,
+                item,
+                thumb,
+                pointerId: usePointerEvents ? event.pointerId : null,
+                startIndex,
+                startX: event.clientX,
+                startY: event.clientY,
+                deltaX: 0,
+                ready: !isTouchPointer,
+                dragging: false,
+                holdTimer: 0
+            };
+            adminProductImageDragState = state;
+
+            const cleanup = () => {
+                window.clearTimeout(state.holdTimer);
+                state.item.classList.remove('is-dragging');
+                state.list.classList.remove('is-reordering');
+                state.list.classList.remove('is-drop-ready');
+                state.item.style.transform = '';
+                document.removeEventListener(moveEventName, handleMove);
+                document.removeEventListener(endEventName, handleEnd);
+                document.removeEventListener(cancelEventName, handleCancel);
+                if (usePointerEvents) {
+                    document.removeEventListener('mousemove', handleMove);
+                    document.removeEventListener('mouseup', handleEnd);
+                    document.removeEventListener('mouseleave', handleCancel);
+                }
+                if (usePointerEvents && state.pointerId !== null) {
+                    try {
+                        state.thumb.releasePointerCapture(state.pointerId);
+                    } catch (error) {
+                        /* Pointer may already be released by the browser. */
+                    }
+                }
+                if (adminProductImageDragState === state) adminProductImageDragState = null;
+            };
+
+            const handleMove = (moveEvent) => {
+                if (adminProductImageDragState !== state) return;
+
+                const deltaX = moveEvent.clientX - state.startX;
+                const deltaY = moveEvent.clientY - state.startY;
+                const distance = Math.hypot(deltaX, deltaY);
+                state.deltaX = deltaX;
+
+                if (!state.ready) {
+                    if (Math.abs(deltaY) > 16 && Math.abs(deltaY) > Math.abs(deltaX)) {
+                        cleanup();
+                    }
+                    if (Math.abs(deltaX) > 12) {
+                        state.ready = true;
+                        state.list.classList.add('is-drop-ready');
+                    }
+                    return;
+                }
+
+                if (!state.dragging && Math.abs(deltaX) > 6) {
+                    state.dragging = true;
+                    state.list.classList.add('is-reordering');
+                    state.item.classList.add('is-dragging');
+                }
+
+                if (!state.dragging) return;
+
+                moveEvent.preventDefault();
+                state.item.style.transform = `translateX(${deltaX}px)`;
+            };
+
+            const handleEnd = (endEvent) => {
+                const wasDragging = state.dragging;
+                const targetIndex = wasDragging
+                    ? getAdminProductImageDragTargetIndex(state)
+                    : state.startIndex;
+
+                cleanup();
+
+                if (!wasDragging) return;
+
+                adminProductImageSuppressClick = true;
+                window.setTimeout(() => {
+                    adminProductImageSuppressClick = false;
+                }, 120);
+                moveAdminProductImage(state.startIndex, targetIndex);
+            };
+
+            const handleCancel = () => {
+                cleanup();
+            };
+
+            state.holdTimer = window.setTimeout(() => {
+                if (adminProductImageDragState === state) {
+                    state.ready = true;
+                    state.list.classList.add('is-drop-ready');
+                }
+            }, isTouchPointer ? 160 : 0);
+
+            document.addEventListener(moveEventName, handleMove);
+            document.addEventListener(endEventName, handleEnd);
+            document.addEventListener(cancelEventName, handleCancel);
+            if (usePointerEvents) {
+                document.addEventListener('mousemove', handleMove);
+                document.addEventListener('mouseup', handleEnd);
+                document.addEventListener('mouseleave', handleCancel);
+            }
+            if (usePointerEvents && event.pointerId !== undefined) {
+                try {
+                    thumb.setPointerCapture(event.pointerId);
+                } catch (error) {
+                    /* Some browsers skip capture for synthetic pointer events. */
+                }
+            }
+        };
+
+        item.addEventListener('pointerdown', event => beginReorder(event, true));
+        item.addEventListener('mousedown', event => beginReorder(event, false));
+    });
+}
+
+function getAdminProductSelectedImage(images) {
+    const selected = images.find(image => image.url === adminProductSelectedImageUrl);
+    if (selected) return selected;
+    adminProductSelectedImageUrl = images[0]?.url || '';
+    return images[0] || null;
+}
+
+function updateAdminProductPreview(image, imagesLength, fallbackLabel = 'Imagem do produto') {
+    const imageDropzone = document.getElementById('admin-product-image-dropzone');
+    const imagePreview = document.getElementById('admin-product-image-preview');
+    if (!imagePreview || !imageDropzone) return;
+
+    if (image) {
+        imagePreview.src = image.url;
+        imagePreview.alt = image.alt || fallbackLabel;
+        imageDropzone.classList.remove('is-empty');
+        imageDropzone.setAttribute('aria-label', `${imagesLength} imagem${imagesLength === 1 ? '' : 's'} adicionada${imagesLength === 1 ? '' : 's'}. Clique ou arraste para adicionar mais.`);
+        return;
+    }
+
+    imagePreview.removeAttribute('src');
+    imagePreview.alt = '';
+    imageDropzone.classList.add('is-empty');
+    imageDropzone.classList.remove('is-dragover', 'is-uploading');
+    imageDropzone.setAttribute('aria-label', 'Selecionar imagens do produto');
+}
+
+function selectAdminProductImage(index) {
+    const images = getAdminProductImages();
+    const selected = images[index];
+    if (!selected) return;
+    adminProductSelectedImageUrl = selected.url;
+    setAdminProductImages(images);
+}
+
+function setAdminProductImages(items, fallbackLabel = 'Imagem do produto') {
+    const imageInput = document.getElementById('admin-product-image');
+    const imagesInput = document.getElementById('admin-product-images');
+    const seen = new Set();
+    const images = (Array.isArray(items) ? items : [items])
+        .map(item => normalizeAdminProductImageItem(item, fallbackLabel))
+        .filter(item => item.url)
+        .filter(item => {
+            if (seen.has(item.url)) return false;
+            seen.add(item.url);
+            return true;
+        });
+
+    if (imageInput) imageInput.value = images[0]?.url || '';
+    if (imagesInput) imagesInput.value = JSON.stringify(images);
+    updateAdminProductPreview(getAdminProductSelectedImage(images), images.length, fallbackLabel);
+
+    renderAdminProductImageList(images);
+}
+
+function addAdminProductImages(items) {
+    setAdminProductImages([...getAdminProductImages(), ...(Array.isArray(items) ? items : [items])]);
+}
+
+function removeAdminProductImage(index) {
+    const images = getAdminProductImages();
+    images.splice(index, 1);
+    setAdminProductImages(images);
+}
+
+function getAdminCategorySelectParts() {
+    const shell = document.querySelector('[data-admin-category-select]');
+    const select = document.getElementById('admin-product-category');
+    const trigger = shell ? shell.querySelector('.admin-category-select-trigger') : null;
+    const current = document.getElementById('admin-product-category-current');
+    const menu = document.getElementById('admin-product-category-menu');
+    return { shell, select, trigger, current, menu };
+}
+
+function syncAdminCategorySelectLabel() {
+    const { select, current, menu } = getAdminCategorySelectParts();
+    if (!select || !current) return;
+
+    const selectedOption = select.options[select.selectedIndex];
+    current.textContent = selectedOption ? selectedOption.textContent : 'Selecione uma categoria';
+
+    if (menu) {
+        menu.querySelectorAll('[data-admin-category-option]').forEach(button => {
+            const isSelected = button.dataset.adminCategoryOption === select.value;
+            button.classList.toggle('is-selected', isSelected);
+            button.setAttribute('aria-selected', String(isSelected));
+        });
+    }
+}
+
+function setAdminProductCategory(value) {
+    const { select } = getAdminCategorySelectParts();
+    if (!select) return;
+    select.value = value;
+    syncAdminCategorySelectLabel();
+}
+
+function closeAdminCategorySelect() {
+    const { shell, trigger } = getAdminCategorySelectParts();
+    if (!shell || !trigger) return;
+    shell.classList.remove('is-open');
+    trigger.setAttribute('aria-expanded', 'false');
+}
+
+function renderAdminCategorySelectMenu() {
+    const { select, menu } = getAdminCategorySelectParts();
+    if (!select || !menu) return;
+
+    menu.innerHTML = Array.from(select.options)
+        .map(option => `
+            <button type="button" class="admin-category-select-option" role="option" data-admin-category-option="${escapeAttribute(option.value)}">
+                ${escapeHtml(option.textContent)}
+            </button>
+        `)
+        .join('');
+
+    syncAdminCategorySelectLabel();
+}
+
+function setupAdminCategorySelect() {
+    const { shell, select, trigger, menu } = getAdminCategorySelectParts();
+    if (!shell || !select || !trigger || !menu || shell.dataset.ready === 'true') return;
+    shell.dataset.ready = 'true';
+
+    trigger.addEventListener('click', () => {
+        const isOpen = shell.classList.toggle('is-open');
+        trigger.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    trigger.addEventListener('keydown', (event) => {
+        if (!['ArrowDown', 'Enter', ' '].includes(event.key)) return;
+        event.preventDefault();
+        shell.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+        menu.querySelector('.is-selected, .admin-category-select-option')?.focus();
+    });
+
+    menu.addEventListener('click', (event) => {
+        const option = event.target.closest('[data-admin-category-option]');
+        if (!option) return;
+        setAdminProductCategory(option.dataset.adminCategoryOption);
+        closeAdminCategorySelect();
+        trigger.focus();
+    });
+
+    menu.addEventListener('keydown', (event) => {
+        const options = Array.from(menu.querySelectorAll('[data-admin-category-option]'));
+        const currentIndex = options.indexOf(document.activeElement);
+
+        if (event.key === 'Escape') {
+            closeAdminCategorySelect();
+            trigger.focus();
+            return;
+        }
+
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            document.activeElement?.click();
+            return;
+        }
+
+        if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+        event.preventDefault();
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+        const nextIndex = (currentIndex + direction + options.length) % options.length;
+        options[nextIndex]?.focus();
+    });
+
+    select.addEventListener('change', syncAdminCategorySelectLabel);
+
+    document.addEventListener('click', (event) => {
+        if (!shell.contains(event.target)) closeAdminCategorySelect();
+    });
+}
+
+function refreshAdminCategoryOptions() {
+    const select = document.getElementById('admin-product-category');
+    if (!select || !window.productStore) return;
+
+    select.innerHTML = productStore.listCategories()
+        .map(category => `<option value="${escapeAttribute(category)}">${escapeHtml(category)}</option>`)
+        .join('');
+    renderAdminCategorySelectMenu();
+}
+
+function refreshAdminProductsUI() {
+    if (!window.productStore) return;
+    refreshAdminCategoryOptions();
+    renderAdminProductList();
+    renderAdminCategoryList();
+    renderAdminSelectedCategoryProducts();
+}
+
+function renderAdminProductList() {
+    const list = document.getElementById('admin-product-list');
+    if (!list) return;
+    const searchTerm = normalizeBlogSearch(document.getElementById('admin-product-search')?.value || '');
+    const products = productStore.listProducts()
+        .filter(product => {
+            if (!searchTerm) return true;
+            return [
+                product.nome,
+                product.categoria,
+                product.material,
+                product.descricao
+            ].some(value => normalizeBlogSearch(value).includes(searchTerm));
+        });
+
+    if (!products.length) {
+        list.innerHTML = `<p class="admin-empty">${searchTerm ? 'Nenhum produto encontrado para a pesquisa.' : 'Nenhum produto cadastrado.'}</p>`;
+        return;
+    }
+
+    list.innerHTML = products
+        .map(product => `
+            <article class="admin-list-item admin-product-row">
+                <img src="${escapeAttribute(encodeURI(product.imagem))}" alt="${escapeAttribute(formatNome(product.nome))}" loading="lazy" decoding="async">
+                <div>
+                    <strong>${escapeHtml(formatNome(product.nome))}</strong>
+                    <span>${escapeHtml(normalizeCategoria(product.categoria))}</span>
+                </div>
+                <div class="admin-list-actions">
+                    <button type="button" class="admin-icon-btn" data-admin-edit-product="${escapeAttribute(product.id)}" aria-label="Editar produto">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button type="button" class="admin-icon-btn admin-icon-btn-danger" data-admin-delete-product="${escapeAttribute(product.id)}" aria-label="Excluir produto">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </article>
+        `)
+        .join('');
+
+    list.querySelectorAll('[data-admin-edit-product]').forEach(button => {
+        button.addEventListener('click', () => {
+            const product = productStore.getProduct(button.dataset.adminEditProduct);
+            if (!product) return;
+            document.getElementById('admin-product-id').value = product.id;
+            document.getElementById('admin-product-name').value = product.nome;
+            setAdminProductImages(product.imagens && product.imagens.length ? product.imagens : [product.imagem], formatNome(product.nome));
+            document.getElementById('admin-product-material').value = product.material || 'Elástico';
+            document.getElementById('admin-product-description').value = product.descricao || '';
+            refreshAdminCategoryOptions();
+            setAdminProductCategory(normalizeCategoria(product.categoria));
+            document.getElementById('admin-product-form-title').textContent = 'Editar produto';
+        });
+    });
+
+    list.querySelectorAll('[data-admin-delete-product]').forEach(button => {
+        button.addEventListener('click', async () => {
+            const action = await showBlogTagImpactDialog({
+                title: 'Remover produto',
+                message: 'Remover este produto também remove sua exibição da home, categorias, busca e cards relacionados.',
+                actions: [
+                    { value: 'delete', label: 'Remover produto', className: 'blog-editor-btn-primary' },
+                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+                ]
+            });
+            if (action !== 'delete') return;
+            productStore.deleteProduct(button.dataset.adminDeleteProduct);
+            refreshAdminProductsUI();
+            showEditorFeedback('Produto removido.');
+        });
+    });
+}
+
+let adminSelectedCategory = '';
+let adminEditingCategory = '';
+
+function renderAdminCategoryList() {
+    const list = document.getElementById('admin-category-list');
+    if (!list) return;
+    const categories = productStore.listCategories();
+    const products = productStore.listProducts();
+    if (!adminSelectedCategory || !categories.some(category => normalizeBlogSearch(category) === normalizeBlogSearch(adminSelectedCategory))) {
+        adminSelectedCategory = categories[0] || '';
+    }
+
+    list.innerHTML = categories
+        .map(category => {
+            const count = products.filter(product => normalizeBlogSearch(product.categoria) === normalizeBlogSearch(category)).length;
+            const isSelected = normalizeBlogSearch(category) === normalizeBlogSearch(adminSelectedCategory);
+            const isEditing = normalizeBlogSearch(category) === normalizeBlogSearch(adminEditingCategory);
+            const mainContent = isEditing
+                ? `
+                    <form class="admin-category-inline-edit" data-admin-category-inline-form="${escapeAttribute(category)}">
+                        <input type="text" value="${escapeAttribute(category)}" aria-label="Editar categoria ${escapeAttribute(category)}">
+                        <button type="submit" class="admin-icon-btn" aria-label="Salvar categoria">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </form>
+                `
+                : `
+                    <button type="button" class="admin-category-open" data-admin-category-open="${escapeAttribute(category)}">
+                        <strong>${escapeHtml(category)}</strong>
+                        <span>${count} produto${count === 1 ? '' : 's'}</span>
+                    </button>
+                `;
+
+            return `
+                <article class="admin-category-item ${isSelected ? 'is-selected' : ''}">
+                    <div>${mainContent}</div>
+                    <div class="admin-list-actions">
+                        <button type="button" class="admin-icon-btn" data-admin-edit-category="${escapeAttribute(category)}" aria-label="Editar categoria">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button type="button" class="admin-icon-btn admin-icon-btn-danger" data-admin-delete-category="${escapeAttribute(category)}" aria-label="Remover categoria">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </article>
+            `;
+        })
+        .join('');
+
+    list.querySelectorAll('[data-admin-category-open]').forEach(button => {
+        button.addEventListener('click', () => {
+            adminSelectedCategory = button.dataset.adminCategoryOpen;
+            adminEditingCategory = '';
+            renderAdminCategoryList();
+            renderAdminSelectedCategoryProducts();
+        });
+    });
+
+    list.querySelectorAll('[data-admin-category-inline-form]').forEach(form => {
+        const input = form.querySelector('input');
+        input?.focus();
+        input?.select();
+
+        input?.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            adminEditingCategory = '';
+            renderAdminCategoryList();
+        });
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            await renameAdminCategory(form.dataset.adminCategoryInlineForm, input.value.trim());
+        });
+    });
+
+    list.querySelectorAll('[data-admin-edit-category]').forEach(button => {
+        button.addEventListener('click', () => {
+            adminEditingCategory = button.dataset.adminEditCategory;
+            renderAdminCategoryList();
+        });
+    });
+
+    list.querySelectorAll('[data-admin-delete-category]').forEach(button => {
+        button.addEventListener('click', async () => {
+            const category = button.dataset.adminDeleteCategory;
+            const count = productStore.countProductsByCategory(category);
+
+            if (count > 0) {
+                await showBlogTagImpactDialog({
+                    title: 'Categoria em uso',
+                    message: `Esta categoria está vinculada a ${count} produto${count === 1 ? '' : 's'}. Remova ou mova esses produtos antes de excluir a categoria.`,
+                    actions: [
+                        { value: 'ok', label: 'Entendi', className: 'blog-editor-btn-primary' }
+                    ]
+                });
+                return;
+            }
+
+            const action = await showBlogTagImpactDialog({
+                title: 'Remover categoria',
+                message: `Deseja remover a categoria "${category}"?`,
+                actions: [
+                    { value: 'delete', label: 'Remover categoria', className: 'blog-editor-btn-primary' },
+                    { value: 'cancel', label: 'Cancelar', className: 'blog-editor-btn-light' }
+                ]
+            });
+            if (action !== 'delete') return;
+            productStore.deleteCategory(category);
+            refreshAdminProductsUI();
+            renderDynamicSidebarCategories();
+            showEditorFeedback('Categoria removida.');
+        });
+    });
+}

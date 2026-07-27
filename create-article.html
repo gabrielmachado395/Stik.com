@@ -46,26 +46,21 @@
                     <section class="blog-editor-panel blog-editor-cover">
                         <div class="blog-editor-panel-head">
                             <h2>Imagem de capa</h2>
-                            <button type="button" class="blog-icon-btn" aria-label="Trocar imagem de capa">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
                         </div>
 
                         <div class="blog-cover-editor">
-                            <figure class="is-empty" aria-label="Nenhuma imagem de capa selecionada"></figure>
-                            <div class="blog-cover-fields">
-                                <div class="blog-cover-actions">
-                                    <button type="button" class="blog-editor-btn blog-editor-btn-light" id="cover-upload-btn">
-                                        <i class="fas fa-upload"></i>
-                                        Enviar imagem
-                                    </button>
-                                    <button type="button" class="blog-editor-btn blog-editor-btn-light" id="cover-library-btn">
-                                        <i class="fas fa-images"></i>
-                                        Biblioteca
-                                    </button>
-                                    <input type="file" id="cover-file-input" accept="image/*" hidden>
+                            <figure class="blog-cover-dropzone is-empty" role="button" tabindex="0" aria-label="Selecionar imagem de capa">
+                                <div class="blog-cover-placeholder">
+                                    <span><i class="fas fa-cloud-upload-alt"></i></span>
+                                    <strong>Arraste a imagem de capa aqui</strong>
+                                    <small>ou clique neste espaço para escolher um arquivo</small>
                                 </div>
-                            </div>
+                                <div class="blog-cover-change-hint">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Trocar imagem
+                                </div>
+                            </figure>
+                            <input type="file" id="cover-file-input" accept="image/*" hidden>
                         </div>
                     </section>
 
