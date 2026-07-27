@@ -52,7 +52,8 @@ main,
 
 /* On desktop we don't want the overlay to darken the page (overlay only for mobile) */
 @media (min-width: 769px) {
-  .overlay {
+  .overlay,
+  #overlay {
     display: none !important;
   }
 }
@@ -273,7 +274,8 @@ button {
     transition: transform 0.3s ease;
 }
 
-.overlay {
+.overlay,
+#overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -284,7 +286,8 @@ button {
     display: none;
 }
 
-.overlay.active {
+.overlay.active,
+#overlay.active {
     display: block;
 }
 
@@ -309,6 +312,7 @@ body.sidebar-open .top-header .main-header{
 .video-hero-section {
     position: relative;
     height: 100vh;
+    min-height: 100svh;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -337,6 +341,15 @@ body.sidebar-open .top-header .main-header{
     height: 100%;
     overflow: hidden;
     background: #000 url("../../img/banner/banner-site-8_Prancheta-1-scaled (1).jpg") center / cover no-repeat;
+}
+
+@supports (height: 100svh) {
+    .sidebar,
+    .overlay,
+    #overlay,
+    .video-hero-section {
+        height: 100svh;
+    }
 }
 
 #institutionalVideo {
