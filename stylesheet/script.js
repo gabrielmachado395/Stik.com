@@ -746,6 +746,8 @@ function getPerformanceProfile() {
     const saveData = Boolean(connection && connection.saveData);
     const smallViewport = mediaMatches('(max-width: 768px)');
     const coarsePointer = mediaMatches('(pointer: coarse)');
+    const anyCoarsePointer = mediaMatches('(any-pointer: coarse)');
+    const touchCapable = anyCoarsePointer || Number(navigator.maxTouchPoints) > 0;
     const reducedMotion = mediaMatches('(prefers-reduced-motion: reduce)');
     const lowMemory = memory <= 4;
     const lowCpu = cores <= 4;
@@ -754,8 +756,10 @@ function getPerformanceProfile() {
         saveData,
         smallViewport,
         coarsePointer,
+        anyCoarsePointer,
+        touchCapable,
         reducedMotion,
-        lowPower: saveData || lowMemory || lowCpu || (smallViewport && coarsePointer)
+        lowPower: saveData || lowMemory || lowCpu || (smallViewport && (coarsePointer || touchCapable))
     };
 }
 
@@ -773,7 +777,7 @@ function shouldUseLimitedCatalogCarousel() {
     const fineHover = hasFineHover();
 
     if (profile.reducedMotion || profile.saveData) return true;
-    if (profile.smallViewport || profile.coarsePointer || !fineHover) return true;
+    if (profile.smallViewport || profile.coarsePointer || profile.touchCapable || !fineHover) return true;
 
     return profile.lowMemory && profile.lowCpu;
 }
@@ -1555,7 +1559,7 @@ function setupDraggableCarousel(carouselElement) {
     let lastPointerX = 0;
     let lastPointerTime = 0;
     let inertiaFrame = null;
-    const useNativeTouchScroll = mediaMatches('(pointer: coarse)');
+    const useNativeTouchScroll = getPerformanceProfile().touchCapable;
     const INERTIA_DECAY = 0.972;
     const INERTIA_START_VELOCITY = 0.015;
     const INERTIA_STOP_VELOCITY = 0.003;
