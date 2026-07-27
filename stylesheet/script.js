@@ -5240,6 +5240,9 @@ function renderAdminProductImageList(images) {
                     <img src="${escapeAttribute(image.url)}" alt="${escapeAttribute(image.alt || `Imagem ${index + 1}`)}" loading="lazy" decoding="async" draggable="false">
                     <span>${escapeHtml(formatAdminProductImageLabel(image, index))}</span>
                 </button>
+                <button type="button" class="admin-product-image-handle" data-product-image-handle="${index}" aria-label="Arrastar para reordenar imagem ${index + 1}">
+                    <span aria-hidden="true">⋮⋮</span>
+                </button>
                 <button type="button" class="admin-product-image-remove" data-product-image-remove="${index}" aria-label="Remover imagem ${index + 1}">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -5250,6 +5253,7 @@ function renderAdminProductImageList(images) {
     list.querySelectorAll('[data-product-image-index]').forEach(item => {
         item.addEventListener('click', (event) => {
             if (event.target.closest('[data-product-image-remove]')) return;
+            if (event.target.closest('[data-product-image-handle]')) return;
             if (adminProductImageSuppressClick) {
                 event.preventDefault();
                 return;
@@ -5292,13 +5296,15 @@ function moveAdminProductImage(fromIndex, toIndex) {
 
 function setupAdminProductImageReorder(list) {
     list.querySelectorAll('[data-product-image-index]').forEach(item => {
-        const thumb = item.querySelector('[data-product-image-select]');
-        if (!thumb) return;
+        const handle = item.querySelector('[data-product-image-handle]');
+        if (!handle) return;
 
         const beginReorder = (event, usePointerEvents) => {
             if (adminProductImageDragState) return;
             if (event.button !== undefined && event.button !== 0) return;
             if (event.target.closest('[data-product-image-remove]')) return;
+            if (!event.target.closest('[data-product-image-handle]')) return;
+            event.preventDefault();
 
             const startIndex = Number(item.dataset.productImageIndex);
             if (!Number.isFinite(startIndex)) return;
@@ -5310,7 +5316,7 @@ function setupAdminProductImageReorder(list) {
             const state = {
                 list,
                 item,
-                thumb,
+                handle,
                 pointerId: usePointerEvents ? event.pointerId : null,
                 startIndex,
                 startX: event.clientX,
@@ -5338,7 +5344,7 @@ function setupAdminProductImageReorder(list) {
                 }
                 if (usePointerEvents && state.pointerId !== null) {
                     try {
-                        state.thumb.releasePointerCapture(state.pointerId);
+                        state.handle.releasePointerCapture(state.pointerId);
                     } catch (error) {
                         /* Pointer may already be released by the browser. */
                     }
@@ -5415,15 +5421,16 @@ function setupAdminProductImageReorder(list) {
             }
             if (usePointerEvents && event.pointerId !== undefined) {
                 try {
-                    thumb.setPointerCapture(event.pointerId);
+                    handle.setPointerCapture(event.pointerId);
                 } catch (error) {
                     /* Some browsers skip capture for synthetic pointer events. */
                 }
             }
         };
 
-        item.addEventListener('pointerdown', event => beginReorder(event, true));
-        item.addEventListener('mousedown', event => beginReorder(event, false));
+        handle.addEventListener('pointerdown', event => beginReorder(event, true));
+        handle.addEventListener('mousedown', event => beginReorder(event, false));
+        handle.addEventListener('contextmenu', event => event.preventDefault());
     });
 }
 
