@@ -8117,7 +8117,7 @@ a,
 
     .admin-category-form .admin-inline-form .blog-editor-btn {
         flex: 0 0 auto;
-        width: auto;
+        width: 100%;
         height: 36px;
         min-height: 36px;
         white-space: nowrap;
