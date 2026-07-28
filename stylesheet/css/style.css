@@ -340,7 +340,7 @@ body.sidebar-open .top-header .main-header{
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #000 url("../../img/banner/banner-site-8_Prancheta-1-scaled (1).jpg") center / cover no-repeat;
+    background: #000 url("../../img/optimized/hero-poster.jpg") center / cover no-repeat;
 }
 
 @supports (height: 100svh) {
