@@ -2560,7 +2560,7 @@ function renderBlogCategorySection(category, articles, includeNewsletter = false
         <section class="blog-category-block" data-blog-category="${escapeAttribute(category)}">
             <div class="blog-container">
                 <h2 class="blog-category-title">${escapeHtml(category)}</h2>
-                <div class="blog-category-layout">
+                <div class="blog-category-layout ${includeNewsletter ? 'has-newsletter' : ''}">
                     ${renderBlogCard(first, { className: 'blog-category-card is-tall' })}
                     ${stackCards ? `<div class="blog-category-stack">${stackCards}</div>` : ''}
                     ${sideCard}
@@ -4970,6 +4970,16 @@ function activateAdminTab(tab) {
     });
 }
 
+function setAdminArticleEditorOpen(isOpen, mode = 'create') {
+    const layout = document.getElementById('admin-articles-layout');
+    const editorPanel = document.getElementById('admin-article-editor-panel');
+    const editorTitle = document.getElementById('admin-article-editor-title');
+
+    layout?.classList.toggle('is-editor-open', Boolean(isOpen));
+    if (editorPanel) editorPanel.hidden = !isOpen;
+    if (editorTitle) editorTitle.textContent = mode === 'edit' ? 'Editar artigo' : 'Criar artigo';
+}
+
 async function setupAdminPage() {
     const loginView = document.getElementById('admin-login-view');
     const dashboardView = document.getElementById('admin-dashboard-view');
@@ -4983,6 +4993,7 @@ async function setupAdminPage() {
     const showDashboard = async () => {
         loginView.hidden = true;
         dashboardView.hidden = false;
+        setAdminArticleEditorOpen(false);
         await setupArticleForm();
         await refreshAdminArticles();
         setupAdminProducts();
@@ -5012,8 +5023,13 @@ async function setupAdminPage() {
 
     const newArticleButton = document.getElementById('admin-new-article');
     newArticleButton?.addEventListener('click', () => {
+        setAdminArticleEditorOpen(true, 'create');
         window.stikArticleEditor?.reset();
         showEditorFeedback('Editor pronto para um novo artigo.');
+    });
+
+    document.getElementById('admin-close-article-editor')?.addEventListener('click', () => {
+        setAdminArticleEditorOpen(false);
     });
 
     window.addEventListener('stik:article-saved', refreshAdminArticles);
@@ -5064,6 +5080,7 @@ async function refreshAdminArticles() {
     list.querySelectorAll('[data-admin-edit-article]').forEach(button => {
         button.addEventListener('click', async () => {
             const article = articleMap.get(String(button.dataset.adminEditArticle));
+            setAdminArticleEditorOpen(true, 'edit');
             await window.stikArticleEditor?.load(article || button.dataset.adminEditArticle);
         });
     });
@@ -5081,6 +5098,7 @@ async function refreshAdminArticles() {
             if (action !== 'delete') return;
             await window.blogApi.deleteArticle(button.dataset.adminDeleteArticle);
             window.stikArticleEditor?.reset();
+            setAdminArticleEditorOpen(false);
             await refreshAdminArticles();
             showEditorFeedback('Artigo excluído.');
         });

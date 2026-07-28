@@ -3623,6 +3623,7 @@ a,
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+        padding: 0 18px;
     }
 
     .category-sort {
@@ -5665,6 +5666,10 @@ a,
     align-items: stretch;
 }
 
+.blog-category-layout.has-newsletter {
+    grid-template-columns: minmax(0, 0.95fr) minmax(210px, 0.55fr) minmax(420px, 1.2fr);
+}
+
 .blog-category-stack {
     display: grid;
     gap: 16px;
@@ -5682,6 +5687,8 @@ a,
     display: flex;
     flex-direction: column;
     justify-content: center;
+    width: 100%;
+    min-width: min(420px, 100%);
     min-height: 540px;
     padding: 34px 26px;
     border-radius: 8px;
@@ -6836,6 +6843,7 @@ a,
     .blog-hero-grid,
     .blog-featured-grid,
     .blog-category-layout,
+    .blog-category-layout.has-newsletter,
     .blog-editor-layout {
         grid-template-columns: 1fr;
     }
@@ -6881,6 +6889,7 @@ a,
     .blog-hero-grid,
     .blog-featured-grid,
     .blog-category-layout,
+    .blog-category-layout.has-newsletter,
     .blog-cover-editor,
     .blog-field-grid,
     .blog-image-meta {
@@ -6923,6 +6932,14 @@ a,
     .blog-feature-card.is-large,
     .blog-category-card.is-tall {
         min-height: 420px;
+    }
+
+    .blog-newsletter-card {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        justify-self: stretch;
+        padding-inline: 24px;
     }
 
     .blog-feature-side,
@@ -7634,10 +7651,39 @@ a,
     align-items: start;
 }
 
+.admin-articles-layout {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-articles-layout.is-editor-open {
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+}
+
 .admin-list-panel,
 .admin-editor-panel,
 .admin-card {
     padding: 20px;
+}
+
+.admin-editor-panel[hidden] {
+    display: none;
+}
+
+.admin-editor-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.admin-editor-head h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
 }
 
 .admin-list-head {
@@ -7992,6 +8038,7 @@ a,
 
 @media (max-width: 1100px) {
     .admin-split,
+    .admin-articles-layout.is-editor-open,
     .admin-products-grid,
     .admin-categories-grid {
         grid-template-columns: 1fr;
@@ -8066,6 +8113,14 @@ a,
     .admin-inline-form .blog-editor-btn {
         align-self: flex-end;
         min-width: 92px;
+    }
+
+    .admin-category-form .admin-inline-form .blog-editor-btn {
+        flex: 0 0 auto;
+        width: auto;
+        height: 36px;
+        min-height: 36px;
+        white-space: nowrap;
     }
 
     .admin-tab {

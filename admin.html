@@ -63,19 +63,25 @@
                 </nav>
 
                 <section class="admin-panel is-active" id="admin-tab-articles">
-                    <div class="admin-split">
+                    <div class="admin-split admin-articles-layout" id="admin-articles-layout">
                         <aside class="admin-list-panel">
                             <div class="admin-list-head">
                                 <h2>Artigos existentes</h2>
                                 <button type="button" class="blog-editor-btn blog-editor-btn-outline" id="admin-new-article">
                                     <i class="fas fa-plus"></i>
-                                    Novo
+                                    Criar artigo
                                 </button>
                             </div>
                             <div class="admin-list" id="admin-article-list"></div>
                         </aside>
 
-                        <div class="admin-editor-panel">
+                        <div class="admin-editor-panel" id="admin-article-editor-panel" hidden>
+                            <div class="admin-editor-head">
+                                <h2 id="admin-article-editor-title">Criar artigo</h2>
+                                <button type="button" class="admin-icon-btn" id="admin-close-article-editor" aria-label="Fechar editor de artigo">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                             <form id="article-form" class="blog-editor-layout blog-editor-layout-simple admin-article-form">
                                 <div class="blog-editor-main">
                                     <section class="blog-editor-panel blog-editor-cover">
