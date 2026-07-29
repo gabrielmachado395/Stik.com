@@ -62,6 +62,9 @@ desktop.ini
 .vscode/
 .idea/
 
+# Documentation drafts
+*.md
+
 # Local agent/tooling state
 .artifacts/
 .bg-shell/
