@@ -3368,17 +3368,18 @@ a,
 
 .category-hero {
     position: relative;
-    min-height: 270px;
+    min-height: clamp(320px, 25vw, 430px);
     width: auto;
     max-width: none;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
     background:
         linear-gradient(90deg, rgba(29, 24, 21, 0.30) 0%, rgba(127, 88, 58, 0.10) 50%, rgba(29, 24, 21, 0.26) 100%),
-        url("../../img/optimized/catalog-carousel-04.jpg") center 38% / cover no-repeat;
+        url("../../img/optimized/categoria-banner.png") center 44% / cover no-repeat;
     overflow: hidden;
     
 }
+
 
 .category-hero::after {
     content: "";
@@ -3670,6 +3671,9 @@ a,
 
     .category-hero {
         min-height: 210px;
+        background:
+            linear-gradient(90deg, rgba(29, 24, 21, 0.30) 0%, rgba(127, 88, 58, 0.10) 50%, rgba(29, 24, 21, 0.26) 100%),
+            url("../../img/optimized/categoria-banner-mobile.jpg") center 38% / cover no-repeat;
     }
 
     .category-hero-overlay {
@@ -3739,7 +3743,7 @@ a,
 
 @media (min-width: 769px) and (max-width: 1024px) {
     .category-hero {
-        min-height: 240px;
+        min-height: 300px;
     }
 
     .category-hero h1 {
