@@ -1,3 +1,78 @@
+const THEME_STORAGE_KEY = 'stik-theme';
+
+function getStoredTheme() {
+    try {
+        const theme = localStorage.getItem(THEME_STORAGE_KEY);
+        return theme === 'dark' || theme === 'light' ? theme : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function getPreferredTheme() {
+    const storedTheme = getStoredTheme();
+    if (storedTheme) return storedTheme;
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function updateThemeToggle(theme) {
+    const isDark = theme === 'dark';
+    document.querySelectorAll('.theme-toggle').forEach((button) => {
+        const icon = button.querySelector('i');
+        button.classList.toggle('is-dark', isDark);
+        button.setAttribute('aria-label', isDark ? 'Alternar para tema claro' : 'Alternar para tema escuro');
+        button.setAttribute('title', isDark ? 'Tema claro' : 'Tema escuro');
+        if (icon) {
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+    });
+}
+
+function applyTheme(theme) {
+    const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = normalizedTheme;
+    document.documentElement.style.colorScheme = normalizedTheme;
+    updateThemeToggle(normalizedTheme);
+}
+
+function setThemePreference(theme) {
+    try {
+        localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (error) {
+        /* Preferencia de tema e apenas uma melhoria local. */
+    }
+    applyTheme(theme);
+}
+
+function inicializarTema() {
+    applyTheme(getPreferredTheme());
+
+    document.querySelectorAll('.theme-toggle:not([data-theme-bound])').forEach((button) => {
+        button.dataset.themeBound = 'true';
+        button.addEventListener('click', () => {
+            const currentTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+            setThemePreference(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+    });
+
+    if (!window.__stikThemeSystemListenerBound && window.matchMedia) {
+        window.__stikThemeSystemListenerBound = true;
+        const themePreference = window.matchMedia('(prefers-color-scheme: dark)');
+        const syncSystemTheme = (event) => {
+            if (!getStoredTheme()) {
+                applyTheme(event.matches ? 'dark' : 'light');
+            }
+        };
+        if (themePreference.addEventListener) {
+            themePreference.addEventListener('change', syncSystemTheme);
+        } else if (themePreference.addListener) {
+            themePreference.addListener(syncSystemTheme);
+        }
+    }
+}
+
+applyTheme(getPreferredTheme());
+
 const produtos = [
     {
         id: 2,
@@ -4315,6 +4390,7 @@ async function inicializarPagina() {
         carregarComponente('footer-placeholder', 'footer.html')
     ]);
     renderDynamicSidebarCategories();
+    inicializarTema();
     inicializarPesquisa();
     inicializarMenu();
     restoreSidebarState();
@@ -5864,7 +5940,7 @@ function renderAdminCategoryList() {
             const mainContent = isEditing
                 ? `
                     <form class="admin-category-inline-edit" data-admin-category-inline-form="${escapeAttribute(category)}">
-                        <input type="text" value="${escapeAttribute(category)}" aria-label="Editar categoria ${escapeAttribute(category)}">
+                        <input type="text" value="${escapeAttribute(category)}" placeholder="Novo nome da categoria" aria-label="Editar categoria ${escapeAttribute(category)}">
                         <button type="submit" class="admin-icon-btn" aria-label="Salvar categoria">
                             <i class="fas fa-check"></i>
                         </button>
