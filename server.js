@@ -1,13 +1,17 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 const fetch = require('node-fetch');
 const nodemailer = require('nodemailer');
 const app = express();
 
 const PORT = process.env.PORT || 3000;
+const ANALYTICS_DIR = path.join(__dirname, '.stik-analytics');
+const ANALYTICS_FILE = path.join(ANALYTICS_DIR, 'analytics.json');
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // Serve arquivos estáticos (site)
 app.use(express.static(path.join(__dirname)));
@@ -24,6 +28,505 @@ function escapeHtml(str) {
 }
 
 // cria transporter nodemailer se variáveis SMTP estiverem configuradas
+function ensureAnalyticsStore() {
+  if (!fs.existsSync(ANALYTICS_DIR)) {
+    fs.mkdirSync(ANALYTICS_DIR, { recursive: true });
+  }
+
+  if (!fs.existsSync(ANALYTICS_FILE)) {
+    const now = new Date().toISOString();
+    const initialStore = {
+      meta: {
+        version: 'temporary-json-v1',
+        createdAt: now,
+        updatedAt: now,
+        note: 'Armazenamento temporario minimizado: cidade/estado, produto de interesse, email informado e dispositivo.'
+      },
+      users: [],
+      contacts: [],
+      productInterests: [],
+      devices: [],
+      locations: []
+    };
+    fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(initialStore, null, 2), 'utf8');
+    return initialStore;
+  }
+
+  const raw = fs.readFileSync(ANALYTICS_FILE, 'utf8');
+  return JSON.parse(raw);
+}
+
+function writeAnalyticsStore(store) {
+  store.meta.updatedAt = new Date().toISOString();
+  const tempPath = `${ANALYTICS_FILE}.tmp`;
+  fs.writeFileSync(tempPath, JSON.stringify(store, null, 2), 'utf8');
+  fs.renameSync(tempPath, ANALYTICS_FILE);
+}
+
+function cleanValue(value, maxLength = 1200, depth = 0) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'string') return value.trim().slice(0, maxLength);
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'boolean') return value;
+  if (depth > 4) return '[truncated]';
+  if (Array.isArray(value)) {
+    return value.slice(0, 50).map(item => cleanValue(item, maxLength, depth + 1));
+  }
+  if (typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).slice(0, 80).map(([key, item]) => [
+      String(key).slice(0, 80),
+      cleanValue(item, maxLength, depth + 1)
+    ]));
+  }
+  return String(value).slice(0, maxLength);
+}
+
+function asString(value, maxLength = 255) {
+  if (value === null || value === undefined) return '';
+  return String(value).trim().slice(0, maxLength);
+}
+
+function normalizeEmail(value) {
+  const email = asString(value, 320).toLowerCase();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
+}
+
+function detectBrowser(userAgent = '') {
+  const ua = asString(userAgent, 500);
+  if (/edg/i.test(ua)) return 'Edge';
+  if (/opr|opera/i.test(ua)) return 'Opera';
+  if (/firefox/i.test(ua)) return 'Firefox';
+  if (/safari/i.test(ua) && !/chrome|chromium/i.test(ua)) return 'Safari';
+  if (/chrome|chromium/i.test(ua)) return 'Chrome';
+  return 'Nao informado';
+}
+
+function summarizeDevice(device = {}) {
+  const viewport = device.viewport || {};
+  const screen = device.screen || {};
+  const width = Number(viewport.width || screen.width || 0);
+  const type = width && width <= 768 ? 'Mobile' : width && width <= 1024 ? 'Tablet' : 'Desktop';
+
+  return {
+    type,
+    platform: asString(device.platform || 'Nao informado', 80),
+    browser: detectBrowser(device.userAgent),
+    language: asString(device.language || device.languages?.[0] || 'Nao informado', 40),
+    screen: {
+      width: Number(screen.width) || null,
+      height: Number(screen.height) || null
+    },
+    viewport: {
+      width: Number(viewport.width) || null,
+      height: Number(viewport.height) || null
+    }
+  };
+}
+
+function getDeviceKey(device) {
+  return [
+    device.type,
+    device.platform,
+    device.browser,
+    device.language,
+    device.screen.width,
+    device.screen.height
+  ].join('|');
+}
+
+function normalizeProductInterestItem(product = {}, now = new Date().toISOString()) {
+  const productName = asString(product.productName, 180);
+  if (!productName) return null;
+  const views = Number(product.views) || 0;
+  const clicks = Number(product.clicks) || 0;
+  return {
+    id: product.id || crypto.randomUUID(),
+    productId: asString(product.productId || productName, 80),
+    productName,
+    category: asString(product.category, 120) || null,
+    interestCount: Number(product.interestCount) || Math.max(views, clicks, 1),
+    firstInterestedAt: product.firstInterestedAt || product.firstSeenAt || now,
+    lastInterestedAt: product.lastInterestedAt || product.lastSeenAt || now
+  };
+}
+
+function normalizeUserItem(user = {}, now = new Date().toISOString()) {
+  const anonymousId = asString(user.anonymousId, 120);
+  if (!anonymousId) return null;
+  const products = Array.isArray(user.productInterests)
+    ? user.productInterests.map(product => normalizeProductInterestItem(product, now)).filter(Boolean)
+    : [];
+  return {
+    id: user.id || crypto.randomUUID(),
+    anonymousId,
+    email: normalizeEmail(user.email) || null,
+    city: asString(user.city, 120) || null,
+    state: asString(user.state, 120) || null,
+    device: user.device ? summarizeDevice(user.device) : null,
+    productInterests: products,
+    firstSeenAt: user.firstSeenAt || now,
+    lastSeenAt: user.lastSeenAt || now
+  };
+}
+
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) return String(forwarded).split(',')[0].trim();
+  return req.socket?.remoteAddress || req.connection?.remoteAddress || req.ip || '';
+}
+
+function isLocalRequest(req) {
+  const ip = getClientIp(req);
+  return !ip || ip === '::1' || ip === '127.0.0.1' || ip === '::ffff:127.0.0.1';
+}
+
+function upsertBy(store, collectionName, predicate, createItem, updateItem) {
+  let item = store[collectionName].find(predicate);
+  if (!item) {
+    item = createItem();
+    store[collectionName].push(item);
+  }
+  updateItem(item);
+  return item;
+}
+
+function normalizeTemporaryAnalyticsStore(store) {
+  const now = new Date().toISOString();
+  const next = {
+    meta: {
+      version: 'temporary-json-v3-users',
+      createdAt: store?.meta?.createdAt || now,
+      updatedAt: store?.meta?.updatedAt || now,
+      note: 'Armazenamento temporario minimizado com visao por usuario: cidade/estado, produto de interesse, email informado e dispositivo.'
+    },
+    users: Array.isArray(store?.users) ? store.users.map(user => normalizeUserItem(user, now)).filter(Boolean) : [],
+    contacts: [],
+    productInterests: [],
+    devices: Array.isArray(store?.devices) ? store.devices : [],
+    locations: Array.isArray(store?.locations) ? store.locations : []
+  };
+
+  const contactSources = Array.isArray(store?.contacts)
+    ? store.contacts
+    : (Array.isArray(store?.leads) ? store.leads : []);
+  contactSources.forEach(contact => {
+    const email = normalizeEmail(contact.email);
+    if (!email) return;
+    upsertBy(
+      next,
+      'contacts',
+      item => item.email === email,
+      () => ({
+        id: contact.id || crypto.randomUUID(),
+        email,
+        firstSubmittedAt: contact.firstSubmittedAt || contact.lastSubmittedAt || now,
+        lastSubmittedAt: contact.lastSubmittedAt || contact.firstSubmittedAt || now
+      }),
+      item => {
+        item.lastSubmittedAt = contact.lastSubmittedAt || contact.firstSubmittedAt || item.lastSubmittedAt || now;
+      }
+    );
+  });
+
+  if (Array.isArray(store?.productInterests)) {
+    store.productInterests.forEach(product => {
+      const productName = asString(product.productName, 180);
+      if (!productName) return;
+      const views = Number(product.views) || 0;
+      const clicks = Number(product.clicks) || 0;
+      const interestCount = Number(product.interestCount) || Math.max(views, clicks, 1);
+      const productId = asString(product.productId || productName, 80);
+      const category = asString(product.category, 120) || null;
+      upsertBy(
+        next,
+        'productInterests',
+        item => item.productId === productId && item.productName === productName && item.category === category,
+        () => ({
+          id: product.id || crypto.randomUUID(),
+          productId,
+          productName,
+          category,
+          interestCount: 0,
+          firstInterestedAt: product.firstInterestedAt || product.firstSeenAt || now,
+          lastInterestedAt: product.lastInterestedAt || product.lastSeenAt || now
+        }),
+        item => {
+          item.interestCount += interestCount;
+          item.lastInterestedAt = product.lastInterestedAt || product.lastSeenAt || item.lastInterestedAt || now;
+        }
+      );
+    });
+  }
+
+  if (!next.productInterests.length && Array.isArray(store?.events)) {
+    store.events.forEach(event => {
+      if (event.eventName !== 'product_view') return;
+      const productName = asString(event.productName || event.metadata?.productName, 180);
+      if (!productName) return;
+      const productId = asString(event.productId || event.metadata?.productId || productName, 80);
+      const category = asString(event.category || event.metadata?.category || '', 120);
+      upsertBy(
+        next,
+        'productInterests',
+        item => item.productId === productId && item.productName === productName && item.category === (category || null),
+        () => ({
+          id: crypto.randomUUID(),
+          productId,
+          productName,
+          category: category || null,
+          interestCount: 0,
+          firstInterestedAt: event.occurredAt || now,
+          lastInterestedAt: event.occurredAt || now
+        }),
+        item => {
+          item.interestCount += 1;
+          item.lastInterestedAt = event.occurredAt || item.lastInterestedAt;
+        }
+      );
+    });
+  }
+
+  if (!next.devices.length) {
+    const legacyDevices = [
+      ...(Array.isArray(store?.sessions) ? store.sessions.map(session => session.device) : []),
+      ...(Array.isArray(store?.visitors) ? store.visitors.map(visitor => visitor.lastDevice) : [])
+    ].filter(Boolean);
+
+    legacyDevices.forEach(devicePayload => {
+      const device = summarizeDevice(devicePayload);
+      const key = getDeviceKey(device);
+      upsertBy(
+        next,
+        'devices',
+        item => item.key === key,
+        () => ({
+          id: crypto.randomUUID(),
+          key,
+          ...device,
+          count: 0,
+          firstSeenAt: now,
+          lastSeenAt: now
+        }),
+        item => {
+          item.count += 1;
+          item.lastSeenAt = now;
+        }
+      );
+    });
+  }
+
+  next.locations = next.locations
+    .map(location => ({
+      id: location.id || crypto.randomUUID(),
+      city: asString(location.city, 120) || null,
+      state: asString(location.state, 120) || null,
+      count: Number(location.count) || 1,
+      firstCollectedAt: location.firstCollectedAt || location.collectedAt || now,
+      lastCollectedAt: location.lastCollectedAt || location.collectedAt || now
+    }))
+    .filter(location => location.city || location.state);
+
+  return next;
+}
+
+function recordTemporaryAnalytics(req, payload = {}) {
+  const store = normalizeTemporaryAnalyticsStore(ensureAnalyticsStore());
+  const now = new Date().toISOString();
+  const analytics = cleanValue(payload.analytics || {});
+  const visitorPayload = cleanValue(payload.visitor || {});
+  const anonymousId = asString(
+    visitorPayload.anonymousId || visitorPayload.anonymous_id || analytics.visitorId || analytics.anonymousId,
+    120
+  );
+
+  let user = null;
+  if (anonymousId) {
+    user = upsertBy(
+      store,
+      'users',
+      item => item.anonymousId === anonymousId,
+      () => ({
+        id: crypto.randomUUID(),
+        anonymousId,
+        email: null,
+        city: null,
+        state: null,
+        device: null,
+        productInterests: [],
+        firstSeenAt: now,
+        lastSeenAt: now
+      }),
+      item => {
+        item.lastSeenAt = now;
+      }
+    );
+  }
+
+  if (analytics.device) {
+    const device = summarizeDevice(analytics.device);
+    const key = getDeviceKey(device);
+    if (user) user.device = device;
+    upsertBy(
+      store,
+      'devices',
+      item => item.key === key,
+      () => ({
+        id: crypto.randomUUID(),
+        key,
+        ...device,
+        count: 0,
+        firstSeenAt: now,
+        lastSeenAt: now
+      }),
+      item => {
+        item.count += 1;
+        item.lastSeenAt = now;
+      }
+    );
+  }
+
+  const leadPayload = cleanValue(payload.lead || {});
+  const email = normalizeEmail(leadPayload.email);
+  if (email) {
+    if (user) {
+      user.email = email;
+      user.lastSeenAt = now;
+    }
+    upsertBy(
+      store,
+      'contacts',
+      item => item.email === email,
+      () => ({
+        id: crypto.randomUUID(),
+        email,
+        firstSubmittedAt: now,
+        lastSubmittedAt: now
+      }),
+      item => {
+        item.lastSubmittedAt = now;
+      }
+    );
+  }
+
+  const events = Array.isArray(payload.events) ? payload.events : [payload.event].filter(Boolean);
+  events.forEach(item => {
+    const event = cleanValue(item || {});
+    const eventName = asString(event.eventName || event.event_name || event.name, 120);
+    if (eventName !== 'product_view') return;
+    const productName = asString(event.productName || event.product_name, 180);
+    if (!productName) return;
+    const productId = asString(event.productId || event.product_id || productName, 80);
+    const category = asString(event.category, 120);
+    if (user) {
+      upsertBy(
+        user,
+        'productInterests',
+        item => item.productId === productId && item.productName === productName && item.category === (category || null),
+        () => ({
+          id: crypto.randomUUID(),
+          productId,
+          productName,
+          category: category || null,
+          interestCount: 0,
+          firstInterestedAt: event.occurredAt || now,
+          lastInterestedAt: event.occurredAt || now
+        }),
+        product => {
+          product.interestCount += 1;
+          product.lastInterestedAt = event.occurredAt || now;
+        }
+      );
+      user.lastSeenAt = event.occurredAt || now;
+    }
+
+    upsertBy(
+      store,
+      'productInterests',
+      item => item.productId === productId && item.productName === productName && item.category === (category || null),
+      () => ({
+        id: crypto.randomUUID(),
+        productId,
+        productName,
+        category: category || null,
+        interestCount: 0,
+        firstInterestedAt: event.occurredAt || now,
+        lastInterestedAt: event.occurredAt || now
+      }),
+      product => {
+        product.interestCount += 1;
+        product.lastInterestedAt = event.occurredAt || now;
+      }
+    );
+  });
+
+  if (payload.location) {
+    const location = cleanValue(payload.location);
+    const city = asString(location.city, 120);
+    const state = asString(location.state, 120);
+    if (city || state) {
+      if (user) {
+        user.city = city || user.city || null;
+        user.state = state || user.state || null;
+        user.lastSeenAt = now;
+      }
+      upsertBy(
+        store,
+        'locations',
+        item => item.city === (city || null) && item.state === (state || null),
+        () => ({
+          id: crypto.randomUUID(),
+          city: city || null,
+          state: state || null,
+          count: 0,
+          firstCollectedAt: now,
+          lastCollectedAt: now
+        }),
+        item => {
+          item.count += 1;
+          item.lastCollectedAt = now;
+        }
+      );
+    }
+  }
+
+  writeAnalyticsStore(store);
+  return {
+    file: ANALYTICS_FILE,
+    counts: {
+      users: store.users.length,
+      contacts: store.contacts.length,
+      productInterests: store.productInterests.length,
+      devices: store.devices.length,
+      locations: store.locations.length
+    }
+  };
+}
+
+app.post('/api/analytics/collect', (req, res) => {
+  try {
+    const result = recordTemporaryAnalytics(req, req.body || {});
+    return res.json({ ok: true, result });
+  } catch (err) {
+    console.error('Falha ao salvar analytics temporario:', err);
+    return res.status(500).json({ ok: false, message: 'Erro ao salvar analytics temporario.' });
+  }
+});
+
+app.get('/api/analytics/debug', (req, res) => {
+  if (process.env.NODE_ENV === 'production' && process.env.DEBUG_ANALYTICS !== 'true' && !isLocalRequest(req)) {
+    return res.status(403).json({ message: 'Debug de analytics desabilitado em producao.' });
+  }
+
+  try {
+    const store = normalizeTemporaryAnalyticsStore(ensureAnalyticsStore());
+    writeAnalyticsStore(store);
+    return res.json({ file: ANALYTICS_FILE, ...store });
+  } catch (err) {
+    console.error('Falha ao ler analytics temporario:', err);
+    return res.status(500).json({ message: 'Erro ao ler analytics temporario.' });
+  }
+});
+
 function createSmtpTransporter() {
   const host = process.env.SMTP_HOST;
   const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : undefined;
@@ -136,6 +639,17 @@ app.post('/api/send-contact', async (req, res) => {
     }
   }
 
+  try {
+    recordTemporaryAnalytics(req, {
+      analytics: req.body.analytics,
+      lead: {
+        email
+      }
+    });
+  } catch (err) {
+    console.error('Falha ao salvar contato no analytics temporario:', err);
+  }
+
   const BREVO_API_KEY = process.env.BREVO_API_KEY;
   if (!BREVO_API_KEY) {
     return res.status(500).json({ message: 'Servidor não configurado (falta BREVO_API_KEY).' });
@@ -212,30 +726,23 @@ app.post('/api/send-catalog', async (req, res) => {
         }
     }
 
+    try {
+      recordTemporaryAnalytics(req, {
+        analytics: req.body.analytics,
+        lead: {
+          email
+        }
+      });
+    } catch (err) {
+      console.error('Falha ao salvar catalogo no analytics temporario:', err);
+    }
+
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     if (!BREVO_API_KEY) {
-        return res.status(500).json({ message: 'Servidor não configurado (falta BREVO_API_KEY).' });
+        return res.status(500).json({ message: 'Servidor nao configurado (falta BREVO_API_KEY).' });
     }
 
     try {
-    // grava evidência do contato (email, timestamp, ip, consent) em data/contacts.csv para auditoria
-    try {
-      const fs = require('fs');
-      const dataDir = path.join(__dirname, 'data');
-      if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-      const csvPath = path.join(dataDir, 'contacts.csv');
-      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip || '';
-      const timestamp = new Date().toISOString();
-      const row = `${email.replace(/"/g, '""')},${timestamp},${ip},${consent ? 'true' : 'false'},catalog`;
-      if (!fs.existsSync(csvPath)) {
-        fs.writeFileSync(csvPath, 'email,timestamp,ip,consent,source\n' + row + '\n', { encoding: 'utf8' });
-      } else {
-        fs.appendFileSync(csvPath, row + '\n', { encoding: 'utf8' });
-      }
-    } catch (err) {
-      console.error('Falha ao salvar contato localmente:', err);
-      // não bloqueia o fluxo de envio, apenas registra o problema
-    }
         // Monta payload para a API de SMTP transactional (senders) da Brevo
         // Usamos a endpoint /smtp/email da Brevo (REST)
         const payload = {
@@ -268,33 +775,47 @@ app.post('/api/send-catalog', async (req, res) => {
 
 // Rota para enviar localização do usuário
 app.post('/api/send-location', async (req, res) => {
-  const { lat, lon, city, state, to } = req.body || {};
+  const { city, state, to } = req.body || {};
+  const hasApproximateLocation = Boolean(city || state);
 
-  if ((lat === undefined || lon === undefined) && !city && !state) {
+  if (!hasApproximateLocation) {
     return res.status(400).json({ message: 'Dados de localização inválidos.' });
   }
 
+  try {
+    recordTemporaryAnalytics(req, {
+      analytics: req.body.analytics,
+      location: {
+        city,
+        state
+      }
+    });
+  } catch (err) {
+    console.error('Falha ao salvar localizacao no analytics temporario:', err);
+  }
   const BREVO_API_KEY = process.env.BREVO_API_KEY;
   if (!BREVO_API_KEY) {
-    return res.status(500).json({ message: 'Servidor não configurado (falta BREVO_API_KEY).' });
+    return res.json({
+      message: 'Localizacao registrada no JSON temporario. Envio por e-mail ignorado porque BREVO_API_KEY nao esta configurada.',
+      result: { stored: true, emailSent: false }
+    });
   }
 
   try {
     const receiver = to || process.env.LOCATION_RECEIVER || process.env.CONTACT_RECEIVER || process.env.FROM_EMAIL;
     if (!receiver) {
-      return res.status(500).json({ message: 'Nenhum destinatário configurado para envio de localização.' });
+      return res.json({
+        message: 'Localizacao registrada no JSON temporario. Nenhum destinatario configurado para envio por e-mail.',
+        result: { stored: true, emailSent: false }
+      });
     }
-
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip || '';
 
     const subject = 'Localização do usuário - Stik';
     const htmlContent = `
       <p>Recebemos dados de localização do usuário:</p>
       <ul>
-        ${lat !== undefined && lon !== undefined ? `<li><strong>Latitude:</strong> ${escapeHtml(String(lat))}</li><li><strong>Longitude:</strong> ${escapeHtml(String(lon))}</li>` : ''}
         ${city ? `<li><strong>Cidade:</strong> ${escapeHtml(city)}</li>` : ''}
         ${state ? `<li><strong>Estado:</strong> ${escapeHtml(state)}</li>` : ''}
-        <li><strong>IP:</strong> ${escapeHtml(String(ip))}</li>
       </ul>
     `;
 

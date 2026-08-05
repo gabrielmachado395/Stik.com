@@ -1,4 +1,351 @@
 const THEME_STORAGE_KEY = 'stik-theme';
+const STIK_ANALYTICS_VISITOR_KEY = 'stik-analytics-visitor-id';
+const STIK_ANALYTICS_SESSION_KEY = 'stik-analytics-session-id';
+const STIK_DATA_CONSENT_KEY = 'stik-data-consent';
+const STIK_DATA_NOTICE_VERSION = 'data-notice-2026-08-03';
+const STIK_LOCATION_REQUEST_SESSION_KEY = 'stik-location-requested-this-session';
+
+function getDefaultStikConsent() {
+    return {
+        necessary: true,
+        analytics: false,
+        marketing: false,
+        location: false,
+        decidedAt: null,
+        noticeVersion: STIK_DATA_NOTICE_VERSION
+    };
+}
+
+function isStikAnalyticsPage() {
+    return /\/dados_capturados(\.html)?$/.test(window.location.pathname.replace(/\/+$/, ''));
+}
+
+function getStikConsent() {
+    try {
+        const stored = localStorage.getItem(STIK_DATA_CONSENT_KEY);
+        if (!stored) return getDefaultStikConsent();
+        return {
+            ...getDefaultStikConsent(),
+            ...JSON.parse(stored)
+        };
+    } catch (error) {
+        return getDefaultStikConsent();
+    }
+}
+
+function hasStikConsent(type) {
+    const consent = getStikConsent();
+    if (type === 'necessary') return true;
+    return Boolean(consent.decidedAt && consent[type]);
+}
+
+function saveStikConsent(nextConsent) {
+    const consent = {
+        ...getDefaultStikConsent(),
+        ...nextConsent,
+        necessary: true,
+        decidedAt: new Date().toISOString(),
+        noticeVersion: STIK_DATA_NOTICE_VERSION
+    };
+
+    try {
+        localStorage.setItem(STIK_DATA_CONSENT_KEY, JSON.stringify(consent));
+    } catch (error) {
+        /* O banner segue funcional mesmo sem persistencia local. */
+    }
+
+    return consent;
+}
+
+function createStikId(prefix) {
+    const randomId = window.crypto?.randomUUID
+        ? window.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    return `${prefix}-${randomId}`;
+}
+
+function getStikStoredId(storage, key, prefix) {
+    try {
+        let id = storage.getItem(key);
+        if (!id) {
+            id = createStikId(prefix);
+            storage.setItem(key, id);
+        }
+        return id;
+    } catch (error) {
+        return createStikId(prefix);
+    }
+}
+
+function getStikVisitorId() {
+    return getStikStoredId(localStorage, STIK_ANALYTICS_VISITOR_KEY, 'visitor');
+}
+
+function getStikSessionId() {
+    return getStikStoredId(sessionStorage, STIK_ANALYTICS_SESSION_KEY, 'session');
+}
+
+function getStikUtmParams() {
+    const params = new URLSearchParams(window.location.search);
+    return ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].reduce((acc, key) => {
+        const value = params.get(key);
+        if (value) acc[key] = value;
+        return acc;
+    }, {});
+}
+
+function getStikDeviceContext() {
+    return {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        languages: Array.from(navigator.languages || []),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+        screen: {
+            width: window.screen?.width || null,
+            height: window.screen?.height || null,
+            pixelRatio: window.devicePixelRatio || 1
+        },
+        viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight
+        }
+    };
+}
+
+function buildStikAnalyticsSnapshot(extra = {}) {
+    return {
+        visitorId: getStikVisitorId(),
+        sessionId: getStikSessionId(),
+        source: extra.source || 'site',
+        device: getStikDeviceContext(),
+        ...extra
+    };
+}
+
+function buildStikSubmissionAnalyticsSnapshot(extra = {}) {
+    if (hasStikConsent('analytics') || hasStikConsent('marketing')) {
+        return buildStikAnalyticsSnapshot(extra);
+    }
+
+    return {
+        visitorId: getStikVisitorId(),
+        sessionId: getStikSessionId(),
+        source: extra.source || 'form_submission',
+        consentState: {
+            analytics: false,
+            marketing: false,
+            noticeVersion: STIK_DATA_NOTICE_VERSION
+        }
+    };
+}
+
+function sendStikAnalytics(payload) {
+    const body = {
+        ...payload,
+        analytics: buildStikAnalyticsSnapshot(payload.analytics || {}),
+        visitor: { anonymousId: getStikVisitorId() },
+        session: { sessionId: getStikSessionId() }
+    };
+
+    return fetch('/api/analytics/collect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        keepalive: true
+    }).catch(error => {
+        console.warn('Falha ao enviar analytics temporario:', error);
+    });
+}
+
+function trackStikEvent(eventName, metadata = {}, options = {}) {
+    if (!eventName) return Promise.resolve();
+    if (eventName !== 'product_view') return Promise.resolve();
+    const purpose = options.purpose || 'analytics';
+    if (!hasStikConsent(purpose)) return Promise.resolve();
+    const { productId, productName, category, ...eventMetadata } = metadata || {};
+    return sendStikAnalytics({
+        event: {
+            eventName,
+            productId,
+            productName,
+            category,
+            metadata: eventMetadata,
+            occurredAt: new Date().toISOString()
+        }
+    });
+}
+
+function recordStikConsentDecision(consent) {
+    return Promise.resolve(consent);
+}
+
+function findProductById(productId) {
+    const id = Number(productId);
+    return produtos.find(product => Number(product.id) === id) || null;
+}
+
+function getProductAnalyticsPayload(product) {
+    if (!product) return {};
+    return {
+        productId: product.id,
+        productName: formatNome(product.nome),
+        category: normalizeCategoria(product.categoria),
+        material: product.material || null
+    };
+}
+
+function sendInitialStikPageView() {
+    if (window.__stikInitialPageViewSent) return;
+    window.__stikInitialPageViewSent = true;
+    if (!hasStikConsent('analytics')) return;
+    sendStikAnalytics({});
+}
+
+function sendCurrentPageMarketingEvent() {
+    if (!hasStikConsent('marketing')) return;
+    const pathname = window.location.pathname.replace(/\/+$/, '');
+
+    if (/\/produto(\.html)?$/.test(pathname)) {
+        const params = new URLSearchParams(window.location.search);
+        const product = findProductById(params.get('id'));
+        if (product) {
+            trackStikEvent('product_view', {
+                ...getProductAnalyticsPayload(product),
+                source: 'post_consent_current_page'
+            }, { purpose: 'marketing' });
+        }
+    } else if (/\/categoria(\.html)?$/.test(pathname)) {
+        const params = new URLSearchParams(window.location.search);
+        let category = params.get('categoria') || '';
+        try { category = decodeURIComponent(category); } catch (error) {}
+        const normalizedCategory = normalizeCategoria(category);
+        const productCount = produtos.filter(product => normalizeCategoria(product.categoria) === normalizedCategory).length;
+        trackStikEvent('category_view', {
+            category: normalizedCategory,
+            productCount,
+            source: 'post_consent_current_page'
+        }, { purpose: 'marketing' });
+    }
+}
+
+async function requestStikLocationIfAllowed() {
+    if (!hasStikConsent('location')) return;
+
+    try {
+        if (sessionStorage.getItem(STIK_LOCATION_REQUEST_SESSION_KEY) === 'true') return;
+        sessionStorage.setItem(STIK_LOCATION_REQUEST_SESSION_KEY, 'true');
+    } catch (error) {
+        /* Se sessionStorage falhar, ainda tentamos uma vez nesta execucao. */
+    }
+
+    if (typeof collectAndSendLocation !== 'function') return;
+
+    try {
+        await collectAndSendLocation();
+    } catch (error) {
+        console.warn('Não foi possível coletar localização:', error);
+    }
+}
+
+function closeStikDataBanner() {
+    document.querySelector('.data-consent-banner')?.remove();
+}
+
+function resetStikConsentPreferences() {
+    try {
+        localStorage.removeItem(STIK_DATA_CONSENT_KEY);
+    } catch (error) {
+        /* Sem persistencia local, apenas reabre o banner. */
+    }
+    window.__stikInitialPageViewSent = false;
+    closeStikDataBanner();
+    initStikDataBanner({ force: true });
+}
+
+function applyStikConsentChoice(nextConsent) {
+    const consent = saveStikConsent(nextConsent);
+    closeStikDataBanner();
+    recordStikConsentDecision(consent);
+    sendInitialStikPageView();
+    sendCurrentPageMarketingEvent();
+    requestStikLocationIfAllowed();
+}
+
+function initStikDataBanner(options = {}) {
+    if (/\/admin(\.html)?$/.test(window.location.pathname.replace(/\/+$/, '')) || isStikAnalyticsPage()) return;
+
+    const consent = getStikConsent();
+    if (consent.decidedAt && !options.force) {
+        sendInitialStikPageView();
+        requestStikLocationIfAllowed();
+        return;
+    }
+
+    if (document.querySelector('.data-consent-banner')) return;
+
+    const banner = document.createElement('section');
+    banner.className = 'data-consent-banner';
+    banner.setAttribute('aria-label', 'Prefer\u00eancias de uso de dados');
+    banner.innerHTML = `
+        <div class="data-consent-copy">
+            <strong>Uso de cookies</strong>
+            <p>Usamos cookies e tecnologias semelhantes para melhorar sua experi&ecirc;ncia, entender seu interesse por nossos produtos e personalizar nossas comunica&ccedil;&otilde;es. Ao utilizar nossos servi&ccedil;os, voc&ecirc; est&aacute; ciente dessa funcionalidade. Mais informações podem ser encontradas em nossa <a href="politica_de_privacidade.html">Pol&iacute;tica de Privacidade</a>.</p>
+        </div>
+        <div class="data-consent-actions">
+            <button type="button" class="data-consent-primary" data-consent-action="accept">Prosseguir</button>
+        </div>
+    `;
+
+    banner.addEventListener('click', event => {
+        const button = event.target.closest('[data-consent-action]');
+        if (!button) return;
+
+        const action = button.dataset.consentAction;
+        if (action === 'accept') {
+            applyStikConsentChoice({ analytics: true, marketing: true, location: true });
+        }
+    });
+
+    document.body.appendChild(banner);
+}
+
+function initTemporaryAnalytics() {
+    if (isStikAnalyticsPage()) return;
+
+    try {
+        if (!sessionStorage.getItem('stik-analytics-landing-page')) {
+            sessionStorage.setItem('stik-analytics-landing-page', window.location.href);
+        }
+    } catch (error) {
+        /* Analytics temporario continua mesmo sem sessionStorage. */
+    }
+
+    initStikDataBanner();
+    requestStikLocationIfAllowed();
+
+    if (window.__stikAnalyticsClickBound) return;
+    window.__stikAnalyticsClickBound = true;
+
+    document.addEventListener('click', event => {
+        const link = event.target.closest('a[href]');
+        if (!link) return;
+
+        const href = link.getAttribute('href') || '';
+        if (/whatsapp|wa\.me/i.test(href)) {
+            trackStikEvent('whatsapp_click', {
+                href,
+                label: link.getAttribute('aria-label') || link.textContent.trim().slice(0, 120)
+            }, { purpose: 'marketing' });
+        }
+    });
+
+    document.addEventListener('click', event => {
+        const resetButton = event.target.closest('#data-consent-reset');
+        if (!resetButton) return;
+        resetStikConsentPreferences();
+    });
+}
 
 function getStoredTheme() {
     try {
@@ -1452,8 +1799,11 @@ function inicializarPesquisa() {
         }
     });
 
+    let searchAnalyticsTimer = 0;
+
     // Busca em tempo real
     searchInput.addEventListener('input', (e) => {
+        const rawTerm = e.target.value.trim();
         const termoBusca = e.target.value.toLowerCase()
             .normalize("NFD") // Normaliza a string para decompor os caracteres
             .replace(/[\u0300-\u036f]/g, ""); // Remove os diacríticos (acentos)
@@ -1495,7 +1845,17 @@ function inicializarPesquisa() {
                 searchBox.classList.remove('has-results');
                 searchResultsList.innerHTML = '<p class="no-results-msg">Nenhum resultado encontrado.</p>';
             }
+
+            window.clearTimeout(searchAnalyticsTimer);
+            searchAnalyticsTimer = window.setTimeout(() => {
+                trackStikEvent('search_performed', {
+                    query: rawTerm,
+                    normalizedQuery: termoBusca,
+                    resultsCount: produtosFiltrados.length
+                }, { purpose: 'marketing' });
+            }, 700);
         } else {
+            window.clearTimeout(searchAnalyticsTimer);
             searchResultsList.innerHTML = '';
             searchBox.classList.remove('has-results');
         }
@@ -4035,6 +4395,11 @@ function carregarDetalhesDoProduto() {
             });
         }
 
+        trackStikEvent('product_view', {
+            ...getProductAnalyticsPayload(produto),
+            imageCount: imagensProduto.length
+        }, { purpose: 'marketing' });
+
     } else {
         console.error("Produto não encontrado.");
     }
@@ -4067,7 +4432,7 @@ function bindCatalogForm() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = input.value.trim();
-        const consentCheckbox = document.getElementById('catalog-consent');
+        const consentCheckbox = document.getElementById('catalog-consent') || form.querySelector('.catalog-consent');
         const consent = !!(consentCheckbox && consentCheckbox.checked);
         feedback.style.color = '#fff';
         if (!email) {
@@ -4093,7 +4458,11 @@ function bindCatalogForm() {
                 }
             }
 
-            const payload = { email, consent };
+            const payload = {
+                email,
+                consent,
+                analytics: buildStikSubmissionAnalyticsSnapshot({ source: 'catalog_form' })
+            };
             if (recaptchaToken) payload.recaptchaToken = recaptchaToken;
 
             const res = await fetch('/api/send-catalog', {
@@ -4197,16 +4566,21 @@ function inicializarAnimateOnScroll() {
         return;
     }
 
+    const isSmallViewport = window.matchMedia?.('(max-width: 768px)').matches;
     const observerOptions = {
-        threshold: 0.12,
-        rootMargin: '0px 0px -8% 0px'
+        threshold: isSmallViewport ? 0.02 : 0.12,
+        rootMargin: isSmallViewport ? '0px 0px 12% 0px' : '0px 0px -8% 0px'
+    };
+
+    const revealElement = (elemento) => {
+        elemento.classList.add('is-visible');
+        elemento.dataset.scrollAnimationReady = 'true';
     };
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                entry.target.dataset.scrollAnimationReady = 'true';
+                revealElement(entry.target);
                 observer.unobserve(entry.target);
             }
         });
@@ -4216,6 +4590,20 @@ function inicializarAnimateOnScroll() {
         elemento.dataset.scrollAnimationReady = 'true';
         observer.observe(elemento);
     });
+
+    requestAnimationFrame(() => {
+        elementosAnimar.forEach(elemento => {
+            if (elemento.classList.contains('is-visible')) return;
+            const rect = elemento.getBoundingClientRect();
+            const preloadOffset = isSmallViewport ? window.innerHeight * 0.12 : 0;
+            const isAlreadyInView = rect.top < window.innerHeight + preloadOffset && rect.bottom > 0;
+            if (isAlreadyInView) {
+                revealElement(elemento);
+                observer.unobserve(elemento);
+            }
+        });
+    });
+
     initDiferenciaisSequence();
 
     // Reaproveita aqui para observar o hero e alternar a visibilidade do FAB
@@ -4409,6 +4797,7 @@ async function inicializarPagina() {
     const isPoliticaPage = /\/politica_de_privacidade(\.html)?$/.test(pathname);
     const isTermosPage = /\/termos_de_uso(\.html)?$/.test(pathname);
     const isFaleConoscoPage = /\/fale_conosco(\.html)?$/.test(pathname);
+    const isDadosCapturadosPage = /\/dados_capturados(\.html)?$/.test(pathname);
 
     // Função utilitária que injeta o template da página caso ainda não esteja presente
     async function ensurePageTemplate(templateUrl) {
@@ -4452,6 +4841,8 @@ async function inicializarPagina() {
         inicializarPaginaTermos();
     } else if (isFaleConoscoPage) {
         inicializarPaginaFaleConosco();
+    } else if (isDadosCapturadosPage) {
+        inicializarPaginaDadosCapturados();
     } else if (isCategoryPage) {
         renderCategoriaPage();
     }
@@ -4555,7 +4946,12 @@ function bindContactForm() {
         if (!recaptchaToken) console.warn('recaptchaToken não obtido para contact');
       }
 
-      const payload = { name, email, message };
+      const payload = {
+        name,
+        email,
+        message,
+        analytics: buildStikSubmissionAnalyticsSnapshot({ source: 'contact_form' })
+      };
       if (recaptchaToken) payload.recaptchaToken = recaptchaToken;
 
       const res = await fetch('/api/send-contact', {
@@ -4692,6 +5088,7 @@ function scrollToTargetEasingCustom(targetY, duration = 200, easing = 'easeInOut
 // Aplica o scroll suave em todos os links âncora internos (ex: <a href="#secao">)
 document.addEventListener('DOMContentLoaded', async () => {
     await inicializarPagina();
+    initTemporaryAnalytics();
 
     // ativa micro-interações depois que a página foi inicializada
     try { initMicroInteractions(); } catch (e) { console.warn('initMicroInteractions falhou:', e); }
@@ -4734,8 +5131,16 @@ async function reverseGeocode(lat, lon) {
         const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR', 'User-Agent': 'StikSite/1.0 (contact@stik.com)' } });
         if (!res.ok) throw new Error('status ' + res.status);
         const data = await res.json();
-        const city = data.address.city || data.address.town || data.address.village || data.address.county || null;
-        const state = data.address.state || data.address.region || null;
+        const address = data.address || {};
+        const city = address.city
+            || address.town
+            || address.village
+            || address.municipality
+            || address.city_district
+            || address.suburb
+            || address.county
+            || null;
+        const state = address.state || address.region || address.state_district || null;
         return { city, state, raw: data };
     } catch (err) {
         console.warn('reverseGeocode falhou:', err);
@@ -4743,12 +5148,48 @@ async function reverseGeocode(lat, lon) {
     }
 }
 
+function hasUsableLocation(location) {
+    if (!location || typeof location !== 'object') return false;
+    const hasCoordinateValues = location.lat !== undefined
+        && location.lat !== null
+        && location.lon !== undefined
+        && location.lon !== null
+        && String(location.lat).trim() !== ''
+        && String(location.lon).trim() !== '';
+    const hasCoordinates = hasCoordinateValues && Number.isFinite(Number(location.lat)) && Number.isFinite(Number(location.lon));
+    return hasCoordinates || Boolean(location.city || location.state);
+}
+
+function hasUsableCoordinates(location) {
+    if (!location || typeof location !== 'object') return false;
+    return location.lat !== undefined
+        && location.lat !== null
+        && location.lon !== undefined
+        && location.lon !== null
+        && String(location.lat).trim() !== ''
+        && String(location.lon).trim() !== ''
+        && Number.isFinite(Number(location.lat))
+        && Number.isFinite(Number(location.lon));
+}
+
 async function collectLocation() {
-    // retorna {lat, lon, city, state}
+    // retorna {city, state}; coordenadas sao usadas apenas no navegador para reverse geocoding.
     // primeiro tenta cookies/localStorage
     const cached = getCookie('stik_location');
     if (cached) {
-        try { return JSON.parse(cached); } catch(e) { /* ignore */ }
+        try {
+            const parsed = JSON.parse(cached);
+            if (hasUsableCoordinates(parsed) && (!parsed.city || !parsed.state)) {
+                const geo = await reverseGeocode(parsed.lat, parsed.lon);
+                const enriched = {
+                    city: parsed.city || geo.city,
+                    state: parsed.state || geo.state
+                };
+                try { setCookie('stik_location', JSON.stringify(enriched), 7); } catch(e) { /* ignore */ }
+                return enriched;
+            }
+            return parsed;
+        } catch(e) { /* ignore */ }
     }
 
     // tenta geolocation do browser
@@ -4767,7 +5208,7 @@ async function collectLocation() {
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
             const geo = await reverseGeocode(lat, lon);
-            const payload = { lat, lon, city: geo.city, state: geo.state };
+            const payload = { city: geo.city, state: geo.state };
             try { setCookie('stik_location', JSON.stringify(payload), 7); } catch(e) { /* ignore */ }
             resolve(payload);
         }, (err) => {
@@ -4778,9 +5219,13 @@ async function collectLocation() {
     });
 }
 
-async function sendLocationToServer({ lat, lon, city, state }, toEmail) {
+async function sendLocationToServer({ city, state }, toEmail) {
     try {
-        const payload = { lat, lon, city, state };
+        const payload = {
+            city,
+            state,
+            analytics: buildStikSubmissionAnalyticsSnapshot({ source: 'send_location' })
+        };
         if (toEmail) payload.to = toEmail;
         const res = await fetch('/api/send-location', {
             method: 'POST',
@@ -4806,6 +5251,16 @@ async function sendLocationToServer({ lat, lon, city, state }, toEmail) {
  */
 async function collectAndSendLocation(toEmail) {
     const loc = await collectLocation();
+    if (!hasUsableLocation(loc) || (!loc.city && !loc.state)) {
+        return {
+            loc,
+            result: {
+                ok: false,
+                status: 400,
+                data: { message: 'Cidade/estado nao autorizado ou indisponivel.' }
+            }
+        };
+    }
     const result = await sendLocationToServer(loc, toEmail);
     return { loc, result };
 }
@@ -5034,6 +5489,628 @@ function renderCategoriaPage() {
 
     syncSortUI(sortEl ? sortEl.value : 'relevance');
     renderItems(sortEl ? sortEl.value : 'relevance');
+    trackStikEvent('category_view', {
+        category: categoryName,
+        productCount: itensBase.length
+    }, { purpose: 'marketing' });
+}
+
+function formatAnalyticsDate(value) {
+    if (!value) return 'Sem data';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Data inválida';
+    return new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short'
+    }).format(date);
+}
+
+function getAnalyticsValue(value, fallback = 'Não informado') {
+    if (value === null || value === undefined || value === '') return fallback;
+    return String(value);
+}
+
+function getAnalyticsEventLabel(eventName) {
+    const labels = {
+        page_view: 'Página visualizada',
+        product_view: 'Produto visualizado',
+        product_click: 'Clique em produto',
+        category_view: 'Categoria visualizada',
+        search_performed: 'Busca realizada',
+        whatsapp_click: 'Clique no WhatsApp',
+        catalog_request: 'Catálogo solicitado',
+        contact_form_submit: 'Formulário enviado',
+        data_consent_update: 'Consentimento atualizado',
+        location_shared: 'Localização enviada'
+    };
+    return labels[eventName] || eventName || 'Evento';
+}
+
+function countBy(items, getKey) {
+    const counts = new Map();
+    items.forEach(item => {
+        const key = getKey(item);
+        if (!key) return;
+        counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    return Array.from(counts.entries())
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'pt-BR'));
+}
+
+function buildProductInterest(events = []) {
+    const products = new Map();
+
+    events.forEach(event => {
+        if (event.eventName !== 'product_view') return;
+        const productName = event.productName || event.metadata?.productName;
+        const productId = event.productId || event.metadata?.productId || productName || 'sem-produto';
+        if (!productName) return;
+
+        const key = productId || productName;
+        const current = products.get(key) || {
+            productName,
+            category: event.category || event.metadata?.category || 'Sem categoria',
+            interestCount: 0,
+            firstInterestedAt: event.occurredAt,
+            lastInterestedAt: event.occurredAt
+        };
+
+        current.interestCount += 1;
+        current.lastInterestedAt = event.occurredAt || current.lastInterestedAt;
+        products.set(key, current);
+    });
+
+    return Array.from(products.values())
+        .sort((a, b) => b.interestCount - a.interestCount || new Date(b.lastInterestedAt || 0) - new Date(a.lastInterestedAt || 0));
+}
+
+async function loadCapturedAnalytics() {
+    const status = document.getElementById('analytics-status');
+    if (status) {
+        status.textContent = 'Carregando dados capturados...';
+        status.classList.remove('is-error');
+    }
+
+    try {
+        const response = await fetch('/api/analytics/debug', { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Não foi possível carregar os dados.');
+        }
+
+        window.__stikCapturedAnalyticsData = data;
+        renderCapturedAnalytics(data);
+
+        if (status) {
+            const updatedAt = data.meta?.updatedAt ? formatAnalyticsDate(data.meta.updatedAt) : 'sem data';
+            status.textContent = `Dados carregados. Última atualização do arquivo: ${updatedAt}.`;
+        }
+    } catch (error) {
+        console.error('Falha ao carregar dados capturados:', error);
+        if (status) {
+            status.textContent = 'Não foi possível carregar os dados capturados. Verifique se o servidor local está rodando.';
+            status.classList.add('is-error');
+        }
+    }
+}
+
+function downloadCapturedAnalytics() {
+    const data = window.__stikCapturedAnalyticsData;
+    if (!data) return;
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `stik-dados-capturados-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+async function requestCapturedAnalyticsLocation() {
+    const status = document.getElementById('analytics-status');
+    if (status) {
+        status.textContent = 'Solicitando permissão de localização no navegador...';
+        status.classList.remove('is-error');
+    }
+
+    if (typeof collectAndSendLocation !== 'function') {
+        if (status) {
+            status.textContent = 'A função de localização não está disponível nesta página.';
+            status.classList.add('is-error');
+        }
+        return;
+    }
+
+    const { loc, result } = await collectAndSendLocation();
+    if (!result?.ok) {
+        if (status) {
+            status.textContent = 'Não foi possível registrar a localização. Verifique se a permissão foi concedida no navegador.';
+            status.classList.add('is-error');
+        }
+        return;
+    }
+
+    if (status) {
+        const place = [loc.city, loc.state].filter(Boolean).join(' / ') || 'cidade/estado registrado';
+        status.textContent = `Cidade/estado registrado: ${place}.`;
+    }
+    await loadCapturedAnalytics();
+}
+
+const STIK_ANALYTICS_PAGE_SIZE = 20;
+
+function normalizeMinimizedAnalyticsData(data = {}) {
+    const users = Array.isArray(data.users)
+        ? data.users.map(user => ({
+            ...user,
+            email: user.email || null,
+            city: user.city || null,
+            state: user.state || null,
+            device: user.device || null,
+            productInterests: Array.isArray(user.productInterests)
+                ? user.productInterests.map(product => ({
+                    ...product,
+                    interestCount: Number(product.interestCount) || Math.max(Number(product.views) || 0, Number(product.clicks) || 0, 1),
+                    firstInterestedAt: product.firstInterestedAt || product.firstSeenAt,
+                    lastInterestedAt: product.lastInterestedAt || product.lastSeenAt
+                }))
+                : []
+        }))
+        : [];
+
+    const contacts = Array.isArray(data.contacts)
+        ? data.contacts
+        : (Array.isArray(data.leads) ? data.leads.map(lead => ({
+            email: lead.email || null,
+            firstSubmittedAt: lead.firstSubmittedAt,
+            lastSubmittedAt: lead.lastSubmittedAt
+        })) : []);
+
+    const productInterests = Array.isArray(data.productInterests)
+        ? data.productInterests.map(product => ({
+            ...product,
+            interestCount: Number(product.interestCount) || Math.max(Number(product.views) || 0, Number(product.clicks) || 0, 1),
+            firstInterestedAt: product.firstInterestedAt || product.firstSeenAt,
+            lastInterestedAt: product.lastInterestedAt || product.lastSeenAt
+        }))
+        : buildProductInterest(Array.isArray(data.events) ? data.events : []);
+
+    const devices = Array.isArray(data.devices)
+        ? data.devices
+        : countBy(Array.isArray(data.sessions) ? data.sessions : [], session => {
+            const device = session.device || {};
+            const platform = device.platform || 'Nao informado';
+            const language = device.language || device.languages?.[0] || 'Nao informado';
+            return `${platform} / ${language}`;
+        }).map(item => ({
+            type: 'Dispositivo',
+            platform: item.label,
+            browser: 'Nao informado',
+            screen: {},
+            count: item.count,
+            lastSeenAt: null
+        }));
+
+    const locations = (Array.isArray(data.locations) ? data.locations : [])
+        .map(location => ({
+            city: location.city || null,
+            state: location.state || null,
+            count: Number(location.count) || 1,
+            firstCollectedAt: location.firstCollectedAt || location.collectedAt,
+            lastCollectedAt: location.lastCollectedAt || location.collectedAt
+        }))
+        .filter(location => location.city || location.state);
+
+    return { users, contacts, productInterests, devices, locations };
+}
+
+function getAnalyticsPage(key, totalItems) {
+    window.__stikAnalyticsPages = window.__stikAnalyticsPages || {};
+    const totalPages = Math.max(1, Math.ceil(totalItems / STIK_ANALYTICS_PAGE_SIZE));
+    const page = Math.min(Math.max(Number(window.__stikAnalyticsPages[key]) || 1, 1), totalPages);
+    window.__stikAnalyticsPages[key] = page;
+    return { page, totalPages };
+}
+
+function getAnalyticsPageSlice(key, items) {
+    const { page, totalPages } = getAnalyticsPage(key, items.length);
+    const start = (page - 1) * STIK_ANALYTICS_PAGE_SIZE;
+    return {
+        page,
+        totalPages,
+        items: items.slice(start, start + STIK_ANALYTICS_PAGE_SIZE)
+    };
+}
+
+function getAnalyticsVisiblePages(currentPage, totalPages) {
+    if (totalPages <= 7) {
+        return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    const pages = new Set([1, totalPages, currentPage, currentPage - 1, currentPage + 1]);
+    return Array.from(pages)
+        .filter(page => page >= 1 && page <= totalPages)
+        .sort((a, b) => a - b);
+}
+
+function renderAnalyticsPagination(paginationId, key, page, totalPages) {
+    const pagination = document.getElementById(paginationId);
+    if (!pagination) return;
+
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+
+    let previousPage = 0;
+    pagination.innerHTML = getAnalyticsVisiblePages(page, totalPages).map(pageNumber => {
+        const gap = previousPage && pageNumber - previousPage > 1 ? '<span class="analytics-page-gap">...</span>' : '';
+        previousPage = pageNumber;
+        return `${gap}<button type="button" class="analytics-page-tab ${pageNumber === page ? 'is-active' : ''}" data-analytics-page-key="${escapeAttribute(key)}" data-analytics-page="${pageNumber}">${pageNumber}</button>`;
+    }).join('');
+}
+
+function renderAnalyticsMetricCards(data) {
+    const metricsEl = document.getElementById('analytics-metrics');
+    if (!metricsEl) return;
+
+    const scopedData = getScopedAnalyticsData(data);
+    const metrics = [
+        { label: 'Usuários', value: scopedData.isUserScoped ? 1 : scopedData.users.length, icon: 'fa-user-friends' },
+        { label: 'Contatos', value: scopedData.contacts.length, icon: 'fa-envelope-open-text' },
+        { label: 'Produtos', value: scopedData.productInterests.length, icon: 'fa-tags' },
+        { label: 'Dispositivos', value: scopedData.devices.length, icon: 'fa-laptop' },
+        { label: 'Cidade/estado', value: scopedData.locations.length, icon: 'fa-map-marker-alt' }
+    ];
+
+    metricsEl.innerHTML = metrics.map(metric => `
+        <article class="analytics-metric">
+            <span><i class="fas ${metric.icon}" aria-hidden="true"></i></span>
+            <strong>${metric.value}</strong>
+            <small>${escapeHtml(metric.label)}</small>
+        </article>
+    `).join('');
+}
+
+function renderAnalyticsRows(tbodyId, rows, emptyMessage, colSpan = 5) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+
+    if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="analytics-empty-cell">${escapeHtml(emptyMessage || 'Nenhum dado capturado ainda.')}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = rows.join('');
+}
+
+function getAnalyticsPlace(user) {
+    return [user.city, user.state].filter(Boolean).join(' / ') || 'Nao informado';
+}
+
+function getAnalyticsDeviceLabel(device) {
+    if (!device) return 'Nao informado';
+    return [device.type, device.browser, device.platform].filter(Boolean).join(' / ') || 'Nao informado';
+}
+
+function getAnalyticsScreenLabel(device) {
+    return device?.screen?.width && device?.screen?.height
+        ? `${device.screen.width} x ${device.screen.height}`
+        : 'Nao informado';
+}
+
+function getAnalyticsUserLabel(user, index = 0) {
+    return `Usuário #${String(index + 1).padStart(3, '0')}`;
+}
+
+function sortAnalyticsUsers(users = []) {
+    return users.slice().sort((a, b) => new Date(b.lastSeenAt || 0) - new Date(a.lastSeenAt || 0));
+}
+
+function populateAnalyticsUserScope(users) {
+    const select = document.getElementById('analytics-user-scope');
+    if (!select) return;
+
+    const currentValue = select.value;
+    const sortedUsers = sortAnalyticsUsers(users).map((user, index) => ({
+        ...user,
+        __label: getAnalyticsUserLabel(user, index)
+    }));
+
+    select.innerHTML = '<option value="">Todos os usuários</option>' + sortedUsers.map(user => {
+        const place = getAnalyticsPlace(user);
+        const pieces = [user.__label, user.email, place !== 'Nao informado' ? place : ''].filter(Boolean);
+        return `<option value="${escapeAttribute(user.id)}">${escapeHtml(pieces.join(' - '))}</option>`;
+    }).join('');
+
+    select.value = sortedUsers.some(user => String(user.id) === String(currentValue)) ? currentValue : '';
+    renderAnalyticsUserScopePicker();
+}
+
+function renderAnalyticsUserScopePicker() {
+    const select = document.getElementById('analytics-user-scope');
+    const label = document.getElementById('analytics-user-scope-label');
+    const menu = document.getElementById('analytics-user-scope-menu');
+    if (!select || !label || !menu) return;
+
+    const options = Array.from(select.options);
+    const selectedOption = options.find(option => option.value === select.value) || options[0];
+    label.textContent = selectedOption?.textContent || 'Todos os usuários';
+
+    menu.innerHTML = options.map(option => `
+        <button type="button" class="analytics-select-option" role="option" data-value="${escapeAttribute(option.value)}" aria-selected="${option.value === select.value ? 'true' : 'false'}">
+            ${escapeHtml(option.textContent || '')}
+        </button>
+    `).join('');
+}
+
+function closeAnalyticsUserScopePicker() {
+    const wrap = document.querySelector('.analytics-select-wrap');
+    const button = document.getElementById('analytics-user-scope-button');
+    wrap?.classList.remove('is-open');
+    button?.setAttribute('aria-expanded', 'false');
+}
+
+function toggleAnalyticsUserScopePicker() {
+    const wrap = document.querySelector('.analytics-select-wrap');
+    const button = document.getElementById('analytics-user-scope-button');
+    const menu = document.getElementById('analytics-user-scope-menu');
+    if (!wrap || !button) return;
+
+    const willOpen = !wrap.classList.contains('is-open');
+    wrap.classList.toggle('is-open', willOpen);
+    button.setAttribute('aria-expanded', String(willOpen));
+
+    if (willOpen && menu) {
+        window.requestAnimationFrame(() => {
+            const selected = menu.querySelector('[aria-selected="true"]');
+            const first = menu.querySelector('.analytics-select-option');
+            (selected || first)?.focus();
+        });
+    }
+}
+
+function initializeAnalyticsUserScopePicker() {
+    const select = document.getElementById('analytics-user-scope');
+    const button = document.getElementById('analytics-user-scope-button');
+    const menu = document.getElementById('analytics-user-scope-menu');
+    if (!select || !button || !menu) return;
+
+    button.addEventListener('click', event => {
+        event.preventDefault();
+        toggleAnalyticsUserScopePicker();
+    });
+
+    button.addEventListener('keydown', event => {
+        if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleAnalyticsUserScopePicker();
+        }
+
+        if (event.key === 'Escape') {
+            closeAnalyticsUserScopePicker();
+        }
+    });
+
+    menu.addEventListener('click', event => {
+        const option = event.target.closest('.analytics-select-option');
+        if (!option) return;
+
+        select.value = option.dataset.value || '';
+        renderAnalyticsUserScopePicker();
+        closeAnalyticsUserScopePicker();
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    menu.addEventListener('keydown', event => {
+        const options = Array.from(menu.querySelectorAll('.analytics-select-option'));
+        const currentIndex = options.indexOf(document.activeElement);
+
+        if (event.key === 'Escape') {
+            closeAnalyticsUserScopePicker();
+            button.focus();
+            return;
+        }
+
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            const direction = event.key === 'ArrowDown' ? 1 : -1;
+            const nextIndex = currentIndex < 0
+                ? 0
+                : (currentIndex + direction + options.length) % options.length;
+            options[nextIndex]?.focus();
+        }
+    });
+
+    document.addEventListener('click', event => {
+        if (event.target.closest('.analytics-select-wrap')) return;
+        closeAnalyticsUserScopePicker();
+    });
+}
+
+function getSelectedAnalyticsUser(data) {
+    const normalized = normalizeMinimizedAnalyticsData(data);
+    const selectedId = document.getElementById('analytics-user-scope')?.value || '';
+    return normalized.users.find(user => String(user.id) === String(selectedId)) || null;
+}
+
+function getScopedAnalyticsData(data) {
+    const normalized = normalizeMinimizedAnalyticsData(data);
+    const selectedUser = getSelectedAnalyticsUser(data);
+
+    if (!selectedUser) {
+        return {
+            ...normalized,
+            selectedUser: null,
+            isUserScoped: false
+        };
+    }
+
+    return {
+        users: normalized.users,
+        contacts: selectedUser.email ? [{
+            id: `${selectedUser.id}-email`,
+            email: selectedUser.email,
+            firstSubmittedAt: selectedUser.firstSeenAt,
+            lastSubmittedAt: selectedUser.lastSeenAt
+        }] : [],
+        productInterests: Array.isArray(selectedUser.productInterests) ? selectedUser.productInterests : [],
+        devices: selectedUser.device ? [{
+            id: `${selectedUser.id}-device`,
+            ...selectedUser.device,
+            count: 1,
+            firstSeenAt: selectedUser.firstSeenAt,
+            lastSeenAt: selectedUser.lastSeenAt
+        }] : [],
+        locations: (selectedUser.city || selectedUser.state) ? [{
+            id: `${selectedUser.id}-location`,
+            city: selectedUser.city || null,
+            state: selectedUser.state || null,
+            count: 1,
+            firstCollectedAt: selectedUser.firstSeenAt,
+            lastCollectedAt: selectedUser.lastSeenAt
+        }] : [],
+        selectedUser,
+        isUserScoped: true
+    };
+}
+
+function renderAnalyticsScopeSummary(scopedData) {
+    const summary = document.getElementById('analytics-scope-summary');
+    if (!summary) return;
+
+    summary.classList.toggle('is-user', Boolean(scopedData.isUserScoped));
+    summary.classList.toggle('is-general', !scopedData.isUserScoped);
+
+    if (!scopedData.isUserScoped) {
+        summary.textContent = 'Visão geral selecionada. Os blocos abaixo mostram os dados consolidados de todos os usuários.';
+        return;
+    }
+
+    const user = scopedData.selectedUser;
+    const details = [
+        user.email || 'sem e-mail',
+        getAnalyticsPlace(user),
+        getAnalyticsDeviceLabel(user.device)
+    ].filter(Boolean).join(' - ');
+    summary.textContent = `Usuário selecionado. Os blocos abaixo foram filtrados para: ${details}.`;
+}
+
+function showAnalyticsScopeFeedback() {
+    const scopedData = getScopedAnalyticsData(window.__stikCapturedAnalyticsData || {});
+    const message = scopedData.isUserScoped
+        ? 'Filtro aplicado: exibindo apenas as informações do usuário selecionado.'
+        : 'Filtro removido: exibindo a visão geral de todos os usuários.';
+
+    if (typeof showEditorFeedback === 'function') {
+        showEditorFeedback(message);
+        return;
+    }
+
+    const status = document.getElementById('analytics-status');
+    if (!status || status.classList.contains('is-error')) return;
+    status.textContent = message;
+}
+
+function renderCapturedAnalytics(data) {
+    const normalized = normalizeMinimizedAnalyticsData(data);
+    populateAnalyticsUserScope(normalized.users);
+    const scopedData = getScopedAnalyticsData(data);
+    renderAnalyticsScopeSummary(scopedData);
+
+    const contacts = scopedData.contacts
+        .slice()
+        .sort((a, b) => new Date(b.lastSubmittedAt || 0) - new Date(a.lastSubmittedAt || 0));
+    const productInterests = scopedData.productInterests
+        .slice()
+        .sort((a, b) => (Number(b.interestCount) || 0) - (Number(a.interestCount) || 0) || new Date(b.lastInterestedAt || 0) - new Date(a.lastInterestedAt || 0));
+    const devices = scopedData.devices
+        .slice()
+        .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0) || new Date(b.lastSeenAt || 0) - new Date(a.lastSeenAt || 0));
+    const locations = scopedData.locations
+        .slice()
+        .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0) || new Date(b.lastCollectedAt || 0) - new Date(a.lastCollectedAt || 0));
+
+    renderAnalyticsMetricCards(data);
+
+    const contactPage = getAnalyticsPageSlice('contacts', contacts);
+    const contactCountEl = document.getElementById('analytics-contact-count');
+    if (contactCountEl) contactCountEl.textContent = `${contacts.length} ${contacts.length === 1 ? 'contato' : 'contatos'}`;
+    renderAnalyticsRows('analytics-contacts', contactPage.items.map(contact => `
+        <tr>
+            <td><strong>${escapeHtml(getAnalyticsValue(contact.email))}</strong></td>
+            <td>${escapeHtml(formatAnalyticsDate(contact.lastSubmittedAt || contact.firstSubmittedAt))}</td>
+        </tr>
+    `), 'Nenhum contato informado.', 2);
+    renderAnalyticsPagination('analytics-contacts-pagination', 'contacts', contactPage.page, contactPage.totalPages);
+
+    const productPage = getAnalyticsPageSlice('products', productInterests);
+    const productCountEl = document.getElementById('analytics-product-count');
+    if (productCountEl) productCountEl.textContent = `${productInterests.length} ${productInterests.length === 1 ? 'item' : 'itens'}`;
+    renderAnalyticsRows('analytics-products', productPage.items.map(product => `
+        <tr>
+            <td><strong>${escapeHtml(getAnalyticsValue(product.productName))}</strong></td>
+            <td>${escapeHtml(getAnalyticsValue(product.category))}</td>
+            <td>${escapeHtml(String(Number(product.interestCount) || 0))}</td>
+            <td>${escapeHtml(formatAnalyticsDate(product.lastInterestedAt || product.firstInterestedAt))}</td>
+        </tr>
+    `), 'Nenhum produto de interesse registrado.', 4);
+    renderAnalyticsPagination('analytics-products-pagination', 'products', productPage.page, productPage.totalPages);
+
+    const devicePage = getAnalyticsPageSlice('devices', devices);
+    const deviceCountEl = document.getElementById('analytics-device-count');
+    if (deviceCountEl) deviceCountEl.textContent = `${devices.length} ${devices.length === 1 ? 'dispositivo' : 'dispositivos'}`;
+    renderAnalyticsRows('analytics-devices', devicePage.items.map(device => {
+        const screen = device.screen?.width && device.screen?.height
+            ? `${device.screen.width} x ${device.screen.height}`
+            : 'Nao informado';
+        return `
+            <tr>
+                <td><strong>${escapeHtml(getAnalyticsValue(device.type))}</strong></td>
+                <td>${escapeHtml(getAnalyticsValue(device.platform))}</td>
+                <td>${escapeHtml(getAnalyticsValue(device.browser))}</td>
+                <td>${escapeHtml(screen)}</td>
+                <td>${escapeHtml(String(Number(device.count) || 1))}</td>
+            </tr>
+        `;
+    }), 'Nenhum dispositivo capturado.', 5);
+    renderAnalyticsPagination('analytics-devices-pagination', 'devices', devicePage.page, devicePage.totalPages);
+
+    const locationPage = getAnalyticsPageSlice('locations', locations);
+    const locationCountEl = document.getElementById('analytics-location-count');
+    if (locationCountEl) locationCountEl.textContent = `${locations.length} ${locations.length === 1 ? 'local' : 'locais'}`;
+    renderAnalyticsRows('analytics-locations', locationPage.items.map(location => `
+        <tr>
+            <td><strong>${escapeHtml(getAnalyticsValue(location.city))}</strong></td>
+            <td>${escapeHtml(getAnalyticsValue(location.state))}</td>
+            <td>${escapeHtml(String(Number(location.count) || 1))}</td>
+            <td>${escapeHtml(formatAnalyticsDate(location.lastCollectedAt || location.firstCollectedAt))}</td>
+        </tr>
+    `), 'Nenhuma cidade/estado capturado. Para aparecer aqui, o usuario precisa permitir localizacao no navegador.', 4);
+    renderAnalyticsPagination('analytics-locations-pagination', 'locations', locationPage.page, locationPage.totalPages);
+}
+
+function inicializarPaginaDadosCapturados() {
+    document.getElementById('analytics-refresh')?.addEventListener('click', loadCapturedAnalytics);
+    document.getElementById('analytics-download')?.addEventListener('click', downloadCapturedAnalytics);
+    initializeAnalyticsUserScopePicker();
+    document.getElementById('analytics-user-scope')?.addEventListener('change', () => {
+        window.__stikAnalyticsPages = {};
+        renderCapturedAnalytics(window.__stikCapturedAnalyticsData || {});
+        showAnalyticsScopeFeedback();
+    });
+    document.addEventListener('click', event => {
+        const button = event.target.closest('[data-analytics-page-key][data-analytics-page]');
+        if (!button) return;
+        window.__stikAnalyticsPages = window.__stikAnalyticsPages || {};
+        window.__stikAnalyticsPages[button.dataset.analyticsPageKey] = Number(button.dataset.analyticsPage) || 1;
+        renderCapturedAnalytics(window.__stikCapturedAnalyticsData || {});
+    });
+    loadCapturedAnalytics();
 }
 
 function activateAdminTab(tab) {

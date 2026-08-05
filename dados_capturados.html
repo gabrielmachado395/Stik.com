@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados Capturados - Stik</title>
+    <link rel="stylesheet" href="stylesheet/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="overlay"></div>
+
+    <main class="analytics-page">
+        <section class="analytics-shell">
+            <header class="analytics-header">
+                <div>
+                    <span class="analytics-eyebrow">Valida&ccedil;&atilde;o LGPD</span>
+                    <h1>Dados capturados</h1>
+                    <p>Vis&atilde;o geral e leitura por usu&aacute;rio an&ocirc;nimo de cidade/estado, produtos de interesse, e-mail informado e dispositivo.</p>
+                </div>
+                <div class="analytics-actions">
+                    <button type="button" class="analytics-btn analytics-btn-light" id="analytics-refresh">
+                        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                        Atualizar
+                    </button>
+                    <button type="button" class="analytics-btn analytics-btn-primary" id="analytics-download">
+                        <i class="fas fa-download" aria-hidden="true"></i>
+                        Baixar JSON
+                    </button>
+                </div>
+            </header>
+
+            <div class="analytics-status" id="analytics-status" role="status" aria-live="polite">Carregando dados capturados...</div>
+ 
+            <section class="analytics-metrics" id="analytics-metrics" aria-label="Resumo dos dados capturados"></section>
+           
+            <section class="analytics-scope" aria-label="Escopo da visualiza&ccedil;&atilde;o">
+                <div class="analytics-scope-field">
+                    <span id="analytics-user-scope-title">Visualizar dados de</span>
+                    <div class="analytics-select-wrap">
+                        <button type="button" class="analytics-select-control" id="analytics-user-scope-button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="analytics-user-scope-title analytics-user-scope-label">
+                            <span id="analytics-user-scope-label">Todos os usu&aacute;rios</span>
+                        </button>
+                        <select id="analytics-user-scope">
+                            <option value="">Todos os usu&aacute;rios</option>
+                        </select>
+                        <div class="analytics-select-menu" id="analytics-user-scope-menu" role="listbox" aria-label="Usu&aacute;rios capturados"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="analytics-card">
+                <div class="analytics-card-head">
+                    <h2>Contatos informados</h2>
+                    <span id="analytics-contact-count">0 contatos</span>
+                </div>
+                <div class="analytics-table-wrap">
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th>E-mail</th>
+                                <th>&Uacute;ltimo envio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analytics-contacts"></tbody>
+                    </table>
+                </div>
+                <div class="analytics-pagination" id="analytics-contacts-pagination"></div>
+            </section>
+
+            <section class="analytics-grid analytics-grid-wide">
+                <article class="analytics-card">
+                    <div class="analytics-card-head">
+                        <h2>Produtos de interesse</h2>
+                        <span id="analytics-product-count">0 itens</span>
+                    </div>
+                    <div class="analytics-table-wrap">
+                        <table class="analytics-table">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Categoria</th>
+                                    <th>Interesses</th>
+                                    <th>&Uacute;ltimo interesse</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analytics-products"></tbody>
+                        </table>
+                    </div>
+                    <div class="analytics-pagination" id="analytics-products-pagination"></div>
+                </article>
+
+                <article class="analytics-card">
+                    <div class="analytics-card-head">
+                        <h2>Dispositivos</h2>
+                        <span id="analytics-device-count">0 dispositivos</span>
+                    </div>
+                    <div class="analytics-table-wrap">
+                        <table class="analytics-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Plataforma</th>
+                                    <th>Navegador</th>
+                                    <th>Tela</th>
+                                    <th>Registros</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analytics-devices"></tbody>
+                        </table>
+                    </div>
+                    <div class="analytics-pagination" id="analytics-devices-pagination"></div>
+                </article>
+            </section>
+
+            <section class="analytics-card">
+                <div class="analytics-card-head">
+                    <h2>Cidade/estado</h2>
+                    <span id="analytics-location-count">0 locais</span>
+                </div>
+                <div class="analytics-table-wrap">
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th>Cidade</th>
+                                <th>Estado</th>
+                                <th>Registros</th>
+                                <th>&Uacute;ltimo registro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analytics-locations"></tbody>
+                    </table>
+                </div>
+                <div class="analytics-pagination" id="analytics-locations-pagination"></div>
+            </section>
+        </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="stylesheet/script.js"></script>
+</body>
+</html>
