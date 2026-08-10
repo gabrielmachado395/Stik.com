@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "label": "Português",
+    "htmlLang": "pt-BR"
+  },
+  "cookies": {
+    "aria": "Preferências de uso de dados",
+    "title": "Uso de cookies",
+    "bodyHtml": "Usamos cookies e tecnologias semelhantes para melhorar sua experiência, entender seu interesse por nossos produtos e personalizar nossas comunicações. Ao utilizar nossos serviços, você está ciente dessa funcionalidade. Mais informações podem ser encontradas em nossa <a href=\"politica_de_privacidade.html\">Política de Privacidade</a>.",
+    "accept": "Prosseguir"
+  },
+  "phrases": {},
+  "attrs": {
+    "placeholder": {},
+    "aria-label": {},
+    "title": {},
+    "alt": {}
+  }
+}

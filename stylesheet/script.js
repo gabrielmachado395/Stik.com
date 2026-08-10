@@ -4,6 +4,194 @@ const STIK_ANALYTICS_SESSION_KEY = 'stik-analytics-session-id';
 const STIK_DATA_CONSENT_KEY = 'stik-data-consent';
 const STIK_DATA_NOTICE_VERSION = 'data-notice-2026-08-03';
 const STIK_LOCATION_REQUEST_SESSION_KEY = 'stik-location-requested-this-session';
+const STIK_LANGUAGE_STORAGE_KEY = 'stik-language';
+const STIK_DEFAULT_LANGUAGE = 'pt';
+const STIK_SUPPORTED_LANGUAGES = ['pt', 'en', 'es', 'fr'];
+const STIK_I18N_TEXT_ORIGINALS = new WeakMap();
+let stikCurrentLanguage = STIK_DEFAULT_LANGUAGE;
+let stikCurrentMessages = null;
+
+function normalizeStikLanguage(language) {
+    const lang = String(language || '').toLowerCase();
+    if (lang.startsWith('pt')) return 'pt';
+    if (lang.startsWith('en')) return 'en';
+    if (lang.startsWith('es')) return 'es';
+    if (lang.startsWith('fr')) return 'fr';
+    return STIK_DEFAULT_LANGUAGE;
+}
+
+function getStoredStikLanguage() {
+    try {
+        const stored = localStorage.getItem(STIK_LANGUAGE_STORAGE_KEY);
+        return STIK_SUPPORTED_LANGUAGES.includes(stored) ? stored : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function getInitialStikLanguage() {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('lang');
+    if (fromUrl) return normalizeStikLanguage(fromUrl);
+    return getStoredStikLanguage() || STIK_DEFAULT_LANGUAGE;
+}
+
+async function loadStikMessages(language) {
+    const normalized = normalizeStikLanguage(language);
+    try {
+        const response = await fetch(`locales/${normalized}.json`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Locale ${normalized} indisponivel`);
+        return await response.json();
+    } catch (error) {
+        if (normalized !== STIK_DEFAULT_LANGUAGE) {
+            return loadStikMessages(STIK_DEFAULT_LANGUAGE);
+        }
+        console.warn('Não foi possível carregar traduções:', error);
+        return { meta: { htmlLang: 'pt-BR' }, cookies: {}, phrases: {}, attrs: {} };
+    }
+}
+
+function getStikMessage(path, fallback = '') {
+    const parts = String(path || '').split('.');
+    let value = stikCurrentMessages;
+    for (const part of parts) {
+        value = value?.[part];
+    }
+    return typeof value === 'string' ? value : fallback;
+}
+
+function translateStikPhrase(text) {
+    return stikCurrentMessages?.phrases?.[text] || text;
+}
+
+function setStikRawText(element, text) {
+    if (!element) return;
+    element.textContent = text;
+    if (element.firstChild) {
+        STIK_I18N_TEXT_ORIGINALS.set(element.firstChild, text);
+    }
+}
+
+function getStikProductCountLabel(count) {
+    const total = Number(count) || 0;
+    const language = stikCurrentLanguage;
+    if (language === 'en') return `${total} ${total === 1 ? 'product found' : 'products found'}`;
+    if (language === 'es') return `${total} ${total === 1 ? 'producto encontrado' : 'productos encontrados'}`;
+    if (language === 'fr') return `${total} ${total === 1 ? 'produit trouvé' : 'produits trouvés'}`;
+    return `${total} ${total === 1 ? 'produto encontrado' : 'produtos encontrados'}`;
+}
+
+function setStikLanguagePreference(language) {
+    stikCurrentLanguage = normalizeStikLanguage(language);
+    try {
+        localStorage.setItem(STIK_LANGUAGE_STORAGE_KEY, stikCurrentLanguage);
+    } catch (error) {
+        /* Preferencia de idioma e apenas uma melhoria local. */
+    }
+}
+
+function translateStikTextNode(textNode, phrases) {
+    if (!textNode || !textNode.nodeValue || !phrases) return;
+    const original = STIK_I18N_TEXT_ORIGINALS.get(textNode) || textNode.nodeValue;
+    STIK_I18N_TEXT_ORIGINALS.set(textNode, original);
+
+    const trimmed = original.trim();
+    if (!trimmed || !phrases[trimmed]) {
+        textNode.nodeValue = original;
+        return;
+    }
+
+    const leading = original.match(/^\s*/)?.[0] || '';
+    const trailing = original.match(/\s*$/)?.[0] || '';
+    textNode.nodeValue = `${leading}${phrases[trimmed]}${trailing}`;
+}
+
+function translateStikAttributes(root, messages) {
+    const attrs = messages?.attrs || {};
+    ['placeholder', 'aria-label', 'title', 'alt'].forEach(attr => {
+        const translations = attrs[attr];
+        if (!translations) return;
+
+        root.querySelectorAll?.(`[${attr}]`).forEach(element => {
+            const storedKey = `i18nOriginal${attr.replace(/(^|-)([a-z])/g, (_, __, char) => char.toUpperCase())}`;
+            const original = element.dataset[storedKey] || element.getAttribute(attr);
+            if (!original) return;
+            element.dataset[storedKey] = original;
+            element.setAttribute(attr, translations[original] || original);
+        });
+    });
+}
+
+function applyStikTranslations(root = document) {
+    const messages = stikCurrentMessages;
+    if (!messages) return;
+
+    document.documentElement.lang = messages.meta?.htmlLang || 'pt-BR';
+    document.querySelectorAll('#languageSelect').forEach(select => {
+        select.value = stikCurrentLanguage;
+    });
+
+    const phrases = messages.phrases || {};
+    const walkerRoot = root.nodeType === Node.DOCUMENT_NODE ? root.body : root;
+    if (walkerRoot) {
+        const walker = document.createTreeWalker(walkerRoot, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+                const parent = node.parentElement;
+                if (!parent || ['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA'].includes(parent.tagName)) {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+            }
+        });
+
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        nodes.forEach(node => translateStikTextNode(node, phrases));
+    }
+
+    translateStikAttributes(root, messages);
+}
+
+function bindStikLanguageControls() {
+    document.querySelectorAll('#languageSelect:not([data-i18n-bound])').forEach(select => {
+        select.dataset.i18nBound = 'true';
+        select.value = stikCurrentLanguage;
+        select.addEventListener('change', async () => {
+            setStikLanguagePreference(select.value);
+            stikCurrentMessages = await loadStikMessages(stikCurrentLanguage);
+            const bannerWasOpen = Boolean(document.querySelector('.data-consent-banner'));
+            refreshStikDynamicTranslations();
+            applyStikTranslations(document);
+            updateThemeToggle(document.documentElement.dataset.theme || getPreferredTheme());
+            if (bannerWasOpen) {
+                closeStikDataBanner();
+                initStikDataBanner({ force: true });
+            }
+        });
+    });
+}
+
+function refreshStikDynamicTranslations() {
+    const pathname = window.location.pathname.replace(/\/+$/, '');
+    if (pathname === '' || pathname === '/' || pathname.endsWith('index.html')) {
+        exibirCategorias(produtos);
+    } else if (/\/categoria(\.html)?$/.test(pathname)) {
+        renderCategoriaPage();
+    }
+}
+
+async function initializeStikI18n() {
+    if (isStikAdminPage()) {
+        document.documentElement.lang = 'pt-BR';
+        document.querySelectorAll('.language-switcher').forEach(element => element.remove());
+        return;
+    }
+
+    setStikLanguagePreference(getInitialStikLanguage());
+    stikCurrentMessages = await loadStikMessages(stikCurrentLanguage);
+    applyStikTranslations(document);
+    bindStikLanguageControls();
+}
 
 function getDefaultStikConsent() {
     return {
@@ -18,6 +206,10 @@ function getDefaultStikConsent() {
 
 function isStikAnalyticsPage() {
     return /\/dados_capturados(\.html)?$/.test(window.location.pathname.replace(/\/+$/, ''));
+}
+
+function isStikAdminPage() {
+    return /\/admin(\.html)?$/.test(window.location.pathname.replace(/\/+$/, ''));
 }
 
 function getStikConsent() {
@@ -273,7 +465,7 @@ function applyStikConsentChoice(nextConsent) {
 }
 
 function initStikDataBanner(options = {}) {
-    if (/\/admin(\.html)?$/.test(window.location.pathname.replace(/\/+$/, '')) || isStikAnalyticsPage()) return;
+    if (isStikAdminPage() || isStikAnalyticsPage()) return;
 
     const consent = getStikConsent();
     if (consent.decidedAt && !options.force) {
@@ -286,14 +478,14 @@ function initStikDataBanner(options = {}) {
 
     const banner = document.createElement('section');
     banner.className = 'data-consent-banner';
-    banner.setAttribute('aria-label', 'Prefer\u00eancias de uso de dados');
+    banner.setAttribute('aria-label', getStikMessage('cookies.aria', 'Preferências de uso de dados'));
     banner.innerHTML = `
         <div class="data-consent-copy">
-            <strong>Uso de cookies</strong>
-            <p>Usamos cookies e tecnologias semelhantes para melhorar sua experi&ecirc;ncia, entender seu interesse por nossos produtos e personalizar nossas comunica&ccedil;&otilde;es. Ao utilizar nossos servi&ccedil;os, voc&ecirc; est&aacute; ciente dessa funcionalidade. Mais informações podem ser encontradas em nossa <a href="politica_de_privacidade.html">Pol&iacute;tica de Privacidade</a>.</p>
+            <strong>${getStikMessage('cookies.title', 'Uso de cookies')}</strong>
+            <p>${getStikMessage('cookies.bodyHtml', 'Usamos cookies e tecnologias semelhantes para melhorar sua experiência. Mais informações podem ser encontradas em nossa <a href="politica_de_privacidade.html">Política de Privacidade</a>.')}</p>
         </div>
         <div class="data-consent-actions">
-            <button type="button" class="data-consent-primary" data-consent-action="accept">Prosseguir</button>
+            <button type="button" class="data-consent-primary" data-consent-action="accept">${getStikMessage('cookies.accept', 'Prosseguir')}</button>
         </div>
     `;
 
@@ -367,8 +559,8 @@ function updateThemeToggle(theme) {
     document.querySelectorAll('.theme-toggle').forEach((button) => {
         const icon = button.querySelector('i');
         button.classList.toggle('is-dark', isDark);
-        button.setAttribute('aria-label', isDark ? 'Alternar para tema claro' : 'Alternar para tema escuro');
-        button.setAttribute('title', isDark ? 'Tema claro' : 'Tema escuro');
+        button.setAttribute('aria-label', isDark ? translateStikPhrase('Alternar para tema claro') : translateStikPhrase('Alternar para tema escuro'));
+        button.setAttribute('title', isDark ? translateStikPhrase('Tema claro') : translateStikPhrase('Tema escuro'));
         if (icon) {
             icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         }
@@ -1277,6 +1469,7 @@ async function carregarComponente(id, url, callback) {
         const response = await fetch(url);
         const html = await response.text();
         placeholder.innerHTML = html;
+        applyStikTranslations(placeholder);
         
         if (callback && typeof callback === 'function') {
             callback();
@@ -1307,6 +1500,7 @@ async function carregarConteudoPrincipal(url) {
             carregarDetalhesDoProduto();
         } 
         inicializarAnimateOnScroll();
+        applyStikTranslations(mainContentPlaceholder);
         inicializarNewsletterCarousel();
 
     } catch (error) {
@@ -1627,7 +1821,7 @@ function exibirCategorias(produtosParaExibir) {
     listaProdutosContainer.innerHTML = '';
 
     if (!Array.isArray(produtosParaExibir) || produtosParaExibir.length === 0) {
-        listaProdutosContainer.innerHTML = '<p class="no-results">Nenhum produto encontrado.</p>';
+        listaProdutosContainer.innerHTML = `<p class="no-results">${escapeHtml(translateStikPhrase('Nenhum produto encontrado.'))}</p>`;
         return;
     }
 
@@ -1642,6 +1836,7 @@ function exibirCategorias(produtosParaExibir) {
         const card = criarCategoriaCard(cat, produtoRepresentativo.imagem);
         listaProdutosContainer.appendChild(card);
     });
+    applyStikTranslations(listaProdutosContainer);
 }
 
 function renderAdminSelectedCategoryProducts() {
@@ -4408,11 +4603,17 @@ function carregarDetalhesDoProduto() {
 function inicializarNewsletterCarousel() {
     const placeholder = document.getElementById('catalogo-placeholder');
     if (!placeholder) return;
+    if (placeholder.dataset.catalogLoaded === 'true') {
+        applyStikTranslations(placeholder);
+        return;
+    }
+    placeholder.dataset.catalogLoaded = 'true';
 
     fetch('catalogo.html')
         .then(response => response.text())
         .then(html => {
             placeholder.innerHTML = html; 
+            applyStikTranslations(placeholder);
             inicializarAnimateOnScroll();
             initNewsletterCarouselEffects();
             // re-bind do form do catálogo quando o HTML for injetado
@@ -4777,6 +4978,7 @@ async function inicializarPagina() {
         carregarComponente('sidebar-placeholder', 'sidebar.html'),
         carregarComponente('footer-placeholder', 'footer.html')
     ]);
+    await initializeStikI18n();
     renderDynamicSidebarCategories();
     inicializarTema();
     inicializarPesquisa();
@@ -4845,6 +5047,10 @@ async function inicializarPagina() {
         inicializarPaginaDadosCapturados();
     } else if (isCategoryPage) {
         renderCategoriaPage();
+    }
+
+    if (!isStikAdminPage()) {
+        applyStikTranslations(document);
     }
     
     // Funções que podem rodar por último
@@ -5305,7 +5511,7 @@ function renderCategoriaPage() {
     const itens = produtos.filter(p => normalizeCategoria(p.categoria) === catNorm);
 
     if (!itens.length) {
-        container.innerHTML = '<p class="no-results">Nenhum produto nesta categoria.</p>';
+        container.innerHTML = `<p class="no-results">${escapeHtml(translateStikPhrase('Nenhum produto nesta categoria.'))}</p>`;
         return;
     }
 
@@ -5351,10 +5557,10 @@ function renderCategoriaPage() {
     if (!container) return;
 
     const titulo = document.getElementById('categoria-title');
-    if (titulo) titulo.textContent = categoryName;
+    if (titulo) setStikRawText(titulo, categoryName);
 
     const breadcrumbCurrent = document.getElementById('categoria-breadcrumb-current');
-    if (breadcrumbCurrent) breadcrumbCurrent.textContent = categoryName;
+    if (breadcrumbCurrent) setStikRawText(breadcrumbCurrent, categoryName);
 
     const countEl = document.getElementById('categoria-count');
     const sortEl = document.getElementById('categoria-sort');
@@ -5368,7 +5574,7 @@ function renderCategoriaPage() {
     let visibleItemsCount = INITIAL_VISIBLE_ITEMS;
 
     if (countEl) {
-        countEl.textContent = `${itensBase.length} ${itensBase.length === 1 ? 'produto encontrado' : 'produtos encontrados'}`;
+        countEl.textContent = getStikProductCountLabel(itensBase.length);
     }
 
     const sortItems = (items, sortValue) => {
@@ -5388,7 +5594,7 @@ function renderCategoriaPage() {
         container.innerHTML = '';
 
         if (!itens.length) {
-            container.innerHTML = '<p class="no-results">Nenhum produto nesta categoria.</p>';
+            container.innerHTML = `<p class="no-results">${escapeHtml(translateStikPhrase('Nenhum produto nesta categoria.'))}</p>`;
             if (showMoreButton) showMoreButton.hidden = true;
             return;
         }
@@ -5424,7 +5630,7 @@ function renderCategoriaPage() {
         if (sortEl) sortEl.value = value;
         if (sortCurrent && sortEl) {
             const option = Array.from(sortEl.options).find(item => item.value === value);
-            sortCurrent.textContent = option ? option.textContent : 'Relevância';
+            sortCurrent.textContent = option ? translateStikPhrase(option.textContent) : translateStikPhrase('Relevância');
         }
 
         if (sortMenu) {
@@ -5444,7 +5650,7 @@ function renderCategoriaPage() {
             button.className = 'category-sort-option';
             button.dataset.value = option.value;
             button.setAttribute('role', 'option');
-            button.textContent = option.textContent;
+            button.textContent = translateStikPhrase(option.textContent);
             button.addEventListener('click', () => {
                 syncSortUI(option.value);
                 closeSortMenu();

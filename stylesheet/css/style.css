@@ -172,6 +172,33 @@ button {
     font-size: 1.3em;
 }
 
+.language-switcher {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.language-select {
+    min-height: 36px;
+    border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+    border-radius: 8px;
+    padding: 0 10px;
+    background: color-mix(in srgb, var(--color-surface) 84%, transparent);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+}
+
+.language-select:hover,
+.language-select:focus-visible {
+    border-color: var(--color-accent);
+    outline: none;
+}
+
 .theme-toggle {
     width: 42px;
     height: 42px;
@@ -9129,6 +9156,12 @@ html[data-theme="dark"] .theme-toggle:hover,
 html[data-theme="dark"] .theme-toggle:focus-visible {
     background: rgba(32, 44, 61, 0.82);
     color: var(--color-accent-hover);
+}
+
+html[data-theme="dark"] .language-select {
+    background: rgba(32, 44, 61, 0.86);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--color-text);
 }
 
 html[data-theme="dark"] .close-sidebar:hover,
