@@ -2,12 +2,16 @@ const THEME_STORAGE_KEY = 'stik-theme';
 const STIK_ANALYTICS_VISITOR_KEY = 'stik-analytics-visitor-id';
 const STIK_ANALYTICS_SESSION_KEY = 'stik-analytics-session-id';
 const STIK_DATA_CONSENT_KEY = 'stik-data-consent';
-const STIK_DATA_NOTICE_VERSION = 'data-notice-2026-08-03';
+const STIK_DATA_NOTICE_VERSION = 'data-notice-2026-08-10';
 const STIK_LOCATION_REQUEST_SESSION_KEY = 'stik-location-requested-this-session';
 const STIK_LANGUAGE_STORAGE_KEY = 'stik-language';
 const STIK_DEFAULT_LANGUAGE = 'pt';
 const STIK_SUPPORTED_LANGUAGES = ['pt', 'en', 'es', 'fr'];
+const STIK_SITE_MEDIA_DB_NAME = 'stik-site-media-preview';
+const STIK_SITE_MEDIA_STORE_NAME = 'media';
+const STIK_SITE_MEDIA_REF_PREFIX = 'stik-media:';
 const STIK_I18N_TEXT_ORIGINALS = new WeakMap();
+const STIK_SITE_MEDIA_URL_CACHE = new Map();
 let stikCurrentLanguage = STIK_DEFAULT_LANGUAGE;
 let stikCurrentMessages = null;
 
@@ -88,6 +92,96 @@ function setStikLanguagePreference(language) {
     } catch (error) {
         /* Preferencia de idioma e apenas uma melhoria local. */
     }
+}
+
+function isStikManagedMediaRef(value) {
+    return new RegExp(`^${STIK_SITE_MEDIA_REF_PREFIX}[a-z0-9-]+$`, 'i').test(String(value || '').trim());
+}
+
+function openStikSiteMediaDb() {
+    return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) {
+            reject(new Error('IndexedDB indisponivel.'));
+            return;
+        }
+
+        const request = indexedDB.open(STIK_SITE_MEDIA_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains(STIK_SITE_MEDIA_STORE_NAME)) {
+                db.createObjectStore(STIK_SITE_MEDIA_STORE_NAME, { keyPath: 'id' });
+            }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('Falha ao abrir IndexedDB.'));
+    });
+}
+
+function transactStikSiteMedia(mode, callback) {
+    return openStikSiteMediaDb().then(db => new Promise((resolve, reject) => {
+        const transaction = db.transaction(STIK_SITE_MEDIA_STORE_NAME, mode);
+        const store = transaction.objectStore(STIK_SITE_MEDIA_STORE_NAME);
+        let callbackResult;
+        transaction.oncomplete = () => {
+            db.close();
+            resolve(callbackResult);
+        };
+        transaction.onerror = () => {
+            db.close();
+            reject(transaction.error || new Error('Falha ao acessar midia local.'));
+        };
+        callbackResult = callback(store);
+    }));
+}
+
+async function saveStikSiteMediaFile(file) {
+    const id = `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`;
+    const record = {
+        id,
+        blob: file,
+        name: file.name || 'arquivo',
+        type: file.type || '',
+        size: file.size || 0,
+        createdAt: new Date().toISOString()
+    };
+
+    await transactStikSiteMedia('readwrite', store => store.put(record));
+    return `${STIK_SITE_MEDIA_REF_PREFIX}${id}`;
+}
+
+async function getStikSiteMediaRecord(ref) {
+    if (!isStikManagedMediaRef(ref)) return null;
+    const id = String(ref).slice(STIK_SITE_MEDIA_REF_PREFIX.length);
+    return transactStikSiteMedia('readonly', store => new Promise((resolve, reject) => {
+        const request = store.get(id);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error || new Error('Falha ao ler midia local.'));
+    }));
+}
+
+async function resolveStikManagedMediaUrl(ref) {
+    if (!isStikManagedMediaRef(ref)) return '';
+    if (STIK_SITE_MEDIA_URL_CACHE.has(ref)) return STIK_SITE_MEDIA_URL_CACHE.get(ref);
+
+    const record = await getStikSiteMediaRecord(ref);
+    if (!record?.blob) return '';
+
+    const url = URL.createObjectURL(record.blob);
+    STIK_SITE_MEDIA_URL_CACHE.set(ref, url);
+    return url;
+}
+
+async function resolveStikAssetUrl(value, fallback = '') {
+    const raw = String(value || '').trim();
+    if (isStikManagedMediaRef(raw)) {
+        try {
+            return await resolveStikManagedMediaUrl(raw) || fallback;
+        } catch (error) {
+            console.warn('Nao foi possivel carregar midia local:', error);
+            return fallback;
+        }
+    }
+    return normalizeStikAssetUrl(raw, fallback);
 }
 
 function translateStikTextNode(textNode, phrases) {
@@ -175,13 +269,16 @@ function refreshStikDynamicTranslations() {
     const pathname = window.location.pathname.replace(/\/+$/, '');
     if (pathname === '' || pathname === '/' || pathname.endsWith('index.html')) {
         exibirCategorias(produtos);
+        applySiteContent(document);
     } else if (/\/categoria(\.html)?$/.test(pathname)) {
         renderCategoriaPage();
+    } else if (/\/institucional(\.html)?$/.test(pathname)) {
+        applySiteContent(document);
     }
 }
 
 async function initializeStikI18n() {
-    if (isStikAdminPage()) {
+    if (isStikInternalPreviewPage()) {
         document.documentElement.lang = 'pt-BR';
         document.querySelectorAll('.language-switcher').forEach(element => element.remove());
         return;
@@ -212,13 +309,48 @@ function isStikAdminPage() {
     return /\/admin(\.html)?$/.test(window.location.pathname.replace(/\/+$/, ''));
 }
 
+function isStikCreateArticlePage() {
+    return /\/create-article(\.html)?$/.test(window.location.pathname.replace(/\/+$/, ''));
+}
+
+function isStikInternalPreviewPage() {
+    return isStikAdminPage() || isStikCreateArticlePage();
+}
+
+function isStikLocalPreviewHost() {
+    return ['localhost', '127.0.0.1', '::1', ''].includes(window.location.hostname);
+}
+
+function guardStikInternalPreviewPage() {
+    if (!isStikInternalPreviewPage() || isStikLocalPreviewHost()) return false;
+    try {
+        localStorage.removeItem('stik.admin.session');
+    } catch (error) {
+        /* Preview interno nao deve depender de storage fora do ambiente local. */
+    }
+
+    const main = document.querySelector('main') || document.body;
+    main.innerHTML = `
+        <section class="admin-page">
+            <div class="admin-login-card">
+                <span class="admin-eyebrow">Preview local</span>
+                <h1>Acesso indisponivel</h1>
+                <p>Esta tela interna e apenas um preview local. O backend definitivo precisa autenticar o CRUD antes de uso em producao.</p>
+            </div>
+        </section>
+    `;
+    return true;
+}
+
 function getStikConsent() {
     try {
         const stored = localStorage.getItem(STIK_DATA_CONSENT_KEY);
         if (!stored) return getDefaultStikConsent();
+        const parsed = JSON.parse(stored);
+        if (parsed.noticeVersion !== STIK_DATA_NOTICE_VERSION) return getDefaultStikConsent();
         return {
             ...getDefaultStikConsent(),
-            ...JSON.parse(stored)
+            ...parsed
         };
     } catch (error) {
         return getDefaultStikConsent();
@@ -321,8 +453,6 @@ function buildStikSubmissionAnalyticsSnapshot(extra = {}) {
     }
 
     return {
-        visitorId: getStikVisitorId(),
-        sessionId: getStikSessionId(),
         source: extra.source || 'form_submission',
         consentState: {
             analytics: false,
@@ -465,7 +595,7 @@ function applyStikConsentChoice(nextConsent) {
 }
 
 function initStikDataBanner(options = {}) {
-    if (isStikAdminPage() || isStikAnalyticsPage()) return;
+    if (isStikInternalPreviewPage() || isStikAnalyticsPage()) return;
 
     const consent = getStikConsent();
     if (consent.decidedAt && !options.force) {
@@ -503,7 +633,7 @@ function initStikDataBanner(options = {}) {
 }
 
 function initTemporaryAnalytics() {
-    if (isStikAnalyticsPage()) return;
+    if (isStikAnalyticsPage() || isStikInternalPreviewPage()) return;
 
     try {
         if (!sessionStorage.getItem('stik-analytics-landing-page')) {
@@ -1169,7 +1299,13 @@ const productStore = (() => {
     };
 
     const writeStorage = (key, value) => {
-        localStorage.setItem(key, JSON.stringify(value));
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (error) {
+            console.warn('Nao foi possivel salvar produtos/categorias no localStorage:', error);
+            return false;
+        }
     };
 
     const normalizeKey = (value) => String(value || '')
@@ -1178,11 +1314,12 @@ const productStore = (() => {
         .toLowerCase()
         .trim();
 
+    const limitText = (value, maxLength) => String(value || '').trim().slice(0, maxLength);
     const cleanCategory = (value) => normalizeCategoria(String(value || '').trim());
 
     const normalizeProductImageItem = (item) => {
         const source = typeof item === 'string' ? { url: item } : (item || {});
-        const url = String(source.url || source.src || source.imagem || source.image || '').trim();
+        const url = normalizeStikAssetUrl(source.url || source.src || source.imagem || source.image || '');
         const titulo = String(source.titulo || source.title || source.label || '').trim();
         const alt = String(source.alt || source.filename || source.name || titulo || '').trim();
 
@@ -1216,12 +1353,12 @@ const productStore = (() => {
 
         return {
         id: Number(payload.id) || Date.now(),
-        nome: String(payload.nome || payload.name || '').trim(),
-        categoria: cleanCategory(payload.categoria || payload.category || ''),
+        nome: limitText(payload.nome || payload.name || '', 120),
+        categoria: limitText(cleanCategory(payload.categoria || payload.category || ''), 120),
         imagem: imagens[0]?.url || '',
         imagens,
-        descricao: String(payload.descricao || payload.description || '').trim(),
-        material: String(payload.material || '').trim() || 'Elástico'
+        descricao: limitText(payload.descricao || payload.description || '', 5000),
+        material: limitText(payload.material || '', 120) || 'Elástico'
         };
     };
 
@@ -1358,8 +1495,470 @@ const productStore = (() => {
     };
 })();
 
+const siteContentStore = (() => {
+    const STORAGE_KEY = 'stik.site.content';
+    const HERO_SLIDESHOW_DURATION = 7000;
+    const gridSlots = ['small-top-left', 'large-center', 'small-top-right', 'small-bottom-left', 'small-bottom-right'];
+
+    function defaults() {
+        return {
+            home: {
+                hero: {
+                    mode: 'video',
+                    poster: 'img/optimized/hero-poster.jpg',
+                    desktopVideo: 'img/optimized/hero-desktop.mp4',
+                    mobileVideo: 'img/optimized/hero-mobile.mp4',
+                    desktopKind: 'video',
+                    mobileKind: 'video',
+                    slideshow: {
+                        duration: HERO_SLIDESHOW_DURATION,
+                        transition: 'fade',
+                        images: [
+                            { image: 'img/optimized/hero-poster.jpg', alt: 'Imagem do hero Stik' }
+                        ]
+                    }
+                },
+                highlights: {
+                    title: 'PRODUTOS',
+                    items: [
+                        { slot: 'small-top-left', image: 'img/optimized/home-grid-geral.jpg', alt: 'Rendas', text: 'RENDAS' },
+                        { slot: 'large-center', image: 'img/optimized/home-grid-rendas.jpg', alt: 'Destaque Geral', text: 'E mais...' },
+                        { slot: 'small-top-right', image: 'img/optimized/home-grid-elasticos.jpg', alt: 'Elasticos', text: 'ELÁSTICOS' },
+                        { slot: 'small-bottom-left', image: 'img/optimized/home-grid-alcas.jpg', alt: 'Alças', text: 'ALÇAS' },
+                        { slot: 'small-bottom-right', image: 'img/optimized/home-grid-premium.jpg', alt: 'Bem-Vindo Outono', text: 'Premium' }
+                    ]
+                },
+                catalog: {
+                    title: 'BAIXE NOSSO CATÁLOGO',
+                    carouselImages: [
+                        { image: 'img/optimized/catalog-carousel-01.jpg', alt: 'Imagem do carrossel Stik' },
+                        { image: 'img/optimized/catalog-carousel-02.jpg', alt: 'Imagem do carrossel Stik' },
+                        { image: 'img/optimized/catalog-carousel-03.jpg', alt: 'Imagem do carrossel Stik' },
+                        { image: 'img/optimized/catalog-carousel-04.jpg', alt: 'Imagem do carrossel Stik' },
+                        { image: 'img/optimized/catalog-carousel-05.jpg', alt: 'Imagem do carrossel Stik' }
+                    ]
+                }
+            },
+            about: {
+                title: 'Stik Elásticos',
+                paragraphs: [
+                    'Na década de 1960 o empresário Francisco Aragão Fontenelle visualizou a oportunidade de investir no setor de confecções e criou a Confecções Royale S/A. A linha produtiva da nova empresa se voltava à produção de peças íntimas, direcionadas ao mercado nacional, setor no qual o Ceará começava a se destacar e a experiência da empresa tomou evidente a necessidade de fornecedores qualificados a oferecer tecidos e elásticos especiais.',
+                    'A STIK inicia suas atividades em 1968 na cidade de Fortaleza, no estado do Ceará. A Passamanaria do Nordeste S/A através da família Fontenele, é uma empresa cearense, que surgiu do desejo de solucionar uma deficiência no seguimento de moda íntima, com o objetivo de crescer o mercado local com uma matéria-prima de qualidade, preços justos e atendimento diferenciado.'
+                ],
+                mainImage: 'img/optimized/home-grid-elasticos-removebg-preview.png',
+                mainImageAlt: 'Onda de inovação',
+                statement: 'Com espírito empreendedor, a STIK nasce da vontade de promover soluções ágeis em sintonia, com um atendimento customizado, acreditando no potencial criativo, e sobretudo, assegurando qualidade em tudo que faz.',
+                galleryImages: [
+                    { image: 'img - Copia/stik-inst4.png', alt: 'Máquina 1' },
+                    { image: 'img - Copia/stik-inst3.png', alt: 'Máquina 2' },
+                    { image: 'img - Copia/stik-inst2.png', alt: 'Máquina 3' },
+                    { image: 'img - Copia/stik-inst1.png', alt: 'Máquina 4' }
+                ],
+                bottomText: 'A Passamanaria do Nordeste S.A continua escrevendo sua história em colaboração com todos os nossos clientes internos e externos, acreditando sempre na parceria contínua e entendendo que é preciso INOVAR para AVANÇAR.',
+                bottomImage: 'img/rel-igualdade-07295413000190-2025-1_page-0001.jpg',
+                bottomImageAlt: 'Visão e inovação'
+            }
+        };
+    }
+
+    const cleanText = (value, maxLength = 500) => String(value || '').trim().slice(0, maxLength);
+    const cleanAsset = (value, fallback = '') => normalizeStikAssetUrl(value, fallback);
+
+    function normalizeImageItem(item = {}, fallback = {}) {
+        return {
+            image: cleanAsset(item.image || item.src || fallback.image, fallback.image || ''),
+            alt: cleanText(item.alt || fallback.alt || 'Imagem Stik', 120)
+        };
+    }
+
+    function normalizeHeroMode(value) {
+        return value === 'slideshow' ? 'slideshow' : 'video';
+    }
+
+    function inferHeroMode(hero = {}) {
+        if (hero.mode === 'video' || hero.mode === 'slideshow') return hero.mode;
+        const desktopKind = normalizeStikHeroMediaKind(hero.desktopKind) || inferStikMediaKind(hero.desktopVideo || hero.desktopSrc, 'video');
+        const mobileKind = normalizeStikHeroMediaKind(hero.mobileKind) || inferStikMediaKind(hero.mobileVideo || hero.mobileSrc, 'video');
+        return desktopKind === 'image' || mobileKind === 'image' ? 'slideshow' : 'video';
+    }
+
+    function normalize(data) {
+        const base = defaults();
+        const source = data && typeof data === 'object' ? data : {};
+        const home = source.home || {};
+        const about = source.about || {};
+        const hero = home.hero || {};
+        const highlights = home.highlights || {};
+        const catalog = home.catalog || {};
+
+        const highlightSource = Array.isArray(highlights.items) ? highlights.items : [];
+        const highlightItems = base.home.highlights.items.map((fallback, index) => {
+            const item = highlightSource[index] || {};
+            return {
+                slot: gridSlots[index],
+                image: cleanAsset(item.image || item.src || fallback.image, fallback.image),
+                alt: cleanText(item.alt || fallback.alt, 120),
+                text: cleanText(item.text || item.label || fallback.text, 80)
+            };
+        });
+
+        const catalogImages = (Array.isArray(catalog.carouselImages) && catalog.carouselImages.length
+            ? catalog.carouselImages
+            : base.home.catalog.carouselImages)
+            .map((item, index) => normalizeImageItem(item, base.home.catalog.carouselImages[index] || base.home.catalog.carouselImages[0]))
+            .filter(item => item.image)
+            .slice(0, 12);
+
+        const aboutGallery = (Array.isArray(about.galleryImages) && about.galleryImages.length
+            ? about.galleryImages
+            : base.about.galleryImages)
+            .map((item, index) => normalizeImageItem(item, base.about.galleryImages[index] || base.about.galleryImages[0]))
+            .filter(item => item.image)
+            .slice(0, 8);
+        const legacyHeroSlides = [
+            normalizeStikHeroMediaKind(hero.desktopKind) === 'image' || inferStikMediaKind(hero.desktopVideo || hero.desktopSrc, 'video') === 'image'
+                ? { image: hero.desktopVideo || hero.desktopSrc, alt: 'Imagem desktop do hero' }
+                : null,
+            normalizeStikHeroMediaKind(hero.mobileKind) === 'image' || inferStikMediaKind(hero.mobileVideo || hero.mobileSrc, 'video') === 'image'
+                ? { image: hero.mobileVideo || hero.mobileSrc, alt: 'Imagem mobile do hero' }
+                : null
+        ].filter(Boolean);
+        const slideshowSource = Array.isArray(hero.slideshow?.images) && hero.slideshow.images.length
+            ? hero.slideshow.images
+            : legacyHeroSlides.length
+                ? legacyHeroSlides
+                : base.home.hero.slideshow.images;
+        const slideshowImages = slideshowSource
+            .map((item, index) => normalizeImageItem(item, base.home.hero.slideshow.images[index] || base.home.hero.slideshow.images[0]))
+            .filter(item => item.image)
+            .slice(0, 12);
+
+        return {
+            home: {
+                hero: {
+                    mode: normalizeHeroMode(inferHeroMode(hero)),
+                    poster: cleanAsset(hero.poster, base.home.hero.poster),
+                    desktopVideo: cleanAsset(hero.desktopVideo || hero.desktopSrc, base.home.hero.desktopVideo),
+                    mobileVideo: cleanAsset(hero.mobileVideo || hero.mobileSrc, base.home.hero.mobileVideo),
+                    desktopKind: normalizeStikHeroMediaKind(hero.desktopKind) || inferStikMediaKind(hero.desktopVideo || hero.desktopSrc, 'video'),
+                    mobileKind: normalizeStikHeroMediaKind(hero.mobileKind) || inferStikMediaKind(hero.mobileVideo || hero.mobileSrc, 'video'),
+                    slideshow: {
+                        duration: HERO_SLIDESHOW_DURATION,
+                        transition: 'fade',
+                        images: slideshowImages.length ? slideshowImages : base.home.hero.slideshow.images
+                    }
+                },
+                highlights: {
+                    title: cleanText(highlights.title, 80) || base.home.highlights.title,
+                    items: highlightItems
+                },
+                catalog: {
+                    title: cleanText(catalog.title, 100) || base.home.catalog.title,
+                    carouselImages: catalogImages.length ? catalogImages : base.home.catalog.carouselImages
+                }
+            },
+            about: {
+                title: cleanText(about.title, 120) || base.about.title,
+                paragraphs: (Array.isArray(about.paragraphs) ? about.paragraphs : base.about.paragraphs)
+                    .map((item, index) => cleanText(item, 1200) || base.about.paragraphs[index] || '')
+                    .filter(Boolean)
+                    .slice(0, 3),
+                mainImage: cleanAsset(about.mainImage, base.about.mainImage),
+                mainImageAlt: cleanText(about.mainImageAlt, 120) || base.about.mainImageAlt,
+                statement: cleanText(about.statement, 800) || base.about.statement,
+                galleryImages: aboutGallery.length ? aboutGallery : base.about.galleryImages,
+                bottomText: cleanText(about.bottomText, 900) || base.about.bottomText,
+                bottomImage: cleanAsset(about.bottomImage, base.about.bottomImage),
+                bottomImageAlt: cleanText(about.bottomImageAlt, 120) || base.about.bottomImageAlt
+            }
+        };
+    }
+
+    function read() {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return normalize(stored ? JSON.parse(stored) : null);
+        } catch (error) {
+            return normalize(null);
+        }
+    }
+
+    function write(content) {
+        const normalized = normalize(content);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+        window.dispatchEvent(new CustomEvent('stik:site-content-updated', { detail: normalized }));
+        return normalized;
+    }
+
+    function reset() {
+        localStorage.removeItem(STORAGE_KEY);
+        const content = normalize(null);
+        window.dispatchEvent(new CustomEvent('stik:site-content-updated', { detail: content }));
+        return content;
+    }
+
+    return { read, write, reset, defaults: () => normalize(null), gridSlots };
+})();
+
+async function applySiteContent(root = document) {
+    const content = siteContentStore.read();
+    await Promise.all([
+        applyHomeSiteContent(root, content.home),
+        applyAboutSiteContent(root, content.about)
+    ]);
+}
+
+async function applyHomeSiteContent(root, home) {
+    const heroContainer = root.querySelector?.('.video-container') || document.querySelector('.video-container');
+    if (heroContainer && home?.hero) {
+        const heroMode = home.hero.mode === 'slideshow' ? 'slideshow' : 'video';
+        const [posterSrc, desktopSrc, mobileSrc, slideshowImages] = await Promise.all([
+            resolveStikAssetUrl(home.hero.poster),
+            resolveStikAssetUrl(home.hero.desktopVideo),
+            resolveStikAssetUrl(home.hero.mobileVideo),
+            Promise.all((home.hero.slideshow?.images || []).map(async item => ({
+                ...item,
+                image: await resolveStikAssetUrl(item.image)
+            })))
+        ]);
+        heroContainer.dataset.heroMode = heroMode;
+        heroContainer.dataset.poster = posterSrc;
+        heroContainer.dataset.desktopSrc = desktopSrc;
+        heroContainer.dataset.mobileSrc = mobileSrc;
+        heroContainer.dataset.desktopKind = heroMode === 'video' ? 'video' : (home.hero.desktopKind || inferStikMediaKind(home.hero.desktopVideo, 'video'));
+        heroContainer.dataset.mobileKind = heroMode === 'video' ? 'video' : (home.hero.mobileKind || inferStikMediaKind(home.hero.mobileVideo, 'video'));
+        heroContainer.dataset.slideshowDuration = String(home.hero.slideshow?.duration || 7000);
+        heroContainer.dataset.slideshowImages = JSON.stringify(slideshowImages.filter(item => item.image));
+        if (posterSrc) {
+            heroContainer.style.backgroundImage = `url("${posterSrc.replace(/"/g, '\\"')}")`;
+        }
+        renderStikHeroMedia(heroContainer, heroContainer.dataset.heroMediaReady === 'true');
+    }
+
+    const highlightsTitle = root.querySelector?.('.product-highlights h2');
+    if (highlightsTitle && home?.highlights?.title) {
+        setStikRawText(highlightsTitle, home.highlights.title);
+    }
+
+    root.querySelectorAll?.('.highlights-grid .highlight-item').forEach((item, index) => {
+        const data = home?.highlights?.items?.[index];
+        if (!data) return;
+        const img = item.querySelector('img');
+        const label = item.querySelector('span');
+        if (img) {
+            resolveStikAssetUrl(data.image).then(src => {
+                if (src) img.src = src;
+            });
+            img.alt = data.alt;
+        }
+        if (label) setStikRawText(label, data.text);
+    });
+
+    const catalogTitle = root.querySelector?.('.newsletter-content h2');
+    if (catalogTitle && home?.catalog?.title) {
+        setStikRawText(catalogTitle, home.catalog.title);
+    }
+
+    const catalogTrack = root.querySelector?.('.carousel-bg .carousel-track');
+    if (catalogTrack && Array.isArray(home?.catalog?.carouselImages)) {
+        const carouselImages = await Promise.all(home.catalog.carouselImages.map(async item => ({
+            ...item,
+            image: await resolveStikAssetUrl(item.image)
+        })));
+        catalogTrack.innerHTML = carouselImages.filter(item => item.image).map(item => `
+            <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.alt)}" loading="lazy" decoding="async">
+        `).join('');
+    }
+}
+
+function getStikHeroMediaConfig(container) {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const src = isMobile ? container.dataset.mobileSrc : container.dataset.desktopSrc;
+    const explicitKind = isMobile ? container.dataset.mobileKind : container.dataset.desktopKind;
+    return {
+        src,
+        kind: normalizeStikHeroMediaKind(explicitKind) || inferStikMediaKind(src, 'video'),
+        poster: container.dataset.poster || ''
+    };
+}
+
+function clearStikHeroSlideshow(container) {
+    if (container.__stikHeroSlideshowTimer) {
+        window.clearInterval(container.__stikHeroSlideshowTimer);
+        container.__stikHeroSlideshowTimer = 0;
+    }
+}
+
+function getStikHeroSlideshowImages(container) {
+    try {
+        const images = JSON.parse(container.dataset.slideshowImages || '[]');
+        if (Array.isArray(images)) {
+            return images
+                .map(item => ({
+                    image: normalizeStikAssetUrl(item?.image || ''),
+                    alt: item?.alt || 'Imagem principal Stik'
+                }))
+                .filter(item => item.image);
+        }
+    } catch (error) {
+        console.warn('Nao foi possivel carregar os slides do hero.', error);
+    }
+    const poster = normalizeStikAssetUrl(container.dataset.poster || '');
+    return poster ? [{ image: poster, alt: 'Imagem principal Stik' }] : [];
+}
+
+function renderStikHeroSlideshow(container, shouldPlay = false) {
+    const slides = getStikHeroSlideshowImages(container);
+    if (!slides.length) return null;
+
+    clearStikHeroSlideshow(container);
+    container.querySelector('#institutionalVideo, #institutionalHeroImage')?.remove();
+
+    let slideshow = container.querySelector('#institutionalHeroSlideshow');
+    if (!slideshow) {
+        slideshow = document.createElement('div');
+        slideshow.id = 'institutionalHeroSlideshow';
+        slideshow.className = 'hero-slideshow hero-media-element';
+        container.appendChild(slideshow);
+    }
+
+    const slidesKey = JSON.stringify(slides.map(item => item.image));
+    if (slideshow.dataset.slidesKey !== slidesKey) {
+        slideshow.innerHTML = slides.map((item, index) => {
+            const image = document.createElement('img');
+            image.src = item.image;
+            image.alt = item.alt;
+            image.decoding = 'async';
+            image.loading = index === 0 ? 'eager' : 'lazy';
+            image.className = index === 0 ? 'is-active' : '';
+            return image.outerHTML;
+        }).join('');
+        slideshow.dataset.slidesKey = slidesKey;
+        slideshow.dataset.activeIndex = '0';
+    }
+
+    container.closest('.video-hero-section')?.classList.add('video-ready');
+    const images = Array.from(slideshow.querySelectorAll('img'));
+    if (shouldPlay && images.length > 1) {
+        const duration = Math.max(2500, Number(container.dataset.slideshowDuration) || 7000);
+        container.__stikHeroSlideshowTimer = window.setInterval(() => {
+            const currentIndex = Number(slideshow.dataset.activeIndex || 0);
+            const nextIndex = (currentIndex + 1) % images.length;
+            images[currentIndex]?.classList.remove('is-active');
+            images[nextIndex]?.classList.add('is-active');
+            slideshow.dataset.activeIndex = String(nextIndex);
+        }, duration);
+    }
+
+    return slideshow;
+}
+
+function renderStikHeroMedia(container, shouldPlay = false) {
+    if ((container.dataset.heroMode || 'video') === 'slideshow') {
+        return renderStikHeroSlideshow(container, shouldPlay);
+    }
+
+    clearStikHeroSlideshow(container);
+    container.querySelector('#institutionalHeroSlideshow')?.remove();
+
+    const { src, kind, poster } = getStikHeroMediaConfig(container);
+    if (!src) return null;
+
+    const current = container.querySelector('#institutionalVideo, #institutionalHeroImage');
+    if (kind === 'image') {
+        let image = current?.id === 'institutionalHeroImage' ? current : null;
+        if (!image) {
+            image = document.createElement('img');
+            image.id = 'institutionalHeroImage';
+            image.className = 'hero-media-element';
+            image.decoding = 'async';
+            image.loading = 'eager';
+            current?.replaceWith(image) || container.appendChild(image);
+        }
+        if (image.getAttribute('src') !== src) image.src = src;
+        image.alt = 'Imagem principal Stik';
+        container.closest('.video-hero-section')?.classList.add('video-ready');
+        return image;
+    }
+
+    let video = current?.id === 'institutionalVideo' ? current : null;
+    if (!video) {
+        video = document.createElement('video');
+        video.id = 'institutionalVideo';
+        video.className = 'hero-media-element';
+        video.autoplay = true;
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.setAttribute('webkit-playsinline', '');
+        video.preload = 'metadata';
+        current?.replaceWith(video) || container.appendChild(video);
+    }
+
+    video.poster = poster;
+    video.dataset.desktopSrc = container.dataset.desktopSrc || '';
+    video.dataset.mobileSrc = container.dataset.mobileSrc || '';
+    if (video.getAttribute('src') !== src) {
+        video.setAttribute('src', src);
+        video.load();
+    }
+    if (shouldPlay) playStikHeroVideo(video);
+    return video;
+}
+
+function playStikHeroVideo(video) {
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.play?.().catch(() => {
+        video.closest('.video-hero-section')?.classList.add('video-autoplay-blocked');
+    });
+}
+
+function applyAboutSiteContent(root, about) {
+    const page = root.querySelector?.('.institutional-page') || (root.classList?.contains('institutional-page') ? root : null);
+    if (!page || !about) return;
+
+    const title = page.querySelector('.institucional-section:first-of-type .title-section');
+    if (title) setStikRawText(title, about.title);
+
+    const paragraphs = page.querySelectorAll('.institucional-section:first-of-type .text-block p');
+    paragraphs.forEach((paragraph, index) => {
+        if (about.paragraphs[index]) setStikRawText(paragraph, about.paragraphs[index]);
+    });
+
+    const mainImage = page.querySelector('.institucional-section:first-of-type .image-block img');
+    if (mainImage) {
+        mainImage.src = about.mainImage;
+        mainImage.alt = about.mainImageAlt;
+    }
+
+    const statement = page.querySelector('.institucional-section:first-of-type .values-block h3');
+    if (statement) setStikRawText(statement, about.statement);
+
+    const galleryGrid = page.querySelector('.gallery-grid');
+    if (galleryGrid && Array.isArray(about.galleryImages)) {
+        galleryGrid.innerHTML = about.galleryImages.map(item => `
+            <div class="gallery-item"><img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.alt)}" loading="lazy" decoding="async"></div>
+        `).join('');
+    }
+
+    const bottomText = page.querySelector('.institucional-stacked .stacked-text p');
+    if (bottomText) setStikRawText(bottomText, about.bottomText);
+
+    const bottomImage = page.querySelector('.institucional-stacked .stacked-image img');
+    if (bottomImage) {
+        bottomImage.src = about.bottomImage;
+        bottomImage.alt = about.bottomImageAlt;
+    }
+}
+
 productStore.hydrate();
 window.productStore = productStore;
+window.siteContentStore = siteContentStore;
 let artigos = null;
 
 function mediaMatches(query) {
@@ -1417,10 +2016,117 @@ function escapeAttribute(value) {
         .replace(/>/g, '&gt;');
 }
 
+function decodeStikUrlPath(value, maxPasses = 3) {
+    const raw = String(value ?? '').trim();
+    let decoded = raw;
+    for (let index = 0; index < maxPasses; index += 1) {
+        try {
+            const next = decodeURI(decoded);
+            if (next === decoded) break;
+            decoded = next;
+        } catch (error) {
+            break;
+        }
+    }
+    return decoded;
+}
+
+function decodeStikUrlSchemeProbe(value, maxPasses = 3) {
+    const raw = String(value ?? '').trim();
+    let decoded = raw;
+    for (let index = 0; index < maxPasses; index += 1) {
+        try {
+            const next = decodeURIComponent(decoded);
+            if (next === decoded) break;
+            decoded = next;
+        } catch (error) {
+            break;
+        }
+    }
+    return decoded;
+}
+
+function encodeStikUrlPath(value) {
+    return encodeURI(decodeStikUrlPath(value));
+}
+
+function encodeStikUrlPreservingEscapes(value) {
+    return encodeURI(String(value ?? '').trim()).replace(/%25([0-9a-f]{2})/gi, '%$1');
+}
+
+function normalizeStikAssetUrl(value, fallback = '') {
+    const original = String(value ?? '').trim();
+    if (isStikManagedMediaRef(original)) return original;
+    const raw = decodeStikUrlPath(original);
+    const schemeProbe = decodeStikUrlSchemeProbe(original);
+    if (!raw || /[\u0000-\u001f\u007f]/.test(raw)) return fallback;
+    if (/^(javascript|vbscript):/i.test(schemeProbe)) return fallback;
+    if (/^data:image\/(?:png|jpe?g|gif|webp|avif);base64,/i.test(raw)) return raw;
+    if (/^data:/i.test(raw)) return fallback;
+    if (/^blob:/i.test(raw)) return raw;
+    if (/^(https?:)?\/\//i.test(original)) {
+        try {
+            const url = new URL(original, window.location.origin);
+            return /^https?:$/i.test(url.protocol) ? url.href : fallback;
+        } catch (error) {
+            return fallback;
+        }
+    }
+    if (/^(\/(?!\/)|\.\/|\.\.\/|#|[^:?#]+(?:[/?#]|$))/i.test(raw)) {
+        return encodeStikUrlPath(raw);
+    }
+    return fallback;
+}
+
+function normalizeStikHeroMediaKind(value) {
+    return ['image', 'video'].includes(value) ? value : '';
+}
+
+function inferStikMediaKind(value, fallback = 'image') {
+    const raw = String(value || '').split(/[?#]/)[0].toLowerCase();
+    if (/\.(mp4|webm|ogg)$/.test(raw)) return 'video';
+    if (/\.(jpe?g|png|webp|gif|avif)$/.test(raw)) return 'image';
+    return normalizeStikHeroMediaKind(fallback) || 'image';
+}
+
+function normalizeStikLinkUrl(value, fallback = '#') {
+    const raw = String(value ?? '').trim();
+    const decodedForScheme = decodeStikUrlSchemeProbe(raw);
+    if (!raw || /[\u0000-\u001f\u007f]/.test(raw)) return fallback;
+    if (/^(javascript|vbscript|data):/i.test(decodedForScheme)) return fallback;
+    if (/^(mailto|tel):/i.test(raw)) return raw;
+    if (/^(https?:)?\/\//i.test(raw)) {
+        try {
+            const url = new URL(raw, window.location.origin);
+            return /^https?:$/i.test(url.protocol) ? url.href : fallback;
+        } catch (error) {
+            return fallback;
+        }
+    }
+    if (/^(\/(?!\/)|\.\/|\.\.\/|#|[^:?#]+(?:[/?#]|$))/i.test(raw)) {
+        return encodeStikUrlPreservingEscapes(raw);
+    }
+    return fallback;
+}
+
+const STIK_ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']);
+const STIK_MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024;
+
+function validateStikImageFile(file) {
+    if (!file) return 'Arquivo invalido.';
+    if (!STIK_ALLOWED_IMAGE_TYPES.has(file.type)) {
+        return 'Escolha uma imagem JPG, PNG, WebP, GIF ou AVIF.';
+    }
+    if (file.size > STIK_MAX_IMAGE_FILE_SIZE) {
+        return 'A imagem deve ter no maximo 5 MB.';
+    }
+    return '';
+}
+
 function optimizedImageMarkup(src, alt, options = {}) {
     const loading = options.loading || 'lazy';
     const fetchPriority = options.fetchPriority ? ` fetchpriority="${escapeAttribute(options.fetchPriority)}"` : '';
-    return `<img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" loading="${loading}" decoding="async"${fetchPriority}>`;
+    return `<img src="${escapeAttribute(normalizeStikAssetUrl(src))}" alt="${escapeAttribute(alt)}" loading="${loading}" decoding="async"${fetchPriority}>`;
 }
 
 function optimizeImageElement(img, options = {}) {
@@ -1498,7 +2204,8 @@ async function carregarConteudoPrincipal(url) {
             }
         } else if (url.includes('produto.html')) {
             carregarDetalhesDoProduto();
-        } 
+        }
+        applySiteContent(mainContentPlaceholder);
         inicializarAnimateOnScroll();
         applyStikTranslations(mainContentPlaceholder);
         inicializarNewsletterCarousel();
@@ -1513,22 +2220,35 @@ function saveSidebarState() {
     const sidebar = document.querySelector('.sidebar');
     if (!sidebar) return;
 
-    localStorage.setItem('sidebarActive', sidebar.classList.contains('active'));
+    try {
+        localStorage.setItem('sidebarActive', sidebar.classList.contains('active'));
 
-    const submenusAtivos = [];
-    document.querySelectorAll('.submenu, .submenu-aninhado, .submenu-terceiro-nivel').forEach((submenu, index) => {
-        if (submenu.classList.contains('active')) {
-            submenusAtivos.push(index);
-        }
-    });
-    localStorage.setItem('submenusAtivos', JSON.stringify(submenusAtivos));
+        const submenusAtivos = [];
+        document.querySelectorAll('.submenu, .submenu-aninhado, .submenu-terceiro-nivel').forEach((submenu, index) => {
+            if (submenu.classList.contains('active')) {
+                submenusAtivos.push(index);
+            }
+        });
+        localStorage.setItem('submenusAtivos', JSON.stringify(submenusAtivos));
+    } catch (error) {
+        /* A sidebar continua funcional mesmo sem persistencia local. */
+    }
 }
 
 function restoreSidebarState() {
     const sidebar = document.querySelector('.sidebar');
     if (!sidebar) return;
 
-    const sidebarActive = localStorage.getItem('sidebarActive') === 'true';
+    let sidebarActive = false;
+    let submenusAtivos = [];
+    try {
+        sidebarActive = localStorage.getItem('sidebarActive') === 'true';
+        submenusAtivos = JSON.parse(localStorage.getItem('submenusAtivos')) || [];
+        if (!Array.isArray(submenusAtivos)) submenusAtivos = [];
+    } catch (error) {
+        sidebarActive = false;
+        submenusAtivos = [];
+    }
     const overlay = document.getElementById('overlay');
 
     if (sidebarActive) {
@@ -1550,7 +2270,6 @@ function restoreSidebarState() {
         document.body.style.overflow = '';
     }
 
-    const submenusAtivos = JSON.parse(localStorage.getItem('submenusAtivos')) || [];
     document.querySelectorAll('.submenu, .submenu-aninhado, .submenu-terceiro-nivel').forEach((submenu, index) => {
         if (submenusAtivos.includes(index)) submenu.classList.add('active');
         else submenu.classList.remove('active');
@@ -1701,8 +2420,12 @@ function inicializarMenu() {
         document.body.style.overflow = '';
 
         // limpa o estado salvo (o usuário fechou manualmente)
-        localStorage.removeItem('sidebarActive');
-        localStorage.removeItem('submenusAtivos');
+        try {
+            localStorage.removeItem('sidebarActive');
+            localStorage.removeItem('submenusAtivos');
+        } catch (error) {
+            /* Sem storage, apenas fecha visualmente. */
+        }
 
         // remove classes visuais
         document.querySelectorAll('.submenu.active, .submenu-aninhado.active, .submenu-terceiro-nivel.active').forEach(s => s.classList.remove('active'));
@@ -1794,11 +2517,11 @@ function formatNome(nome) {
 function criarProdutoCard(produto) {
     const produtoCard = document.createElement('a'); 
     produtoCard.classList.add('produto-card');
-    produtoCard.href = `produto.html?id=${produto.id}`;
-    const src = encodeURI(produto.imagem);
+    produtoCard.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
+    const categoryName = normalizeCategoria(produto.categoria);
     produtoCard.innerHTML = `
-        ${optimizedImageMarkup(src, normalizeCategoria(produto.categoria))}
-        <h3>${normalizeCategoria(produto.categoria)}</h3>
+        ${optimizedImageMarkup(produto.imagem, categoryName)}
+        <h3>${escapeHtml(categoryName)}</h3>
     `;
     return produtoCard;
 }
@@ -1807,10 +2530,9 @@ function criarCategoriaCard(categoria, imagemRepresentativa) {
     const card = document.createElement('a');
     card.classList.add('produto-card');
     card.href = `categoria.html?categoria=${encodeURIComponent(categoria)}`;
-    const src = encodeURI(imagemRepresentativa);
     card.innerHTML = `
-        ${optimizedImageMarkup(src, categoria)}
-        <h3>${categoria}</h3>
+        ${optimizedImageMarkup(imagemRepresentativa, categoria)}
+        <h3>${escapeHtml(categoria)}</h3>
     `;
     return card;
 }
@@ -1870,13 +2592,13 @@ function renderAdminSelectedCategoryProducts() {
     container.innerHTML = products
         .map(product => `
             <article class="admin-category-selected-product">
-                <img src="${escapeAttribute(encodeURI(product.imagem))}" alt="${escapeAttribute(formatNome(product.nome))}" loading="lazy" decoding="async">
+                <img src="${escapeAttribute(normalizeStikAssetUrl(product.imagem))}" alt="${escapeAttribute(formatNome(product.nome))}" loading="lazy" decoding="async">
                 <div>
                     <strong>${escapeHtml(formatNome(product.nome))}</strong>
                     <span>${escapeHtml(product.material || 'Material não informado')}</span>
                 </div>
                 <div class="admin-list-actions">
-                    <a class="admin-icon-btn" href="produto.html?id=${escapeAttribute(product.id)}" target="_blank" rel="noopener" aria-label="Abrir produto">
+                    <a class="admin-icon-btn" href="produto.html?id=${escapeAttribute(encodeURIComponent(product.id))}" target="_blank" rel="noopener" aria-label="Abrir produto">
                         <i class="fas fa-external-link-alt"></i>
                     </a>
                     <button type="button" class="admin-icon-btn" data-admin-edit-product-from-category="${escapeAttribute(product.id)}" aria-label="Editar produto">
@@ -2026,12 +2748,11 @@ function inicializarPesquisa() {
             if (produtosFiltrados.length > 0) {
                 produtosFiltrados.forEach(produto => {
                     const item = document.createElement('a');
-                    item.href = `produto.html?id=${produto.id}`;
+                    item.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
                     item.classList.add('search-result-item');
-                    const src = encodeURI(produto.imagem);
                     item.innerHTML = `
-                        ${optimizedImageMarkup(src, formatNome(produto.nome))}
-                        <span>${formatNome(produto.nome)} <small>(${normalizeCategoria(produto.categoria)})</small></span>
+                        ${optimizedImageMarkup(produto.imagem, formatNome(produto.nome))}
+                        <span>${escapeHtml(formatNome(produto.nome))} <small>(${escapeHtml(normalizeCategoria(produto.categoria))})</small></span>
                     `;
                     searchResultsList.appendChild(item);
                 });
@@ -2979,6 +3700,46 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+function sanitizeArticleHtml(html) {
+    const template = document.createElement('template');
+    template.innerHTML = String(html || '');
+    template.content.querySelectorAll('script, style, link, meta, base, noscript, iframe, object, embed, form, input, button, video, audio, canvas, svg').forEach(element => element.remove());
+
+    template.content.querySelectorAll('*').forEach(element => {
+        Array.from(element.attributes).forEach(attr => {
+            const name = attr.name.toLowerCase();
+            const value = attr.value.trim();
+
+            if (name.startsWith('on') || name === 'srcdoc' || name === 'style' || ['srcset', 'ping', 'formaction', 'poster'].includes(name)) {
+                element.removeAttribute(attr.name);
+                return;
+            }
+
+            if (['href', 'action', 'xlink:href'].includes(name)) {
+                const safeLink = normalizeStikLinkUrl(value, '');
+                if (safeLink) element.setAttribute(attr.name, safeLink);
+                else element.removeAttribute(attr.name);
+                return;
+            }
+
+            if (name === 'src') {
+                const safeAsset = normalizeStikAssetUrl(value, '');
+                if (safeAsset) element.setAttribute(attr.name, safeAsset);
+                else element.removeAttribute(attr.name);
+            }
+        });
+
+        if (element.tagName === 'A') {
+            const href = element.getAttribute('href') || '';
+            if (element.getAttribute('target') === '_blank' || /^(https?:)?\/\//i.test(href)) {
+                element.setAttribute('rel', 'noopener noreferrer');
+            }
+        }
+    });
+
+    return template.innerHTML;
+}
+
 function getBlogScreenArticles() {
     return BLOG_SCREEN_ARTICLES;
 }
@@ -3066,14 +3827,15 @@ function renderBlogTags(tags) {
 
 function renderBlogCard(article, options = {}) {
     if (!article) return '';
-    const className = options.className || 'blog-mini-card';
-    const headingTag = options.headingTag || 'h3';
+    const allowedCardClasses = new Set(['blog-mini-card', 'blog-category-card is-medium', 'blog-category-card is-tall', 'blog-result-card', 'blog-feature-card is-large', 'blog-feature-card']);
+    const className = allowedCardClasses.has(options.className) ? options.className : 'blog-mini-card';
+    const headingTag = /^h[2-4]$/i.test(options.headingTag || '') ? options.headingTag.toLowerCase() : 'h3';
     const loading = options.loading || 'lazy';
     const title = escapeHtml(article.titulo);
     const tags = renderBlogTags(getBlogTags(article));
 
     return `
-        <a class="${className}" href="artigo.html?id=${escapeAttribute(article.id)}">
+        <a class="${escapeAttribute(className)}" href="artigo.html?id=${encodeURIComponent(article.id)}">
             ${optimizedImageMarkup(article.imagem, article.titulo, { loading })}
             <div class="blog-card-content">
                 <div class="blog-card-tags">${tags}</div>
@@ -3423,16 +4185,16 @@ async function displayArticles() {
 
 function renderArticleContent(article) {
     if (article.contentHtml) {
-        return article.contentHtml;
+        return sanitizeArticleHtml(article.contentHtml);
     }
 
     if (Array.isArray(article.blocos)) {
         return article.blocos.map(block => {
             if (block.tipo === 'lead') {
-                return `<p class="is-lead">${block.html}</p>`;
+                return `<p class="is-lead">${sanitizeArticleHtml(block.html)}</p>`;
             }
             if (block.tipo === 'paragrafo') {
-                return `<p>${block.html}</p>`;
+                return `<p>${sanitizeArticleHtml(block.html)}</p>`;
             }
             if (block.tipo === 'titulo') {
                 const level = block.nivel === 3 ? 3 : 2;
@@ -3456,7 +4218,7 @@ function renderArticleContent(article) {
         }).join('');
     }
 
-    return article.conteudoCompleto || `<p>${escapeHtml(article.resumo || '')}</p>`;
+    return article.conteudoCompleto ? sanitizeArticleHtml(article.conteudoCompleto) : `<p>${escapeHtml(article.resumo || '')}</p>`;
 }
 
 async function carregarArtigo() {
@@ -3513,7 +4275,7 @@ async function carregarArtigo() {
     }
     if (articleImageEl) {
         optimizeImageElement(articleImageEl, { loading: 'eager', fetchPriority: 'high' });
-        articleImageEl.src = artigo.imagem;
+        articleImageEl.src = normalizeStikAssetUrl(artigo.imagem);
         articleImageEl.alt = artigo.titulo;
         if (articleImageEl.decode) articleImageEl.decode().catch(() => {/* ignore */});
     }
@@ -3567,7 +4329,6 @@ function createEditorBlock(type) {
                 <figure>${optimizedImageMarkup('img - Copia/thumb-blog-14-300x200.jpg', 'Imagem do artigo')}</figure>
                 <div class="blog-image-meta">
                     <input type="text" value="Crédito" aria-label="Crédito da imagem">
-                    <input type="text" value="Texto alternativo" aria-label="Texto alternativo da imagem">
                 </div>
             </article>
         `;
@@ -3704,7 +4465,7 @@ async function createTipTapArticleEditor(element) {
             focus: () => editor.chain().focus().run(),
             getHTML: () => editor.getHTML(),
             getJSON: () => editor.getJSON(),
-            setHTML: (html) => editor.commands.setContent(html || ''),
+            setHTML: (html) => editor.commands.setContent(sanitizeArticleHtml(html || '')),
             setFormat: (format) => {
                 const chain = editor.chain().focus();
                 if (format === 'h2') return chain.toggleHeading({ level: 2 }).run();
@@ -3718,8 +4479,14 @@ async function createTipTapArticleEditor(element) {
                 if (command === 'insertUnorderedList') return chain.toggleBulletList().run();
                 return false;
             },
-            setLink: (href) => editor.chain().focus().extendMarkRange('link').setLink({ href }).run(),
-            insertImage: ({ src, alt, title }) => editor.chain().focus().setImage({ src, alt, title }).run()
+            setLink: (href) => {
+                const safeHref = normalizeStikLinkUrl(href, '');
+                return safeHref ? editor.chain().focus().extendMarkRange('link').setLink({ href: safeHref }).run() : false;
+            },
+            insertImage: ({ src, alt, title }) => {
+                const safeSrc = normalizeStikAssetUrl(src, '');
+                return safeSrc ? editor.chain().focus().setImage({ src: safeSrc, alt, title }).run() : false;
+            }
         };
     } catch (error) {
         console.warn('TipTap não carregou. Usando editor nativo como fallback.', error);
@@ -3731,7 +4498,7 @@ async function createTipTapArticleEditor(element) {
             getHTML: () => element.innerHTML,
             getJSON: () => ({ type: 'html', html: element.innerHTML }),
             setHTML: (html) => {
-                element.innerHTML = html || '';
+                element.innerHTML = sanitizeArticleHtml(html || '');
             },
             setFormat: (format) => {
                 element.focus();
@@ -3743,13 +4510,14 @@ async function createTipTapArticleEditor(element) {
             },
             setLink: (href) => {
                 element.focus();
-                document.execCommand('createLink', false, href);
+                const safeHref = normalizeStikLinkUrl(href, '');
+                if (safeHref) document.execCommand('createLink', false, safeHref);
             },
             insertImage: ({ src, alt }) => {
                 element.focus();
                 document.execCommand('insertHTML', false, `
                     <figure>
-                        <img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt || 'Imagem do artigo')}" loading="lazy" decoding="async">
+                        <img src="${escapeAttribute(normalizeStikAssetUrl(src))}" alt="${escapeAttribute(alt || 'Imagem do artigo')}" loading="lazy" decoding="async">
                         <figcaption>Crédito ou legenda</figcaption>
                     </figure>
                 `);
@@ -3774,11 +4542,11 @@ function buildArticlePayload(editorController, status = 'draft', coverState = {}
     return {
         title,
         summary: summaryInput ? summaryInput.value.trim() : '',
-        coverUrl: coverState.url || (coverImage ? coverImage.getAttribute('src') : ''),
+        coverUrl: normalizeStikAssetUrl(coverState.url || (coverImage ? coverImage.getAttribute('src') : '')),
         tags: collectSelectedTags(document.getElementById('selected-tags')),
         status,
         contentJson: editorController.getJSON(),
-        contentHtml: editorController.getHTML()
+        contentHtml: sanitizeArticleHtml(editorController.getHTML())
     };
 }
 
@@ -3899,6 +4667,12 @@ async function setupArticleForm() {
         inlineImageInput.addEventListener('change', async () => {
             const file = inlineImageInput.files && inlineImageInput.files[0];
             if (!file) return;
+            const validationMessage = validateStikImageFile(file);
+            if (validationMessage) {
+                showEditorFeedback(validationMessage);
+                inlineImageInput.value = '';
+                return;
+            }
 
             try {
                 const media = window.blogApi
@@ -3915,25 +4689,31 @@ async function setupArticleForm() {
 
     const applyCoverMedia = (media, fallbackName = 'Imagem de capa') => {
         if (!media || !media.url || !coverFigure) return;
+        const safeUrl = normalizeStikAssetUrl(media.url);
+        if (!safeUrl) {
+            showEditorFeedback('A URL da imagem de capa nao e valida.');
+            return;
+        }
         if (!coverImage) {
             coverImage = document.createElement('img');
             coverImage.loading = 'lazy';
             coverImage.decoding = 'async';
             coverFigure.prepend(coverImage);
         }
-        coverImage.src = media.url;
+        coverImage.src = safeUrl;
         coverImage.alt = media.filename || fallbackName;
         coverFigure.classList.remove('is-empty');
         coverFigure.setAttribute('aria-label', `Imagem de capa selecionada: ${media.filename || fallbackName}. Clique ou arraste para trocar.`);
         coverState.mediaId = media.id || null;
-        coverState.url = media.url;
+        coverState.url = safeUrl;
     };
 
     const uploadCoverFile = async (file) => {
         if (!file) return;
 
-        if (!file.type || !file.type.startsWith('image/')) {
-            showEditorFeedback('Escolha um arquivo de imagem.');
+        const validationMessage = validateStikImageFile(file);
+        if (validationMessage) {
+            showEditorFeedback(validationMessage);
             return;
         }
 
@@ -4347,7 +5127,7 @@ function getProductGalleryImages(produto, fallbackLabel = 'Imagem do produto') {
             const titulo = String(source.titulo || source.title || source.label || '').trim();
             const alt = String(source.alt || source.filename || source.name || titulo || fallbackLabel).trim();
             return {
-                url: String(source.url || source.src || source.imagem || source.image || '').trim(),
+                url: normalizeStikAssetUrl(source.url || source.src || source.imagem || source.image || ''),
                 titulo,
                 alt
             };
@@ -4382,7 +5162,7 @@ function setupProductImageGallery(images, productName) {
         const activeImage = galleryImages[activeIndex] || galleryImages[0];
         if (!activeImage) return;
 
-        mainProductImage.src = encodeURI(activeImage.url);
+        mainProductImage.src = normalizeStikAssetUrl(activeImage.url);
         mainProductImage.alt = activeImage.alt || productName;
         imageCard.setAttribute('aria-label', `Abrir imagem ${activeIndex + 1} de ${galleryImages.length} do produto ${productName}`);
 
@@ -4423,7 +5203,7 @@ function setupProductImageGallery(images, productName) {
     variationOptions.innerHTML = galleryImages
         .map((image, index) => `
             <button type="button" class="product-thumb-option" data-product-gallery-index="${index}" aria-label="Ver imagem ${index + 1}">
-                <img src="${escapeAttribute(encodeURI(image.url))}" alt="${escapeAttribute(image.alt || productName)}" loading="lazy" decoding="async">
+                <img src="${escapeAttribute(normalizeStikAssetUrl(image.url))}" alt="${escapeAttribute(image.alt || productName)}" loading="lazy" decoding="async">
                 <span>${escapeHtml(image.label || `Imagem ${index + 1}`)}</span>
             </button>
         `)
@@ -4481,7 +5261,7 @@ function openProductImageViewer(src, alt) {
     }
 
     const image = viewer.querySelector('img');
-    image.src = encodeURI(src);
+    image.src = normalizeStikAssetUrl(src);
     image.alt = alt || 'Imagem do produto';
     viewer.classList.add('is-open');
 }
@@ -4499,7 +5279,7 @@ function carregarDetalhesDoProduto() {
         const mainProductImage = document.getElementById('main-product-image');
         if (mainProductImage) {
             optimizeImageElement(mainProductImage, { loading: 'eager', fetchPriority: 'high' });
-            mainProductImage.src = encodeURI(imagensProduto[0]?.url || produto.imagem);
+            mainProductImage.src = normalizeStikAssetUrl(imagensProduto[0]?.url || produto.imagem);
             mainProductImage.alt = nomeFormatado;
         }
         setupProductImageGallery(imagensProduto, nomeFormatado);
@@ -4584,8 +5364,8 @@ function carregarDetalhesDoProduto() {
             [...mesmaCategoria, ...outrasCategorias].slice(0, 3).forEach(p => {
                 const card = document.createElement('a');
                 card.classList.add('produto-card');
-                card.href = `produto.html?id=${p.id}`;
-                card.innerHTML = `${optimizedImageMarkup(encodeURI(p.imagem), formatNome(p.nome))}<h3>${formatNome(p.nome)}</h3>`;
+                card.href = `produto.html?id=${encodeURIComponent(p.id)}`;
+                card.innerHTML = `${optimizedImageMarkup(p.imagem, formatNome(p.nome))}<h3>${escapeHtml(formatNome(p.nome))}</h3>`;
                 grid.appendChild(card);
             });
         }
@@ -4604,6 +5384,7 @@ function inicializarNewsletterCarousel() {
     const placeholder = document.getElementById('catalogo-placeholder');
     if (!placeholder) return;
     if (placeholder.dataset.catalogLoaded === 'true') {
+        applySiteContent(placeholder);
         applyStikTranslations(placeholder);
         return;
     }
@@ -4613,6 +5394,7 @@ function inicializarNewsletterCarousel() {
         .then(response => response.text())
         .then(html => {
             placeholder.innerHTML = html; 
+            applySiteContent(placeholder);
             applyStikTranslations(placeholder);
             inicializarAnimateOnScroll();
             initNewsletterCarouselEffects();
@@ -4916,55 +5698,45 @@ function inicializarPaginaFaleConosco() {
 }
 
 function inicializarHeroVideo() {
-    const video = document.getElementById('institutionalVideo');
-    if (!video || video.dataset.heroVideoReady === 'true') return;
-    video.dataset.heroVideoReady = 'true';
+    const container = document.querySelector('.video-container');
+    if (!container || container.dataset.heroMediaReady === 'true') return;
+    container.dataset.heroMediaReady = 'true';
 
-    const getVideoSrc = () => {
-        const isMobile = window.matchMedia('(max-width: 768px)').matches;
-        return isMobile ? video.dataset.mobileSrc : video.dataset.desktopSrc;
-    };
-
-    const applyVideoSource = () => {
-        const nextSrc = getVideoSrc();
-        if (!nextSrc || video.getAttribute('src') === nextSrc) return;
-        video.setAttribute('src', nextSrc);
-        video.load();
-    };
-
-    const playVideo = () => {
-        video.muted = true;
-        video.defaultMuted = true;
-        video.setAttribute('muted', '');
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
-        video.play?.().catch(() => {
-            video.closest('.video-hero-section')?.classList.add('video-autoplay-blocked');
+    const bindVideoEvents = media => {
+        if (!media || media.tagName !== 'VIDEO' || media.dataset.heroVideoEventsReady === 'true') return;
+        media.dataset.heroVideoEventsReady = 'true';
+        media.addEventListener('loadeddata', () => {
+            media.closest('.video-hero-section')?.classList.add('video-ready');
+        }, { once: true });
+        media.addEventListener('error', () => {
+            media.closest('.video-hero-section')?.classList.add('video-autoplay-blocked');
         });
     };
 
-    applyVideoSource();
-    playVideo();
-    video.addEventListener('loadeddata', () => {
-        video.closest('.video-hero-section')?.classList.add('video-ready');
-    }, { once: true });
-    video.addEventListener('error', () => {
-        video.closest('.video-hero-section')?.classList.add('video-autoplay-blocked');
-    });
+    const applyHeroMedia = () => {
+        const media = renderStikHeroMedia(container, true);
+        bindVideoEvents(media);
+    };
 
-    document.addEventListener('touchstart', playVideo, { once: true, passive: true });
+    applyHeroMedia();
+
+    document.addEventListener('touchstart', () => {
+        playStikHeroVideo(container.querySelector('#institutionalVideo'));
+    }, { once: true, passive: true });
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) playVideo();
+        if (!document.hidden) playStikHeroVideo(container.querySelector('#institutionalVideo'));
     });
 
     let resizeTimer = 0;
     window.addEventListener('resize', () => {
         window.clearTimeout(resizeTimer);
         resizeTimer = window.setTimeout(() => {
-        const currentTime = video.currentTime || 0;
-        applyVideoSource();
-        video.currentTime = Math.min(currentTime, video.duration || currentTime);
-        playVideo();
+            const previousVideo = container.querySelector('#institutionalVideo');
+            const currentTime = previousVideo?.currentTime || 0;
+            applyHeroMedia();
+            const nextVideo = container.querySelector('#institutionalVideo');
+            if (nextVideo) nextVideo.currentTime = Math.min(currentTime, nextVideo.duration || currentTime);
+            playStikHeroVideo(nextVideo);
         }, 180);
     });
 }
@@ -5000,6 +5772,7 @@ async function inicializarPagina() {
     const isTermosPage = /\/termos_de_uso(\.html)?$/.test(pathname);
     const isFaleConoscoPage = /\/fale_conosco(\.html)?$/.test(pathname);
     const isDadosCapturadosPage = /\/dados_capturados(\.html)?$/.test(pathname);
+    if (guardStikInternalPreviewPage()) return;
 
     // Função utilitária que injeta o template da página caso ainda não esteja presente
     async function ensurePageTemplate(templateUrl) {
@@ -5016,6 +5789,7 @@ async function inicializarPagina() {
     }
     
     if (isIndexPage) {
+        applySiteContent(document);
         inicializarHeroVideo();
         inicializarHeaderIndex();
         exibirCategorias(produtos);
@@ -5049,7 +5823,8 @@ async function inicializarPagina() {
         renderCategoriaPage();
     }
 
-    if (!isStikAdminPage()) {
+    if (!isStikInternalPreviewPage()) {
+        applySiteContent(document);
         applyStikTranslations(document);
     }
     
@@ -5320,7 +6095,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function setCookie(name, value, days = 30) {
     const expires = new Date(Date.now() + days * 864e5).toUTCString();
-    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax' + secure;
 }
 
 function getCookie(name) {
@@ -5330,11 +6106,24 @@ function getCookie(name) {
     }, null);
 }
 
+function fetchStikWithTimeout(url, options = {}, timeoutMs = 8000) {
+    if (typeof AbortController === 'undefined') {
+        return fetch(url, options);
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, {
+        ...options,
+        signal: controller.signal
+    }).finally(() => window.clearTimeout(timer));
+}
+
 async function reverseGeocode(lat, lon) {
     try {
         // Use Nominatim (OpenStreetMap) para reverse geocoding sem chave
         const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&addressdetails=1`;
-        const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR', 'User-Agent': 'StikSite/1.0 (contact@stik.com)' } });
+        const res = await fetchStikWithTimeout(url, { headers: { 'Accept-Language': 'pt-BR' } }, 6000);
         if (!res.ok) throw new Error('status ' + res.status);
         const data = await res.json();
         const address = data.address || {};
@@ -5425,19 +6214,18 @@ async function collectLocation() {
     });
 }
 
-async function sendLocationToServer({ city, state }, toEmail) {
+async function sendLocationToServer({ city, state }) {
     try {
         const payload = {
             city,
             state,
             analytics: buildStikSubmissionAnalyticsSnapshot({ source: 'send_location' })
         };
-        if (toEmail) payload.to = toEmail;
-        const res = await fetch('/api/send-location', {
+        const res = await fetchStikWithTimeout('/api/send-location', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-        });
+        }, 8000);
         const data = await res.json().catch(()=>({}));
         if (!res.ok) {
             console.warn('send-location falhou:', res.status, data);
@@ -5451,11 +6239,21 @@ async function sendLocationToServer({ city, state }, toEmail) {
 }
 
 /**
- * collectAndSendLocation(toEmail)
- * - pede permissão de geolocalização, faz reverse-geocode, salva cookie e envia ao servidor
- * - toEmail é opcional e sobrescreve o destinatário configurado no servidor
+ * collectAndSendLocation()
+ * - pede permissao de geolocalizacao, faz reverse-geocode e envia apenas cidade/estado ao servidor
  */
-async function collectAndSendLocation(toEmail) {
+async function collectAndSendLocation() {
+    if (!hasStikConsent('location')) {
+        return {
+            loc: null,
+            result: {
+                ok: false,
+                status: 403,
+                data: { message: 'Localizacao nao autorizada pelo banner de dados.' }
+            }
+        };
+    }
+
     const loc = await collectLocation();
     if (!hasUsableLocation(loc) || (!loc.city && !loc.state)) {
         return {
@@ -5467,7 +6265,7 @@ async function collectAndSendLocation(toEmail) {
             }
         };
     }
-    const result = await sendLocationToServer(loc, toEmail);
+    const result = await sendLocationToServer(loc);
     return { loc, result };
 }
 
@@ -5477,74 +6275,6 @@ window.collectAndSendLocation = collectAndSendLocation;
 // ---------- Fim das funções de localização ----------
 
 // -------- Página de Categoria: lista produtos por categoria --------
-function renderCategoriaPage() {
-    const params = new URLSearchParams(window.location.search);
-    let categoria = params.get('categoria') || '';
-    try { categoria = decodeURIComponent(categoria); } catch (_) {}
-    const catNorm = normalizeCategoria(categoria);
-
-    const container = document.getElementById('categoria-container');
-    if (!container) return;
-
-    // Título
-    const titulo = document.getElementById('categoria-title');
-    if (titulo) titulo.textContent = catNorm;
-
-    // Descrição por categoria (texto curto e único para não deixar vazio)
-    const descEl = document.getElementById('categoria-description');
-    if (descEl) {
-        const descricoes = {
-            'Alça': 'Alças técnicas desenvolvidas para oferecer sustentação, conforto e estética nas suas peças. Do dia a dia ao luxo, nossa linha equilibra resistência, toque agradável e caimento perfeito para diferentes propostas de design.',
-            'Base': 'Bases pensadas para estruturar cós, bustos e barras com estabilidade dimensional e elasticidade controlada. Soluções que dão forma e longevidade às peças, sem abrir mão do conforto e do acabamento premium.',
-            'Elásticos Crus': 'Matérias‑primas em seu estado natural para quem cria e produz com liberdade. Elásticos crus prontos para tingimento e acabamento, com alta resistência, estabilidade e desempenho industrial consistente.',
-            'Modeladores': 'Materiais com compressão e recuperação elástica pensados para modelar com precisão. Ideais para peças que pedem suporte firme, definição de silhueta e conforto durante o uso prolongado.',
-            'Personalizados': 'Acabamentos sob medida que colocam a sua marca em evidência. Estampas, padrões e cores exclusivos, com a nossa qualidade técnica para garantir durabilidade, fidelidade de cor e alto valor percebido.',
-            'Premium': 'Linha premium com toque sofisticado, brilho equilibrado e performance elevada. Produtos que unem estética e durabilidade para coleções de alto padrão e peças que pedem acabamento impecável.',
-            'Rendas': 'Rendas com desenho marcante, toque macio e excelente estabilidade. Beleza e funcionalidade lado a lado para compor detalhes, recortes e acabamentos que elevam o visual das suas criações.',
-            'Viés': 'Vieses versáteis para reforço de costuras, contornos e acabamentos limpos. Maleáveis, resistentes e fáceis de aplicar, garantem resultado profissional em peças do básico ao sofisticado.',
-            'Viés Com Arco': 'Vieses com arco integrado para dar suporte localizado e manter a forma da peça. Perfeitos para sutiãs, corsets e modeladores, combinando estrutura, conforto e acabamento discreto.'
-        };
-        descEl.textContent = descricoes[catNorm] || 'Produtos selecionados para atender diferentes necessidades de criação e produção, combinando desempenho técnico, conforto e acabamento de alto nível.';
-    }
-
-    // Filtra produtos
-    const itens = produtos.filter(p => normalizeCategoria(p.categoria) === catNorm);
-
-    if (!itens.length) {
-        container.innerHTML = `<p class="no-results">${escapeHtml(translateStikPhrase('Nenhum produto nesta categoria.'))}</p>`;
-        return;
-    }
-
-    // Reordena para começar pelo meio e alternar lados
-    const centralizados = [];
-    const meio = Math.floor(itens.length / 2);
-    centralizados.push(itens[meio]);
-    let left = meio - 1;
-    let right = meio + 1;
-    while (left >= 0 || right < itens.length) {
-        if (right < itens.length) centralizados.push(itens[right]);
-        if (left >= 0) centralizados.push(itens[left]);
-        right++;
-        left--;
-    }
-
-    // Monta cards
-    const frag = document.createDocumentFragment();
-    centralizados.forEach(p => {
-        const a = document.createElement('a');
-        a.href = `produto.html?id=${p.id}`;
-        a.classList.add('produto-card');
-        const src = encodeURI(p.imagem);
-        a.innerHTML = `
-            ${optimizedImageMarkup(src, formatNome(p.nome))}
-            <h3>${formatNome(p.nome)}</h3>
-        `;
-        frag.appendChild(a);
-    });
-    container.innerHTML = '';
-    container.appendChild(frag);
-}
-
 function renderCategoriaPage() {
     const params = new URLSearchParams(window.location.search);
     let categoria = params.get('categoria') || '';
@@ -5602,13 +6332,12 @@ function renderCategoriaPage() {
         const frag = document.createDocumentFragment();
         itens.slice(0, visibleItemsCount).forEach(produto => {
             const card = document.createElement('a');
-            card.href = `produto.html?id=${produto.id}`;
+            card.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
             card.classList.add('produto-card');
 
-            const src = encodeURI(produto.imagem);
             card.innerHTML = `
-                ${optimizedImageMarkup(src, formatNome(produto.nome))}
-                <h3>${formatNome(produto.nome)}</h3>
+                ${optimizedImageMarkup(produto.imagem, formatNome(produto.nome))}
+                <h3>${escapeHtml(formatNome(produto.nome))}</h3>
             `;
 
             frag.appendChild(card);
@@ -5774,12 +6503,14 @@ function buildProductInterest(events = []) {
 async function loadCapturedAnalytics() {
     const status = document.getElementById('analytics-status');
     if (status) {
-        status.textContent = 'Carregando dados capturados...';
+        status.textContent = 'Carregando insights de visitantes...';
         status.classList.remove('is-error');
     }
 
     try {
-        const response = await fetch('/api/analytics/debug', { cache: 'no-store' });
+        const response = await fetch('/api/analytics/debug', {
+            cache: 'no-store'
+        });
         const data = await response.json();
         if (!response.ok) {
             throw new Error(data.message || 'Não foi possível carregar os dados.');
@@ -5790,30 +6521,15 @@ async function loadCapturedAnalytics() {
 
         if (status) {
             const updatedAt = data.meta?.updatedAt ? formatAnalyticsDate(data.meta.updatedAt) : 'sem data';
-            status.textContent = `Dados carregados. Última atualização do arquivo: ${updatedAt}.`;
+            status.textContent = `Insights carregados. Última atualização do arquivo: ${updatedAt}.`;
         }
     } catch (error) {
-        console.error('Falha ao carregar dados capturados:', error);
+        console.error('Falha ao carregar insights de visitantes:', error);
         if (status) {
-            status.textContent = 'Não foi possível carregar os dados capturados. Verifique se o servidor local está rodando.';
+            status.textContent = 'Não foi possível carregar os insights de visitantes. Verifique se o servidor local está rodando.';
             status.classList.add('is-error');
         }
     }
-}
-
-function downloadCapturedAnalytics() {
-    const data = window.__stikCapturedAnalyticsData;
-    if (!data) return;
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `stik-dados-capturados-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
 }
 
 async function requestCapturedAnalyticsLocation() {
@@ -5853,6 +6569,7 @@ function normalizeMinimizedAnalyticsData(data = {}) {
     const users = Array.isArray(data.users)
         ? data.users.map(user => ({
             ...user,
+            id: user.id || user.anonymousId || null,
             email: user.email || null,
             city: user.city || null,
             state: user.state || null,
@@ -5987,7 +6704,7 @@ function renderAnalyticsRows(tbodyId, rows, emptyMessage, colSpan = 5) {
     if (!tbody) return;
 
     if (!rows.length) {
-        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="analytics-empty-cell">${escapeHtml(emptyMessage || 'Nenhum dado capturado ainda.')}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="analytics-empty-cell">${escapeHtml(emptyMessage || 'Nenhuma informação registrada ainda.')}</td></tr>`;
         return;
     }
 
@@ -6015,6 +6732,28 @@ function getAnalyticsUserLabel(user, index = 0) {
 
 function sortAnalyticsUsers(users = []) {
     return users.slice().sort((a, b) => new Date(b.lastSeenAt || 0) - new Date(a.lastSeenAt || 0));
+}
+
+function getSelectedAnalyticsUserId() {
+    return String(window.__stikSelectedAnalyticsUserId || '');
+}
+
+function setSelectedAnalyticsUserId(userId = '') {
+    window.__stikSelectedAnalyticsUserId = String(userId || '');
+}
+
+function resetAnalyticsDetailPages() {
+    window.__stikAnalyticsPages = window.__stikAnalyticsPages || {};
+    ['contacts', 'products', 'devices', 'locations'].forEach(key => {
+        window.__stikAnalyticsPages[key] = 1;
+    });
+}
+
+function ensureSelectedAnalyticsUserExists(users = []) {
+    const selectedId = getSelectedAnalyticsUserId();
+    if (selectedId && !users.some(user => String(user.id) === selectedId)) {
+        setSelectedAnalyticsUserId('');
+    }
 }
 
 function populateAnalyticsUserScope(users) {
@@ -6140,7 +6879,7 @@ function initializeAnalyticsUserScopePicker() {
 
 function getSelectedAnalyticsUser(data) {
     const normalized = normalizeMinimizedAnalyticsData(data);
-    const selectedId = document.getElementById('analytics-user-scope')?.value || '';
+    const selectedId = getSelectedAnalyticsUserId();
     return normalized.users.find(user => String(user.id) === String(selectedId)) || null;
 }
 
@@ -6206,11 +6945,47 @@ function renderAnalyticsScopeSummary(scopedData) {
     summary.textContent = `Usuário selecionado. Os blocos abaixo foram filtrados para: ${details}.`;
 }
 
+function renderAnalyticsUsersTable(users = []) {
+    const sortedUsers = sortAnalyticsUsers(users).map((user, index) => ({
+        ...user,
+        __label: getAnalyticsUserLabel(user, index)
+    }));
+    const selectedId = getSelectedAnalyticsUserId();
+    const userCountEl = document.getElementById('analytics-user-count');
+    const allUsersButton = document.getElementById('analytics-all-users');
+
+    if (userCountEl) userCountEl.textContent = `${sortedUsers.length} ${sortedUsers.length === 1 ? 'visitante' : 'visitantes'}`;
+    if (allUsersButton) {
+        const isGeneral = !selectedId;
+        allUsersButton.classList.toggle('is-active', isGeneral);
+        allUsersButton.setAttribute('aria-pressed', String(isGeneral));
+    }
+
+    const userPage = getAnalyticsPageSlice('users', sortedUsers);
+    renderAnalyticsRows('analytics-users', userPage.items.map(user => {
+        const isSelected = String(user.id) === selectedId;
+        return `
+            <tr class="analytics-user-row ${isSelected ? 'is-selected' : ''}" data-analytics-user-id="${escapeAttribute(user.id)}">
+                <td>
+                    <button type="button" class="analytics-user-row-button" data-analytics-user-id="${escapeAttribute(user.id)}">
+                        ${escapeHtml(user.__label)}
+                    </button>
+                </td>
+                <td>${escapeHtml(getAnalyticsValue(user.email))}</td>
+                <td>${escapeHtml(getAnalyticsPlace(user))}</td>
+                <td>${escapeHtml(getAnalyticsDeviceLabel(user.device))}</td>
+                <td>${escapeHtml(formatAnalyticsDate(user.lastSeenAt || user.firstSeenAt))}</td>
+            </tr>
+        `;
+    }), 'Nenhum visitante registrado ainda.', 5);
+    renderAnalyticsPagination('analytics-users-pagination', 'users', userPage.page, userPage.totalPages);
+}
+
 function showAnalyticsScopeFeedback() {
     const scopedData = getScopedAnalyticsData(window.__stikCapturedAnalyticsData || {});
     const message = scopedData.isUserScoped
-        ? 'Filtro aplicado: exibindo apenas as informações do usuário selecionado.'
-        : 'Filtro removido: exibindo a visão geral de todos os usuários.';
+        ? 'Filtro aplicado: exibindo apenas as informações do visitante selecionado.'
+        : 'Filtro removido: exibindo a visão geral de todos os visitantes.';
 
     if (typeof showEditorFeedback === 'function') {
         showEditorFeedback(message);
@@ -6224,9 +6999,10 @@ function showAnalyticsScopeFeedback() {
 
 function renderCapturedAnalytics(data) {
     const normalized = normalizeMinimizedAnalyticsData(data);
-    populateAnalyticsUserScope(normalized.users);
+    ensureSelectedAnalyticsUserExists(normalized.users);
     const scopedData = getScopedAnalyticsData(data);
     renderAnalyticsScopeSummary(scopedData);
+    renderAnalyticsUsersTable(normalized.users);
 
     const contacts = scopedData.contacts
         .slice()
@@ -6283,7 +7059,7 @@ function renderCapturedAnalytics(data) {
                 <td>${escapeHtml(String(Number(device.count) || 1))}</td>
             </tr>
         `;
-    }), 'Nenhum dispositivo capturado.', 5);
+    }), 'Nenhum dispositivo registrado.', 5);
     renderAnalyticsPagination('analytics-devices-pagination', 'devices', devicePage.page, devicePage.totalPages);
 
     const locationPage = getAnalyticsPageSlice('locations', locations);
@@ -6296,20 +7072,30 @@ function renderCapturedAnalytics(data) {
             <td>${escapeHtml(String(Number(location.count) || 1))}</td>
             <td>${escapeHtml(formatAnalyticsDate(location.lastCollectedAt || location.firstCollectedAt))}</td>
         </tr>
-    `), 'Nenhuma cidade/estado capturado. Para aparecer aqui, o usuario precisa permitir localizacao no navegador.', 4);
+    `), 'Nenhuma cidade/estado registrada. Para aparecer aqui, o usuario precisa permitir localizacao no navegador.', 4);
     renderAnalyticsPagination('analytics-locations-pagination', 'locations', locationPage.page, locationPage.totalPages);
 }
 
 function inicializarPaginaDadosCapturados() {
     document.getElementById('analytics-refresh')?.addEventListener('click', loadCapturedAnalytics);
-    document.getElementById('analytics-download')?.addEventListener('click', downloadCapturedAnalytics);
-    initializeAnalyticsUserScopePicker();
-    document.getElementById('analytics-user-scope')?.addEventListener('change', () => {
-        window.__stikAnalyticsPages = {};
+
+    document.getElementById('analytics-all-users')?.addEventListener('click', () => {
+        setSelectedAnalyticsUserId('');
+        resetAnalyticsDetailPages();
         renderCapturedAnalytics(window.__stikCapturedAnalyticsData || {});
         showAnalyticsScopeFeedback();
     });
+
     document.addEventListener('click', event => {
+        const userButton = event.target.closest('[data-analytics-user-id]');
+        if (userButton) {
+            setSelectedAnalyticsUserId(userButton.dataset.analyticsUserId || '');
+            resetAnalyticsDetailPages();
+            renderCapturedAnalytics(window.__stikCapturedAnalyticsData || {});
+            showAnalyticsScopeFeedback();
+            return;
+        }
+
         const button = event.target.closest('[data-analytics-page-key][data-analytics-page]');
         if (!button) return;
         window.__stikAnalyticsPages = window.__stikAnalyticsPages || {};
@@ -6339,6 +7125,920 @@ function setAdminArticleEditorOpen(isOpen, mode = 'create') {
     if (editorTitle) editorTitle.textContent = mode === 'edit' ? 'Editar artigo' : 'Criar artigo';
 }
 
+function getSiteContentPathValue(source, path) {
+    return String(path || '').split('.').reduce((value, part) => value?.[part], source);
+}
+
+function setSiteContentPathValue(source, path, value) {
+    const parts = String(path || '').split('.');
+    let target = source;
+    parts.slice(0, -1).forEach(part => {
+        if (target && typeof target === 'object') target = target[part];
+    });
+    if (target && typeof target === 'object') {
+        target[parts[parts.length - 1]] = value;
+    }
+}
+
+function renderAdminContentField({ path, label, value, type = 'text', rows = 3, help = '' }) {
+    const id = `site-content-${path.replace(/[^a-z0-9]+/gi, '-')}`;
+    const commonAttrs = `id="${escapeAttribute(id)}" data-site-content-path="${escapeAttribute(path)}"`;
+    return `
+        <label class="admin-site-field" for="${escapeAttribute(id)}">
+            <span>${escapeHtml(label)}</span>
+            ${type === 'textarea'
+                ? `<textarea ${commonAttrs} rows="${rows}">${escapeHtml(value)}</textarea>`
+                : `<input ${commonAttrs} type="${escapeAttribute(type)}" value="${escapeAttribute(value)}">`
+            }
+            ${help ? `<small>${escapeHtml(help)}</small>` : ''}
+        </label>
+    `;
+}
+
+function renderAdminImagePreview(image, alt = 'Preview') {
+    return `
+        <figure class="admin-site-image-preview">
+            <img src="${escapeAttribute(normalizeStikAssetUrl(image))}" alt="${escapeAttribute(alt)}" loading="lazy" decoding="async">
+        </figure>
+    `;
+}
+
+function renderAdminSiteImageRows(items, basePath, options = {}) {
+    const canRemove = options.canRemove === true;
+    const canMove = options.canMove === true;
+    return `
+        <div class="admin-site-repeatable">
+            ${items.map((item, index) => `
+                <article class="admin-site-image-row">
+                    ${renderAdminImagePreview(item.image, item.alt)}
+                    <div class="admin-site-image-fields">
+                        ${renderAdminContentField({
+                            path: `${basePath}.${index}.image`,
+                            label: 'Imagem',
+                            value: item.image,
+                            help: 'Use um caminho do projeto, como img/arquivo.jpg, ou uma URL https.'
+                        })}
+                    </div>
+                    ${(canRemove || canMove) ? `
+                        <div class="admin-site-row-actions">
+                            ${canMove ? `
+                                <button type="button" class="admin-icon-btn" data-site-content-move="${escapeAttribute(basePath)}" data-site-content-index="${index}" data-site-content-direction="-1" aria-label="Mover imagem para cima">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button type="button" class="admin-icon-btn" data-site-content-move="${escapeAttribute(basePath)}" data-site-content-index="${index}" data-site-content-direction="1" aria-label="Mover imagem para baixo">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                            ` : ''}
+                            ${canRemove ? `
+                                <button type="button" class="admin-icon-btn admin-icon-btn-danger" data-site-content-remove="${escapeAttribute(basePath)}" data-site-content-index="${index}" aria-label="Remover imagem">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </article>
+            `).join('')}
+        </div>
+    `;
+}
+
+function collectAdminSiteContentForm(root) {
+    const content = siteContentStore.read();
+    root.querySelectorAll('[data-site-content-path]').forEach(field => {
+        setSiteContentPathValue(content, field.dataset.siteContentPath, field.value);
+    });
+    return content;
+}
+
+function updateAdminSiteContentPreviews(root) {
+    root.querySelectorAll('.admin-site-image-row').forEach(row => {
+        const imageInput = row.querySelector('[data-site-content-path$=".image"]');
+        const altInput = row.querySelector('[data-site-content-path$=".alt"]');
+        const preview = row.querySelector('img');
+        if (preview && imageInput) preview.src = normalizeStikAssetUrl(imageInput.value);
+        if (preview && altInput) preview.alt = altInput.value || 'Preview';
+    });
+}
+
+function renderAdminSiteContent() {
+    const root = document.getElementById('admin-site-content-root');
+    if (!root) return;
+    const content = siteContentStore.read();
+
+    root.innerHTML = `
+        <form class="admin-site-content-form" id="admin-site-content-form">
+            <section class="admin-card admin-site-content-card">
+                <div class="admin-list-head">
+                    <h2>Home - Hero inicial</h2>
+                    <a class="blog-editor-btn blog-editor-btn-outline" href="index.html" target="_blank" rel="noopener">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Home
+                    </a>
+                </div>
+                <div class="admin-site-grid">
+                    ${renderAdminContentField({ path: 'home.hero.poster', label: 'Poster do vídeo', value: content.home.hero.poster })}
+                    ${renderAdminContentField({ path: 'home.hero.desktopVideo', label: 'Vídeo desktop', value: content.home.hero.desktopVideo })}
+                    ${renderAdminContentField({ path: 'home.hero.mobileVideo', label: 'Vídeo mobile', value: content.home.hero.mobileVideo })}
+                </div>
+            </section>
+
+            <section class="admin-card admin-site-content-card">
+                <div class="admin-list-head">
+                    <h2>Home - Grid de produtos</h2>
+                </div>
+                ${renderAdminContentField({ path: 'home.highlights.title', label: 'Título da seção', value: content.home.highlights.title })}
+                <div class="admin-site-highlight-list">
+                    ${content.home.highlights.items.map((item, index) => `
+                        <article class="admin-site-highlight-row">
+                            <div class="admin-site-slot">${escapeHtml(item.slot)}</div>
+                            ${renderAdminImagePreview(item.image, item.alt)}
+                            <div class="admin-site-image-fields">
+                                ${renderAdminContentField({ path: `home.highlights.items.${index}.image`, label: 'Imagem', value: item.image })}
+                                ${renderAdminContentField({ path: `home.highlights.items.${index}.text`, label: 'Texto sobre a imagem', value: item.text })}
+                            </div>
+                        </article>
+                    `).join('')}
+                </div>
+            </section>
+
+            <section class="admin-card admin-site-content-card">
+                <div class="admin-list-head">
+                    <h2>Catálogo - Carrossel infinito</h2>
+                    <button type="button" class="blog-editor-btn blog-editor-btn-outline" data-site-content-add="home.catalog.carouselImages">
+                        <i class="fas fa-plus"></i>
+                        Adicionar imagem
+                    </button>
+                </div>
+                ${renderAdminContentField({ path: 'home.catalog.title', label: 'Título do bloco', value: content.home.catalog.title })}
+                ${renderAdminSiteImageRows(content.home.catalog.carouselImages, 'home.catalog.carouselImages', { canRemove: true, canMove: true })}
+            </section>
+
+            <section class="admin-card admin-site-content-card">
+                <div class="admin-list-head">
+                    <h2>Sobre a Stik</h2>
+                    <a class="blog-editor-btn blog-editor-btn-outline" href="institucional.html" target="_blank" rel="noopener">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Sobre
+                    </a>
+                </div>
+                <div class="admin-site-grid">
+                    ${renderAdminContentField({ path: 'about.title', label: 'Título principal', value: content.about.title })}
+                    ${renderAdminContentField({ path: 'about.mainImage', label: 'Imagem principal', value: content.about.mainImage })}
+                    ${renderAdminContentField({ path: 'about.mainImageAlt', label: 'Alt da imagem principal', value: content.about.mainImageAlt })}
+                </div>
+                ${renderAdminContentField({ path: 'about.paragraphs.0', label: 'Primeiro texto', value: content.about.paragraphs[0] || '', type: 'textarea', rows: 5 })}
+                ${renderAdminContentField({ path: 'about.paragraphs.1', label: 'Segundo texto', value: content.about.paragraphs[1] || '', type: 'textarea', rows: 5 })}
+                ${renderAdminContentField({ path: 'about.statement', label: 'Frase de destaque', value: content.about.statement, type: 'textarea', rows: 4 })}
+            </section>
+
+            <section class="admin-card admin-site-content-card">
+                <div class="admin-list-head">
+                    <h2>Sobre - Galeria</h2>
+                    <button type="button" class="blog-editor-btn blog-editor-btn-outline" data-site-content-add="about.galleryImages">
+                        <i class="fas fa-plus"></i>
+                        Adicionar imagem
+                    </button>
+                </div>
+                ${renderAdminSiteImageRows(content.about.galleryImages, 'about.galleryImages', { canRemove: true, canMove: true })}
+            </section>
+
+            <section class="admin-card admin-site-content-card">
+                <div class="admin-list-head">
+                    <h2>Sobre - Bloco final</h2>
+                </div>
+                ${renderAdminContentField({ path: 'about.bottomText', label: 'Texto final', value: content.about.bottomText, type: 'textarea', rows: 4 })}
+                <div class="admin-site-grid">
+                    ${renderAdminContentField({ path: 'about.bottomImage', label: 'Imagem final', value: content.about.bottomImage })}
+                    ${renderAdminContentField({ path: 'about.bottomImageAlt', label: 'Alt da imagem final', value: content.about.bottomImageAlt })}
+                </div>
+            </section>
+
+            <div class="admin-site-actions">
+                <button type="button" class="blog-editor-btn blog-editor-btn-light" id="admin-site-content-reset">
+                    <i class="fas fa-undo"></i>
+                    Restaurar padrão
+                </button>
+                <button type="submit" class="blog-editor-btn blog-editor-btn-primary">
+                    <i class="fas fa-save"></i>
+                    Salvar conteúdo
+                </button>
+            </div>
+        </form>
+    `;
+
+    updateAdminSiteContentPreviews(root);
+}
+
+function setupAdminSiteContent() {
+    const root = document.getElementById('admin-site-content-root');
+    if (!root || root.dataset.siteContentReady === 'true') return;
+    root.dataset.siteContentReady = 'true';
+    renderAdminSiteContent();
+
+    root.addEventListener('input', event => {
+        if (event.target.matches('[data-site-content-path]')) {
+            updateAdminSiteContentPreviews(root);
+        }
+    });
+
+    root.addEventListener('submit', event => {
+        event.preventDefault();
+        const content = collectAdminSiteContentForm(root);
+        siteContentStore.write(content);
+        renderAdminSiteContent();
+        applySiteContent(document);
+        showEditorFeedback('Conteúdo do site salvo.');
+    });
+
+    root.addEventListener('click', event => {
+        const addButton = event.target.closest('[data-site-content-add]');
+        const removeButton = event.target.closest('[data-site-content-remove]');
+        const moveButton = event.target.closest('[data-site-content-move]');
+        const resetButton = event.target.closest('#admin-site-content-reset');
+
+        if (addButton) {
+            const content = collectAdminSiteContentForm(root);
+            const list = getSiteContentPathValue(content, addButton.dataset.siteContentAdd);
+            if (Array.isArray(list)) {
+                list.push({ image: 'img/optimized/home-grid-geral.jpg', alt: 'Nova imagem Stik' });
+                siteContentStore.write(content);
+                renderAdminSiteContent();
+                showEditorFeedback('Imagem adicionada.');
+            }
+            return;
+        }
+
+        if (removeButton) {
+            const content = collectAdminSiteContentForm(root);
+            const list = getSiteContentPathValue(content, removeButton.dataset.siteContentRemove);
+            const index = Number(removeButton.dataset.siteContentIndex);
+            if (Array.isArray(list) && list.length > 1 && index >= 0) {
+                list.splice(index, 1);
+                siteContentStore.write(content);
+                renderAdminSiteContent();
+                showEditorFeedback('Imagem removida.');
+            } else {
+                showEditorFeedback('Mantenha pelo menos uma imagem.');
+            }
+            return;
+        }
+
+        if (moveButton) {
+            const content = collectAdminSiteContentForm(root);
+            const list = getSiteContentPathValue(content, moveButton.dataset.siteContentMove);
+            const index = Number(moveButton.dataset.siteContentIndex);
+            const direction = Number(moveButton.dataset.siteContentDirection);
+            const nextIndex = index + direction;
+            if (Array.isArray(list) && index >= 0 && nextIndex >= 0 && nextIndex < list.length) {
+                const [item] = list.splice(index, 1);
+                list.splice(nextIndex, 0, item);
+                siteContentStore.write(content);
+                renderAdminSiteContent();
+                showEditorFeedback('Ordem atualizada.');
+            }
+            return;
+        }
+
+        if (resetButton) {
+            const confirmed = window.confirm('Restaurar o conteúdo visual padrão da Home e da página Sobre?');
+            if (!confirmed) return;
+            siteContentStore.reset();
+            renderAdminSiteContent();
+            applySiteContent(document);
+            showEditorFeedback('Conteúdo padrão restaurado.');
+        }
+    });
+}
+
+function getAdminSiteContentDraftV2(root) {
+    if (!root.__stikSiteContentDraft) {
+        root.__stikSiteContentDraft = siteContentStore.read();
+    }
+    return root.__stikSiteContentDraft;
+}
+
+function setAdminSiteContentDraftV2(root, content) {
+    root.__stikSiteContentDraft = content;
+    return content;
+}
+
+function getAdminSiteSectionV2(root) {
+    return root.dataset.siteContentSection || 'home';
+}
+
+function getAdminSiteMediaKindV2(path) {
+    return /video/i.test(path || '') ? 'video' : 'image';
+}
+
+function validateAdminSiteMediaFileV2(file, kind = 'image') {
+    if (!file) return 'Arquivo invalido.';
+    if (kind === 'media') {
+        if (file.type?.startsWith('image/')) return validateStikImageFile(file);
+        if (file.type?.startsWith('video/')) return validateAdminSiteMediaFileV2(file, 'video');
+        return 'Escolha uma imagem ou video valido.';
+    }
+    if (kind === 'video') {
+        const allowedVideoTypes = new Set(['video/mp4', 'video/webm', 'video/ogg']);
+        if (!allowedVideoTypes.has(file.type)) return 'Escolha um video MP4, WebM ou OGG.';
+        if (file.size > 40 * 1024 * 1024) return 'O video deve ter no maximo 40 MB.';
+        return '';
+    }
+    return validateStikImageFile(file);
+}
+
+function getAdminSiteResolvedMediaKindV2(value, kind = 'image', mediaKind = '') {
+    if (kind === 'media') return normalizeStikHeroMediaKind(mediaKind) || inferStikMediaKind(value, 'image');
+    return kind;
+}
+
+function getAdminSiteHeroKindPathV2(path) {
+    if (path === 'home.hero.desktopVideo') return 'home.hero.desktopKind';
+    if (path === 'home.hero.mobileVideo') return 'home.hero.mobileKind';
+    return '';
+}
+
+function getAdminSiteHeroStoredKindV2(path) {
+    const root = document.getElementById('admin-site-content-root');
+    const content = root ? getAdminSiteContentDraftV2(root) : null;
+    if (path === 'home.hero.desktopVideo') return content?.home?.hero?.desktopKind || '';
+    if (path === 'home.hero.mobileVideo') return content?.home?.hero?.mobileKind || '';
+    return '';
+}
+
+function getAdminSiteHeroLabelV2(path, fallback) {
+    if (path === 'home.hero.poster') return 'Imagem de capa do hero';
+    if (path === 'home.hero.desktopVideo') return 'Vídeo desktop';
+    if (path === 'home.hero.mobileVideo') return 'Vídeo mobile';
+    return fallback;
+}
+
+function renderAdminSiteMediaPreviewV2(value, alt = 'Preview', kind = 'image', mediaKind = '') {
+    const safeValue = normalizeStikAssetUrl(value);
+    const resolvedKind = getAdminSiteResolvedMediaKindV2(safeValue, kind, mediaKind);
+    if (resolvedKind === 'video') {
+        return `
+            <figure class="admin-site-media-preview">
+                <video src="${escapeAttribute(safeValue)}" muted playsinline controls preload="metadata"></video>
+            </figure>
+        `;
+    }
+    return `
+        <figure class="admin-site-media-preview">
+            <img src="${escapeAttribute(safeValue)}" alt="${escapeAttribute(alt)}" loading="lazy" decoding="async">
+        </figure>
+    `;
+}
+
+function renderAdminSiteMediaCardV2({
+    path,
+    label,
+    value,
+    altPath = '',
+    altValue = '',
+    textPath = '',
+    textValue = '',
+    slot = '',
+    basePath = '',
+    index = 0,
+    canMove = false,
+    canRemove = false,
+    cardClass = '',
+    kind = getAdminSiteMediaKindV2(path),
+    mediaKind = ''
+}) {
+    const heroKindPath = getAdminSiteHeroKindPathV2(path);
+    const effectiveKind = kind === 'media' ? 'media' : kind;
+    const effectiveMediaKind = mediaKind || (effectiveKind === 'media' ? getAdminSiteHeroStoredKindV2(path) : '');
+    const displayLabel = getAdminSiteHeroLabelV2(path, label);
+    const inputId = `site-content-file-${path.replace(/[^a-z0-9]+/gi, '-')}`;
+    const resolvedKind = getAdminSiteResolvedMediaKindV2(value, effectiveKind, effectiveMediaKind);
+    const accept = effectiveKind === 'media'
+        ? 'image/jpeg,image/png,image/webp,image/gif,image/avif,video/mp4,video/webm,video/ogg'
+        : effectiveKind === 'video'
+        ? 'video/mp4,video/webm,video/ogg'
+        : 'image/jpeg,image/png,image/webp,image/gif,image/avif';
+    const currentFileLabel = String(value || '').split(/[\\/]/).pop() || 'Arquivo atual';
+    const mediaLabel = effectiveKind === 'media' ? 'mídia' : effectiveKind === 'video' ? 'vídeo' : 'imagem';
+
+    return `
+        <article class="admin-site-media-card ${escapeAttribute(cardClass)}" data-site-content-media-card ${canMove ? `data-site-content-v2-sort-base="${escapeAttribute(basePath)}" data-site-content-index="${index}"` : ''}>
+            <div class="admin-site-media-head">
+                <div>
+                    ${slot ? `<span class="admin-site-slot">${escapeHtml(slot)}</span>` : ''}
+                    <h3>${escapeHtml(displayLabel)}</h3>
+                </div>
+                ${canRemove ? `
+                    <div class="admin-site-row-actions">
+                        <button type="button" class="admin-icon-btn admin-icon-btn-danger" data-site-content-v2-remove="${escapeAttribute(basePath)}" data-site-content-index="${index}" aria-label="Remover item">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="admin-site-media-dropzone ${resolvedKind === 'video' ? 'has-video-preview' : ''}" data-site-content-v2-drop-path="${escapeAttribute(path)}" data-site-content-v2-kind="${escapeAttribute(effectiveKind)}" role="button" tabindex="0" aria-label="Trocar arquivo">
+                ${renderAdminSiteMediaPreviewV2(value, altValue, effectiveKind, effectiveMediaKind)}
+                <div class="admin-site-media-overlay">
+                    <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                    <strong>Trocar ${mediaLabel}</strong>
+                    <small>Arraste aqui ou clique para escolher</small>
+                </div>
+            </div>
+            <input type="file" id="${escapeAttribute(inputId)}" accept="${escapeAttribute(accept)}" data-site-content-v2-upload-path="${escapeAttribute(path)}" data-site-content-v2-kind="${escapeAttribute(effectiveKind)}" hidden>
+            <input type="hidden" data-site-content-path="${escapeAttribute(path)}" value="${escapeAttribute(value)}">
+            <div class="admin-site-image-fields">
+                <p class="admin-site-media-current">${escapeHtml(currentFileLabel)}</p>
+                ${textPath ? renderAdminContentField({ path: textPath, label: 'Texto exibido', value: textValue }) : ''}
+            </div>
+            ${canMove ? `
+                <button type="button" class="admin-site-drag-handle" draggable="true" data-site-content-v2-drag-handle="${escapeAttribute(basePath)}" data-site-content-index="${index}" aria-label="Arrastar para reordenar">
+                    <i class="fas fa-grip-lines" aria-hidden="true"></i>
+                </button>
+            ` : ''}
+        </article>
+    `;
+}
+
+function renderAdminSiteMediaGridV2(items, basePath, options = {}) {
+    return `
+        <div class="admin-site-media-grid ${options.variant ? `admin-site-media-grid-${escapeAttribute(options.variant)}` : ''}">
+            ${items.map((item, index) => renderAdminSiteMediaCardV2({
+                path: `${basePath}.${index}.image`,
+                label: `${options.labelPrefix || 'Imagem'} ${index + 1}`,
+                value: item.image,
+                altPath: `${basePath}.${index}.alt`,
+                altValue: item.alt,
+                basePath,
+                index,
+                canMove: options.canMove === true,
+                canRemove: options.canRemove === true
+            })).join('')}
+        </div>
+    `;
+}
+
+function updateAdminSiteContentPreviewsV2(root) {
+    root.querySelectorAll('[data-site-content-media-card]').forEach(card => {
+        const mediaInput = card.querySelector('[data-site-content-path]');
+        const altInput = card.querySelector('[data-site-content-path$=".alt"]');
+        const image = card.querySelector('.admin-site-media-preview img');
+        const video = card.querySelector('.admin-site-media-preview video');
+        if (image && mediaInput) image.src = normalizeStikAssetUrl(mediaInput.value);
+        if (image && altInput) image.alt = altInput.value || 'Preview';
+        if (video && mediaInput) video.src = normalizeStikAssetUrl(mediaInput.value);
+    });
+}
+
+function collectAdminSiteContentFormV2(root) {
+    const content = getAdminSiteContentDraftV2(root);
+    root.querySelectorAll('[data-site-content-path]').forEach(field => {
+        setSiteContentPathValue(content, field.dataset.siteContentPath, field.value);
+    });
+    return setAdminSiteContentDraftV2(root, content);
+}
+
+function isAdminSiteSortDragEventV2(event, root) {
+    const types = Array.from(event.dataTransfer?.types || []);
+    return types.includes('application/x-stik-site-content-sort') || Boolean(root?.dataset.siteContentDragBase);
+}
+
+function clearAdminSiteSortStateV2(root) {
+    delete root.dataset.siteContentDragBase;
+    delete root.dataset.siteContentDragIndex;
+    root.querySelectorAll('.admin-site-media-card.is-dragging, .admin-site-media-card.is-drop-before, .admin-site-media-card.is-drop-after')
+        .forEach(card => card.classList.remove('is-dragging', 'is-drop-before', 'is-drop-after'));
+}
+
+function markAdminSiteDropTargetV2(card, event) {
+    card.parentElement?.querySelectorAll('.is-drop-before, .is-drop-after')
+        .forEach(item => item.classList.remove('is-drop-before', 'is-drop-after'));
+
+    const rect = card.getBoundingClientRect();
+    const isHorizontal = card.parentElement && getComputedStyle(card.parentElement).gridTemplateColumns.split(' ').length > 1;
+    const after = isHorizontal
+        ? event.clientX > rect.left + rect.width / 2
+        : event.clientY > rect.top + rect.height / 2;
+    card.classList.toggle('is-drop-before', !after);
+    card.classList.toggle('is-drop-after', after);
+}
+
+function reorderAdminSiteContentListV2(root, targetCard) {
+    const basePath = root.dataset.siteContentDragBase;
+    const fromIndex = Number(root.dataset.siteContentDragIndex);
+    const targetIndex = Number(targetCard.dataset.siteContentIndex);
+    if (!basePath || !Number.isFinite(fromIndex) || !Number.isFinite(targetIndex) || fromIndex === targetIndex) return false;
+
+    const content = collectAdminSiteContentFormV2(root);
+    const list = getSiteContentPathValue(content, basePath);
+    if (!Array.isArray(list) || fromIndex < 0 || fromIndex >= list.length || targetIndex < 0 || targetIndex >= list.length) return false;
+
+    const insertAfter = targetCard.classList.contains('is-drop-after');
+    const [item] = list.splice(fromIndex, 1);
+    let nextIndex = targetIndex + (insertAfter ? 1 : 0);
+    if (fromIndex < nextIndex) nextIndex -= 1;
+    nextIndex = Math.max(0, Math.min(nextIndex, list.length));
+    list.splice(nextIndex, 0, item);
+    setAdminSiteContentDraftV2(root, content);
+    return true;
+}
+
+function renderAdminHeroModePanelV2(hero) {
+    const mode = hero?.mode === 'slideshow' ? 'slideshow' : 'video';
+    return `
+        <div class="admin-hero-mode-panel">
+            <input type="hidden" data-site-content-path="home.hero.mode" value="${escapeAttribute(mode)}">
+            <div class="admin-hero-mode-control" role="group" aria-label="Formato do hero inicial">
+                <button type="button" class="admin-hero-mode-button ${mode === 'video' ? 'is-active' : ''}" data-site-content-v2-hero-mode="video">
+                    <i class="fas fa-play-circle" aria-hidden="true"></i>
+                    <span>Vídeo único</span>
+                </button>
+                <button type="button" class="admin-hero-mode-button ${mode === 'slideshow' ? 'is-active' : ''}" data-site-content-v2-hero-mode="slideshow">
+                    <i class="fas fa-images" aria-hidden="true"></i>
+                    <span>Slides de imagens</span>
+                </button>
+            </div>
+            <p class="admin-hero-mode-note">
+                ${mode === 'video'
+                    ? 'Use um vídeo para desktop e, se quiser, outro mais leve para mobile. A imagem de capa aparece antes do carregamento.'
+                    : 'Adicione as imagens do hero e arraste pela alça inferior para definir a ordem. A troca acontece automaticamente a cada 7 segundos.'}
+            </p>
+        </div>
+    `;
+}
+
+function renderAdminSiteContentV2() {
+    const root = document.getElementById('admin-site-content-root');
+    if (!root) return;
+    const content = getAdminSiteContentDraftV2(root);
+    const section = getAdminSiteSectionV2(root);
+    const heroMode = content.home.hero.mode === 'slideshow' ? 'slideshow' : 'video';
+
+    root.innerHTML = `
+        <form class="admin-site-content-form" id="admin-site-content-form">
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" data-site-content-v2-add-file hidden>
+            <nav class="admin-site-subtabs" aria-label="Seções editáveis">
+                <button type="button" class="${section === 'home' ? 'is-active' : ''}" data-site-content-v2-section-tab="home">
+                    <i class="fas fa-home" aria-hidden="true"></i>
+                    Home
+                </button>
+                <button type="button" class="${section === 'institutional' ? 'is-active' : ''}" data-site-content-v2-section-tab="institutional">
+                    <i class="fas fa-building" aria-hidden="true"></i>
+                    Institucional
+                </button>
+            </nav>
+
+            <div class="admin-site-section ${section === 'home' ? 'is-active' : ''}" data-site-content-v2-section="home">
+                <section class="admin-card admin-site-content-card">
+                    <div class="admin-list-head">
+                        <h2>Hero inicial</h2>
+                        <a class="blog-editor-btn blog-editor-btn-outline" href="index.html" target="_blank" rel="noopener">
+                            <i class="fas fa-external-link-alt"></i>
+                            Ver Home
+                        </a>
+                    </div>
+                    ${renderAdminHeroModePanelV2(content.home.hero)}
+                    ${heroMode === 'video' ? `
+                        <div class="admin-site-media-grid admin-site-media-grid-hero">
+                            ${renderAdminSiteMediaCardV2({ path: 'home.hero.poster', label: 'Poster do vídeo', value: content.home.hero.poster, kind: 'image' })}
+                            ${renderAdminSiteMediaCardV2({ path: 'home.hero.desktopVideo', label: 'Vídeo desktop', value: content.home.hero.desktopVideo, kind: 'video' })}
+                            ${renderAdminSiteMediaCardV2({ path: 'home.hero.mobileVideo', label: 'Vídeo mobile', value: content.home.hero.mobileVideo, kind: 'video' })}
+                        </div>
+                    ` : `
+                        <div class="admin-list-head admin-site-nested-head">
+                            <div>
+                                <h3>Imagens do slide</h3>
+                                <p>O primeiro card será exibido primeiro no hero.</p>
+                            </div>
+                            <button type="button" class="blog-editor-btn blog-editor-btn-outline" data-site-content-v2-add="home.hero.slideshow.images">
+                                <i class="fas fa-plus"></i>
+                                Adicionar imagem
+                            </button>
+                        </div>
+                        ${renderAdminSiteMediaGridV2(content.home.hero.slideshow.images, 'home.hero.slideshow.images', { labelPrefix: 'Slide', canMove: true, canRemove: true, variant: 'hero-slideshow' })}
+                    `}
+                </section>
+
+                <section class="admin-card admin-site-content-card">
+                    <div class="admin-list-head">
+                        <h2>Grid de produtos</h2>
+                    </div>
+                    ${renderAdminContentField({ path: 'home.highlights.title', label: 'Título da seção', value: content.home.highlights.title })}
+                    <div class="admin-site-media-grid admin-site-media-grid-home">
+                        ${content.home.highlights.items.map((item, index) => renderAdminSiteMediaCardV2({
+                            path: `home.highlights.items.${index}.image`,
+                            label: `Card ${index + 1}`,
+                            value: item.image,
+                            altPath: `home.highlights.items.${index}.alt`,
+                            altValue: item.alt,
+                            textPath: `home.highlights.items.${index}.text`,
+                            textValue: item.text,
+                            cardClass: `admin-site-home-card-${item.slot}`
+                        })).join('')}
+                    </div>
+                </section>
+
+                <section class="admin-card admin-site-content-card">
+                    <div class="admin-list-head">
+                        <h2>Carrossel do catálogo</h2>
+                        <button type="button" class="blog-editor-btn blog-editor-btn-outline" data-site-content-v2-add="home.catalog.carouselImages">
+                            <i class="fas fa-plus"></i>
+                            Adicionar imagem
+                        </button>
+                    </div>
+                    ${renderAdminContentField({ path: 'home.catalog.title', label: 'Título do bloco', value: content.home.catalog.title })}
+                    ${renderAdminSiteMediaGridV2(content.home.catalog.carouselImages, 'home.catalog.carouselImages', { labelPrefix: 'Imagem', canMove: true, canRemove: true, variant: 'carousel' })}
+                </section>
+            </div>
+
+            <div class="admin-site-section ${section === 'institutional' ? 'is-active' : ''}" data-site-content-v2-section="institutional">
+                <section class="admin-card admin-site-content-card">
+                    <div class="admin-list-head">
+                        <h2>Sobre a Stik</h2>
+                        <a class="blog-editor-btn blog-editor-btn-outline" href="institucional.html" target="_blank" rel="noopener">
+                            <i class="fas fa-external-link-alt"></i>
+                            Ver Institucional
+                        </a>
+                    </div>
+                    ${renderAdminContentField({ path: 'about.title', label: 'Título principal', value: content.about.title })}
+                    <div class="admin-site-media-grid admin-site-media-grid-hero">
+                        ${renderAdminSiteMediaCardV2({
+                            path: 'about.mainImage',
+                            label: 'Imagem principal',
+                            value: content.about.mainImage,
+                            altPath: 'about.mainImageAlt',
+                            altValue: content.about.mainImageAlt
+                        })}
+                    </div>
+                    ${renderAdminContentField({ path: 'about.paragraphs.0', label: 'Primeiro texto', value: content.about.paragraphs[0] || '', type: 'textarea', rows: 5 })}
+                    ${renderAdminContentField({ path: 'about.paragraphs.1', label: 'Segundo texto', value: content.about.paragraphs[1] || '', type: 'textarea', rows: 5 })}
+                    ${renderAdminContentField({ path: 'about.statement', label: 'Frase de destaque', value: content.about.statement, type: 'textarea', rows: 4 })}
+                </section>
+
+                <section class="admin-card admin-site-content-card">
+                    <div class="admin-list-head">
+                        <h2>Galeria institucional</h2>
+                        <button type="button" class="blog-editor-btn blog-editor-btn-outline" data-site-content-v2-add="about.galleryImages">
+                            <i class="fas fa-plus"></i>
+                            Adicionar imagem
+                        </button>
+                    </div>
+                    ${renderAdminSiteMediaGridV2(content.about.galleryImages, 'about.galleryImages', { labelPrefix: 'Imagem', canMove: true, canRemove: true, variant: 'institutional' })}
+                </section>
+
+                <section class="admin-card admin-site-content-card">
+                    <div class="admin-list-head">
+                        <h2>Bloco final</h2>
+                    </div>
+                    ${renderAdminContentField({ path: 'about.bottomText', label: 'Texto final', value: content.about.bottomText, type: 'textarea', rows: 4 })}
+                    <div class="admin-site-media-grid admin-site-media-grid-hero">
+                        ${renderAdminSiteMediaCardV2({
+                            path: 'about.bottomImage',
+                            label: 'Imagem final',
+                            value: content.about.bottomImage,
+                            altPath: 'about.bottomImageAlt',
+                            altValue: content.about.bottomImageAlt
+                        })}
+                    </div>
+                </section>
+            </div>
+
+            <div class="admin-site-actions">
+                <button type="button" class="blog-editor-btn blog-editor-btn-light" id="admin-site-content-v2-reset">
+                    <i class="fas fa-undo"></i>
+                    Restaurar padrão
+                </button>
+                <button type="submit" class="blog-editor-btn blog-editor-btn-primary">
+                    <i class="fas fa-save"></i>
+                    Salvar conteúdo
+                </button>
+            </div>
+        </form>
+    `;
+
+    updateAdminSiteContentPreviewsV2(root);
+}
+
+function setAdminSiteMediaFromFileV2(root, path, file, kind) {
+    const validationMessage = validateAdminSiteMediaFileV2(file, kind);
+    if (validationMessage) {
+        showEditorFeedback(validationMessage);
+        return;
+    }
+
+    const content = collectAdminSiteContentFormV2(root);
+    setSiteContentPathValue(content, path, URL.createObjectURL(file));
+    const heroKindPath = getAdminSiteHeroKindPathV2(path);
+    if (kind === 'media' && heroKindPath) {
+        setSiteContentPathValue(content, heroKindPath, file.type?.startsWith('video/') ? 'video' : 'image');
+    }
+    setAdminSiteContentDraftV2(root, content);
+    renderAdminSiteContentV2();
+    if (kind === 'media') {
+        showEditorFeedback(`${file.type?.startsWith('video/') ? 'Video' : 'Imagem'} carregado para preview.`);
+        return;
+    }
+    showEditorFeedback(`${kind === 'video' ? 'Vídeo' : 'Imagem'} carregado para preview.`);
+}
+
+function addAdminSiteImageFromFileV2(root, path, file) {
+    const validationMessage = validateAdminSiteMediaFileV2(file, 'image');
+    if (validationMessage) {
+        showEditorFeedback(validationMessage);
+        return;
+    }
+
+    const content = collectAdminSiteContentFormV2(root);
+    const list = getSiteContentPathValue(content, path);
+    if (!Array.isArray(list)) {
+        showEditorFeedback('Nao foi possivel adicionar a imagem.');
+        return;
+    }
+
+    const fileName = file.name || 'Nova imagem Stik';
+    const altText = fileName.replace(/\.[^.]+$/, '') || 'Nova imagem Stik';
+    list.push({ image: URL.createObjectURL(file), alt: altText });
+    setAdminSiteContentDraftV2(root, content);
+    renderAdminSiteContentV2();
+    showEditorFeedback('Imagem adicionada.');
+}
+
+function setupAdminSiteContentV2() {
+    const root = document.getElementById('admin-site-content-root');
+    if (!root || root.dataset.siteContentReady === 'true') return;
+    root.dataset.siteContentReady = 'true';
+    root.dataset.siteContentSection = 'home';
+    setAdminSiteContentDraftV2(root, siteContentStore.read());
+    renderAdminSiteContentV2();
+
+    root.addEventListener('input', event => {
+        if (!event.target.matches('[data-site-content-path]')) return;
+        collectAdminSiteContentFormV2(root);
+        updateAdminSiteContentPreviewsV2(root);
+    });
+
+    root.addEventListener('change', event => {
+        const addInput = event.target.closest('[data-site-content-v2-add-file]');
+        if (addInput) {
+            const file = addInput.files && addInput.files[0];
+            const path = root.dataset.siteContentPendingAddPath;
+            delete root.dataset.siteContentPendingAddPath;
+            if (!file) return;
+            addAdminSiteImageFromFileV2(root, path, file);
+            return;
+        }
+
+        const input = event.target.closest('[data-site-content-v2-upload-path]');
+        if (!input) return;
+        const file = input.files && input.files[0];
+        if (!file) return;
+        setAdminSiteMediaFromFileV2(root, input.dataset.siteContentV2UploadPath, file, input.dataset.siteContentV2Kind || 'image');
+    });
+
+    root.addEventListener('dragstart', event => {
+        const handle = event.target.closest('[data-site-content-v2-drag-handle]');
+        if (!handle) return;
+        collectAdminSiteContentFormV2(root);
+        root.dataset.siteContentDragBase = handle.dataset.siteContentV2DragHandle;
+        root.dataset.siteContentDragIndex = handle.dataset.siteContentIndex;
+        event.dataTransfer?.setData('application/x-stik-site-content-sort', '1');
+        if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+        handle.closest('[data-site-content-media-card]')?.classList.add('is-dragging');
+    });
+
+    root.addEventListener('dragover', event => {
+        const sortableCard = event.target.closest('[data-site-content-v2-sort-base]');
+        if (sortableCard && root.dataset.siteContentDragBase === sortableCard.dataset.siteContentV2SortBase) {
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+            markAdminSiteDropTargetV2(sortableCard, event);
+            return;
+        }
+
+        const dropzone = event.target.closest('[data-site-content-v2-drop-path]');
+        if (!dropzone || isAdminSiteSortDragEventV2(event, root)) return;
+        event.preventDefault();
+        dropzone.classList.add('is-dragging');
+    });
+
+    root.addEventListener('dragleave', event => {
+        const sortableCard = event.target.closest('[data-site-content-v2-sort-base]');
+        if (sortableCard && !sortableCard.contains(event.relatedTarget)) {
+            sortableCard.classList.remove('is-drop-before', 'is-drop-after');
+        }
+
+        const dropzone = event.target.closest('[data-site-content-v2-drop-path]');
+        if (!dropzone || dropzone.contains(event.relatedTarget)) return;
+        dropzone.classList.remove('is-dragging');
+    });
+
+    root.addEventListener('drop', event => {
+        const sortableCard = event.target.closest('[data-site-content-v2-sort-base]');
+        if (sortableCard && root.dataset.siteContentDragBase === sortableCard.dataset.siteContentV2SortBase) {
+            event.preventDefault();
+            const changed = reorderAdminSiteContentListV2(root, sortableCard);
+            clearAdminSiteSortStateV2(root);
+            if (changed) {
+                renderAdminSiteContentV2();
+                showEditorFeedback('Ordem atualizada.');
+            }
+            return;
+        }
+
+        const dropzone = event.target.closest('[data-site-content-v2-drop-path]');
+        if (!dropzone || isAdminSiteSortDragEventV2(event, root)) return;
+        event.preventDefault();
+        dropzone.classList.remove('is-dragging');
+        const file = event.dataTransfer?.files?.[0];
+        if (!file) return;
+        setAdminSiteMediaFromFileV2(root, dropzone.dataset.siteContentV2DropPath, file, dropzone.dataset.siteContentV2Kind || 'image');
+    });
+
+    root.addEventListener('dragend', () => {
+        clearAdminSiteSortStateV2(root);
+    });
+
+    root.addEventListener('submit', event => {
+        event.preventDefault();
+        const content = collectAdminSiteContentFormV2(root);
+        const savedContent = siteContentStore.write(content);
+        setAdminSiteContentDraftV2(root, savedContent);
+        renderAdminSiteContentV2();
+        applySiteContent(document);
+        showEditorFeedback('Conteúdo do site salvo.');
+    });
+
+    root.addEventListener('click', event => {
+        const sectionButton = event.target.closest('[data-site-content-v2-section-tab]');
+        const heroModeButton = event.target.closest('[data-site-content-v2-hero-mode]');
+        const dropzone = event.target.closest('[data-site-content-v2-drop-path]');
+        const addButton = event.target.closest('[data-site-content-v2-add]');
+        const removeButton = event.target.closest('[data-site-content-v2-remove]');
+        const resetButton = event.target.closest('#admin-site-content-v2-reset');
+
+        if (sectionButton) {
+            collectAdminSiteContentFormV2(root);
+            root.dataset.siteContentSection = sectionButton.dataset.siteContentV2SectionTab;
+            renderAdminSiteContentV2();
+            return;
+        }
+
+        if (heroModeButton) {
+            const nextMode = heroModeButton.dataset.siteContentV2HeroMode === 'slideshow' ? 'slideshow' : 'video';
+            const content = collectAdminSiteContentFormV2(root);
+            setSiteContentPathValue(content, 'home.hero.mode', nextMode);
+            setAdminSiteContentDraftV2(root, content);
+            renderAdminSiteContentV2();
+            showEditorFeedback(nextMode === 'slideshow' ? 'Hero configurado para slides de imagens.' : 'Hero configurado para vídeo.');
+            return;
+        }
+
+        if (dropzone) {
+            if (event.target.closest('video')) return;
+            const input = Array.from(root.querySelectorAll('[data-site-content-v2-upload-path]'))
+                .find(item => item.dataset.siteContentV2UploadPath === dropzone.dataset.siteContentV2DropPath);
+            input?.click();
+            return;
+        }
+
+        if (addButton) {
+            collectAdminSiteContentFormV2(root);
+            root.dataset.siteContentPendingAddPath = addButton.dataset.siteContentV2Add;
+            const input = root.querySelector('[data-site-content-v2-add-file]');
+            if (!input) {
+                showEditorFeedback('Nao foi possivel abrir o upload.');
+                return;
+            }
+            input.value = '';
+            input.click();
+            return;
+        }
+
+        if (removeButton) {
+            const content = collectAdminSiteContentFormV2(root);
+            const list = getSiteContentPathValue(content, removeButton.dataset.siteContentV2Remove);
+            const index = Number(removeButton.dataset.siteContentIndex);
+            if (Array.isArray(list) && list.length > 1 && index >= 0) {
+                list.splice(index, 1);
+                setAdminSiteContentDraftV2(root, content);
+                renderAdminSiteContentV2();
+                showEditorFeedback('Imagem removida.');
+            } else {
+                showEditorFeedback('Mantenha pelo menos uma imagem.');
+            }
+            return;
+        }
+
+        if (resetButton) {
+            const confirmed = window.confirm('Restaurar o conteúdo visual padrão da Home e da página Institucional?');
+            if (!confirmed) return;
+            const content = siteContentStore.reset();
+            setAdminSiteContentDraftV2(root, content);
+            renderAdminSiteContentV2();
+            applySiteContent(document);
+            showEditorFeedback('Conteúdo padrão restaurado.');
+        }
+    });
+}
+
 async function setupAdminPage() {
     const loginView = document.getElementById('admin-login-view');
     const dashboardView = document.getElementById('admin-dashboard-view');
@@ -6348,6 +8048,23 @@ async function setupAdminPage() {
     const SESSION_KEY = 'stik.admin.session';
     const loginForm = document.getElementById('admin-login-form');
     const logoutButton = document.getElementById('admin-logout');
+    const isLocalPreview = isStikLocalPreviewHost();
+
+    if (!isLocalPreview) {
+        try {
+            localStorage.removeItem(SESSION_KEY);
+        } catch (error) {
+            /* Admin preview nao deve depender de storage fora do ambiente local. */
+        }
+        dashboardView.hidden = true;
+        loginView.hidden = false;
+        if (loginForm) loginForm.hidden = true;
+        const description = loginView.querySelector('p');
+        if (description) {
+            description.textContent = 'Este painel administrativo e apenas um preview local. O CRUD definitivo precisa de backend autenticado antes de uso em producao.';
+        }
+        return;
+    }
 
     const showDashboard = async () => {
         loginView.hidden = true;
@@ -6356,6 +8073,7 @@ async function setupAdminPage() {
         await setupArticleForm();
         await refreshAdminArticles();
         setupAdminProducts();
+        setupAdminSiteContentV2();
     };
 
     const showLogin = () => {
@@ -6488,8 +8206,9 @@ function setupAdminProducts() {
         const selectedFiles = Array.from(files || []);
         if (!selectedFiles.length) return;
 
-        if (selectedFiles.some(file => !file.type || !file.type.startsWith('image/'))) {
-            showEditorFeedback('Escolha um arquivo de imagem.');
+        const invalidFileMessage = selectedFiles.map(validateStikImageFile).find(Boolean);
+        if (invalidFileMessage) {
+            showEditorFeedback(invalidFileMessage);
             return;
         }
 
@@ -6636,12 +8355,12 @@ function setupAdminProducts() {
 
 function normalizeAdminProductImageItem(item, fallbackLabel = 'Imagem do produto') {
     const source = typeof item === 'string' ? { url: item } : (item || {});
-    const url = source.url || source.src || source.imagem || source.image || '';
+    const url = normalizeStikAssetUrl(source.url || source.src || source.imagem || source.image || '');
     const titulo = source.titulo || source.title || '';
     const alt = source.alt || source.label || source.filename || source.name || titulo || fallbackLabel;
 
     return {
-        url: String(url || '').trim(),
+        url,
         titulo: String(titulo || '').trim(),
         alt: String(alt || fallbackLabel).trim()
     };
@@ -7153,7 +8872,7 @@ function renderAdminProductList() {
     list.innerHTML = products
         .map(product => `
             <article class="admin-list-item admin-product-row">
-                <img src="${escapeAttribute(encodeURI(product.imagem))}" alt="${escapeAttribute(formatNome(product.nome))}" loading="lazy" decoding="async">
+                <img src="${escapeAttribute(normalizeStikAssetUrl(product.imagem))}" alt="${escapeAttribute(formatNome(product.nome))}" loading="lazy" decoding="async">
                 <div>
                     <strong>${escapeHtml(formatNome(product.nome))}</strong>
                     <span>${escapeHtml(normalizeCategoria(product.categoria))}</span>

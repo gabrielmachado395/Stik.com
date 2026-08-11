@@ -17,6 +17,8 @@
 
     const API_BASE = window.STIK_BLOG_API_BASE || '/api';
     const USE_MOCKS = window.STIK_USE_BLOG_MOCKS !== false;
+    const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']);
+    const MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024;
 
     function readStorage(key, fallback) {
         try {
@@ -64,6 +66,10 @@
             .trim();
     }
 
+    function cleanTagName(value) {
+        return limitText(getTagName(value), 60);
+    }
+
     function getTagName(tag) {
         return typeof tag === 'string' ? tag : (tag && (tag.name || tag.title)) || '';
     }
@@ -93,6 +99,10 @@
 
     function removeEmbeddedImageData(value) {
         return String(value || '').replace(/data:image\/[^"'\s>)]+/g, '');
+    }
+
+    function limitText(value, maxLength) {
+        return String(value || '').trim().slice(0, maxLength);
     }
 
     function compactContentJson(contentJson) {
@@ -125,17 +135,17 @@
 
     function normalizeArticlePayload(payload) {
         const now = new Date().toISOString();
-        const contentHtml = removeEmbeddedImageData(payload.contentHtml || payload.content_html || '');
-        const title = payload.title || payload.titulo || 'Novo artigo';
+        const contentHtml = limitText(removeEmbeddedImageData(payload.contentHtml || payload.content_html || ''), 50000);
+        const title = limitText(payload.title || payload.titulo || 'Novo artigo', 140);
         const readingTime = estimateReadingTime(contentHtml);
 
         return {
             id: payload.id || Date.now(),
             slug: payload.slug || slugify(title),
             title,
-            summary: payload.summary || payload.resumo || '',
-            coverUrl: removeEmbeddedImageData(payload.coverUrl || payload.cover_url || payload.imagem || 'img - Copia/thumb-blog-17-1.jpg'),
-            tags: Array.isArray(payload.tags) ? payload.tags : [],
+            summary: limitText(payload.summary || payload.resumo || '', 500),
+            coverUrl: limitText(removeEmbeddedImageData(payload.coverUrl || payload.cover_url || payload.imagem || 'img - Copia/thumb-blog-17-1.jpg'), 2000),
+            tags: Array.isArray(payload.tags) ? payload.tags.map(tag => limitText(tag, 60)).filter(Boolean).slice(0, 12) : [],
             status: payload.status || 'draft',
             contentJson: compactContentJson(payload.contentJson || payload.content_json || null),
             contentHtml,
@@ -152,7 +162,7 @@
 
     function withEstimatedReadingTime(article) {
         if (!article) return article;
-        const contentHtml = removeEmbeddedImageData(article.contentHtml || article.content_html || '');
+        const contentHtml = limitText(removeEmbeddedImageData(article.contentHtml || article.content_html || ''), 50000);
 
         return {
             ...article,
@@ -246,23 +256,29 @@
 
     async function listTags() {
         if (!USE_MOCKS) return request('/tags');
-        return readStorage(STORAGE_KEYS.tags, DEFAULT_TAGS);
+        return readStorage(STORAGE_KEYS.tags, DEFAULT_TAGS)
+            .map(cleanTagName)
+            .filter(Boolean)
+            .slice(0, 50);
     }
 
     async function createTag(name) {
+        const cleanName = cleanTagName(name);
+        if (!cleanName) throw new Error('Nome da tag invalido.');
+
         if (!USE_MOCKS) {
             return request('/tags', {
                 method: 'POST',
-                body: JSON.stringify({ name })
+                body: JSON.stringify({ name: cleanName })
             });
         }
 
-        const tags = readStorage(STORAGE_KEYS.tags, DEFAULT_TAGS);
-        if (!tags.some(tag => tag.toLowerCase() === name.toLowerCase())) {
-            tags.push(name);
+        const tags = await listTags();
+        if (!tags.some(tag => normalizeTag(tag) === normalizeTag(cleanName))) {
+            tags.push(cleanName);
             writeStorage(STORAGE_KEYS.tags, tags);
         }
-        return { id: slugify(name), name };
+        return { id: slugify(cleanName), name: cleanName };
     }
 
     async function getTagUsage(idOrName) {
@@ -286,19 +302,19 @@
     }
 
     async function updateTag(idOrName, payload = {}) {
+        const nextName = cleanTagName(payload.name);
+        if (!nextName) throw new Error('Nome da tag inválido.');
+
         if (!USE_MOCKS) {
             return request(`/tags/${encodeURIComponent(idOrName)}`, {
                 method: 'PATCH',
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ ...payload, name: nextName })
             });
         }
 
-        const nextName = String(payload.name || '').trim();
-        if (!nextName) throw new Error('Nome da tag inválido.');
-
         const normalizedOld = normalizeTag(idOrName);
         const normalizedNext = normalizeTag(nextName);
-        const tags = readStorage(STORAGE_KEYS.tags, DEFAULT_TAGS);
+        const tags = await listTags();
         const nextTags = tags
             .map(tag => normalizeTag(getTagName(tag)) === normalizedOld ? nextName : tag)
             .filter((tag, index, list) => list.findIndex(item => normalizeTag(getTagName(item)) === normalizeTag(getTagName(tag))) === index);
@@ -352,6 +368,13 @@
 
     async function uploadBlogImage(file) {
         if (!file) throw new Error('Arquivo inválido.');
+
+        if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+            throw new Error('Escolha uma imagem JPG, PNG, WebP, GIF ou AVIF.');
+        }
+        if (file.size > MAX_IMAGE_FILE_SIZE) {
+            throw new Error('A imagem deve ter no maximo 5 MB.');
+        }
 
         if (!USE_MOCKS) {
             const body = new FormData();

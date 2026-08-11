@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dados Capturados - Stik</title>
+    <title>Dados capturados - Stik</title>
     <link rel="stylesheet" href="stylesheet/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
@@ -16,7 +16,6 @@
         <section class="analytics-shell">
             <header class="analytics-header">
                 <div>
-                    <span class="analytics-eyebrow">Valida&ccedil;&atilde;o LGPD</span>
                     <h1>Dados capturados</h1>
                     <p>Vis&atilde;o geral e leitura por usu&aacute;rio an&ocirc;nimo de cidade/estado, produtos de interesse, e-mail informado e dispositivo.</p>
                 </div>
@@ -25,30 +24,40 @@
                         <i class="fas fa-sync-alt" aria-hidden="true"></i>
                         Atualizar
                     </button>
-                    <button type="button" class="analytics-btn analytics-btn-primary" id="analytics-download">
-                        <i class="fas fa-download" aria-hidden="true"></i>
-                        Baixar JSON
-                    </button>
                 </div>
             </header>
 
-            <div class="analytics-status" id="analytics-status" role="status" aria-live="polite">Carregando dados capturados...</div>
+            <div class="analytics-status" id="analytics-status" role="status" aria-live="polite">Carregando insights de visitantes...</div>
  
-            <section class="analytics-metrics" id="analytics-metrics" aria-label="Resumo dos dados capturados"></section>
+            <section class="analytics-metrics" id="analytics-metrics" aria-label="Resumo dos insights de visitantes"></section>
            
-            <section class="analytics-scope" aria-label="Escopo da visualiza&ccedil;&atilde;o">
-                <div class="analytics-scope-field">
-                    <span id="analytics-user-scope-title">Visualizar dados de</span>
-                    <div class="analytics-select-wrap">
-                        <button type="button" class="analytics-select-control" id="analytics-user-scope-button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="analytics-user-scope-title analytics-user-scope-label">
-                            <span id="analytics-user-scope-label">Todos os usu&aacute;rios</span>
-                        </button>
-                        <select id="analytics-user-scope">
-                            <option value="">Todos os usu&aacute;rios</option>
-                        </select>
-                        <div class="analytics-select-menu" id="analytics-user-scope-menu" role="listbox" aria-label="Usu&aacute;rios capturados"></div>
+            <section class="analytics-card analytics-users-card" aria-label="Visitantes analisados">
+                <div class="analytics-card-head analytics-users-head">
+                    <div>
+                        <h2>Visitantes</h2>
+                        <span id="analytics-user-count">0 visitantes</span>
                     </div>
+                    <button type="button" class="analytics-btn analytics-btn-light analytics-all-users-btn" id="analytics-all-users">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        Todos os usu&aacute;rios
+                    </button>
                 </div>
+                <p class="analytics-scope-summary is-general" id="analytics-scope-summary">Vis&atilde;o geral selecionada. Os blocos abaixo mostram os dados consolidados de todos os usu&aacute;rios.</p>
+                <div class="analytics-table-wrap">
+                    <table class="analytics-table analytics-users-table">
+                        <thead>
+                            <tr>
+                                <th>Visitante</th>
+                                <th>E-mail</th>
+                                <th>Cidade/estado</th>
+                                <th>Dispositivo</th>
+                                <th>&Uacute;ltimo acesso</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analytics-users"></tbody>
+                    </table>
+                </div>
+                <div class="analytics-pagination" id="analytics-users-pagination"></div>
             </section>
             
             <section class="analytics-card">
