@@ -6715,9 +6715,16 @@ function getAnalyticsPlace(user) {
     return [user.city, user.state].filter(Boolean).join(' / ') || 'Nao informado';
 }
 
+function isAnalyticsKnownValue(value) {
+    const normalized = String(value || '').trim().toLowerCase();
+    return normalized && !['nao informado', 'não informado', 'unknown', 'undefined', 'null'].includes(normalized);
+}
+
 function getAnalyticsDeviceLabel(device) {
     if (!device) return 'Nao informado';
-    return [device.type, device.browser, device.platform].filter(Boolean).join(' / ') || 'Nao informado';
+    return [device.type, device.browser, device.platform]
+        .filter(isAnalyticsKnownValue)
+        .join(' / ') || 'Nao informado';
 }
 
 function getAnalyticsScreenLabel(device) {
@@ -6883,13 +6890,115 @@ function getSelectedAnalyticsUser(data) {
     return normalized.users.find(user => String(user.id) === String(selectedId)) || null;
 }
 
+function mergeAnalyticsProductInterestsFromUsers(users = []) {
+    const products = new Map();
+    users.forEach(user => {
+        (Array.isArray(user.productInterests) ? user.productInterests : []).forEach(product => {
+            const productName = product.productName || '';
+            if (!productName) return;
+            const key = [product.productId || productName, productName, product.category || ''].join('|');
+            const current = products.get(key) || {
+                id: key,
+                productId: product.productId || productName,
+                productName,
+                category: product.category || null,
+                interestCount: 0,
+                firstInterestedAt: product.firstInterestedAt || product.lastInterestedAt,
+                lastInterestedAt: product.lastInterestedAt || product.firstInterestedAt
+            };
+            current.interestCount += Number(product.interestCount) || 1;
+            if (!current.firstInterestedAt || new Date(product.firstInterestedAt || 0) < new Date(current.firstInterestedAt || 0)) {
+                current.firstInterestedAt = product.firstInterestedAt || current.firstInterestedAt;
+            }
+            if (!current.lastInterestedAt || new Date(product.lastInterestedAt || 0) > new Date(current.lastInterestedAt || 0)) {
+                current.lastInterestedAt = product.lastInterestedAt || current.lastInterestedAt;
+            }
+            products.set(key, current);
+        });
+    });
+    return Array.from(products.values());
+}
+
+function mergeAnalyticsDevicesFromUsers(users = []) {
+    const devices = new Map();
+    users.forEach(user => {
+        if (!user.device) return;
+        const device = user.device;
+        const key = [
+            device.type || '',
+            device.browser || '',
+            device.platform || '',
+            device.screen?.width || '',
+            device.screen?.height || ''
+        ].join('|');
+        const current = devices.get(key) || {
+            id: key,
+            ...device,
+            count: 0,
+            firstSeenAt: user.firstSeenAt,
+            lastSeenAt: user.lastSeenAt
+        };
+        current.count += 1;
+        if (!current.firstSeenAt || new Date(user.firstSeenAt || 0) < new Date(current.firstSeenAt || 0)) {
+            current.firstSeenAt = user.firstSeenAt || current.firstSeenAt;
+        }
+        if (!current.lastSeenAt || new Date(user.lastSeenAt || 0) > new Date(current.lastSeenAt || 0)) {
+            current.lastSeenAt = user.lastSeenAt || current.lastSeenAt;
+        }
+        devices.set(key, current);
+    });
+    return Array.from(devices.values());
+}
+
+function mergeAnalyticsLocationsFromUsers(users = []) {
+    const locations = new Map();
+    users.forEach(user => {
+        if (!user.city && !user.state) return;
+        const key = [user.city || '', user.state || ''].join('|');
+        const current = locations.get(key) || {
+            id: key,
+            city: user.city || null,
+            state: user.state || null,
+            count: 0,
+            firstCollectedAt: user.firstSeenAt,
+            lastCollectedAt: user.lastSeenAt
+        };
+        current.count += 1;
+        if (!current.firstCollectedAt || new Date(user.firstSeenAt || 0) < new Date(current.firstCollectedAt || 0)) {
+            current.firstCollectedAt = user.firstSeenAt || current.firstCollectedAt;
+        }
+        if (!current.lastCollectedAt || new Date(user.lastSeenAt || 0) > new Date(current.lastCollectedAt || 0)) {
+            current.lastCollectedAt = user.lastSeenAt || current.lastCollectedAt;
+        }
+        locations.set(key, current);
+    });
+    return Array.from(locations.values());
+}
+
+function getUserDerivedAnalyticsData(normalized) {
+    return {
+        users: normalized.users,
+        contacts: normalized.users
+            .filter(user => user.email)
+            .map(user => ({
+                id: `${user.id}-email`,
+                email: user.email,
+                firstSubmittedAt: user.firstSeenAt,
+                lastSubmittedAt: user.lastSeenAt
+            })),
+        productInterests: mergeAnalyticsProductInterestsFromUsers(normalized.users),
+        devices: mergeAnalyticsDevicesFromUsers(normalized.users),
+        locations: mergeAnalyticsLocationsFromUsers(normalized.users)
+    };
+}
+
 function getScopedAnalyticsData(data) {
     const normalized = normalizeMinimizedAnalyticsData(data);
     const selectedUser = getSelectedAnalyticsUser(data);
 
     if (!selectedUser) {
         return {
-            ...normalized,
+            ...getUserDerivedAnalyticsData(normalized),
             selectedUser: null,
             isUserScoped: false
         };
