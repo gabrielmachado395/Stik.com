@@ -6564,6 +6564,7 @@ async function requestCapturedAnalyticsLocation() {
 }
 
 const STIK_ANALYTICS_PAGE_SIZE = 20;
+const STIK_ANALYTICS_USERS_PAGE_SIZE = 10;
 
 function normalizeMinimizedAnalyticsData(data = {}) {
     const users = Array.isArray(data.users)
@@ -6631,9 +6632,14 @@ function normalizeMinimizedAnalyticsData(data = {}) {
     return { users, contacts, productInterests, devices, locations };
 }
 
+function getAnalyticsPageSize(key) {
+    return key === 'users' ? STIK_ANALYTICS_USERS_PAGE_SIZE : STIK_ANALYTICS_PAGE_SIZE;
+}
+
 function getAnalyticsPage(key, totalItems) {
     window.__stikAnalyticsPages = window.__stikAnalyticsPages || {};
-    const totalPages = Math.max(1, Math.ceil(totalItems / STIK_ANALYTICS_PAGE_SIZE));
+    const pageSize = getAnalyticsPageSize(key);
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
     const page = Math.min(Math.max(Number(window.__stikAnalyticsPages[key]) || 1, 1), totalPages);
     window.__stikAnalyticsPages[key] = page;
     return { page, totalPages };
@@ -6641,11 +6647,12 @@ function getAnalyticsPage(key, totalItems) {
 
 function getAnalyticsPageSlice(key, items) {
     const { page, totalPages } = getAnalyticsPage(key, items.length);
-    const start = (page - 1) * STIK_ANALYTICS_PAGE_SIZE;
+    const pageSize = getAnalyticsPageSize(key);
+    const start = (page - 1) * pageSize;
     return {
         page,
         totalPages,
-        items: items.slice(start, start + STIK_ANALYTICS_PAGE_SIZE)
+        items: items.slice(start, start + pageSize)
     };
 }
 
@@ -6722,9 +6729,13 @@ function isAnalyticsKnownValue(value) {
 
 function getAnalyticsDeviceLabel(device) {
     if (!device) return 'Nao informado';
-    return [device.type, device.browser, device.platform]
+    return [device.type, device.platform]
         .filter(isAnalyticsKnownValue)
         .join(' / ') || 'Nao informado';
+}
+
+function getAnalyticsBrowserLabel(device) {
+    return isAnalyticsKnownValue(device?.browser) ? device.browser : 'Nao informado';
 }
 
 function getAnalyticsScreenLabel(device) {
@@ -7083,10 +7094,11 @@ function renderAnalyticsUsersTable(users = []) {
                 <td>${escapeHtml(getAnalyticsValue(user.email))}</td>
                 <td>${escapeHtml(getAnalyticsPlace(user))}</td>
                 <td>${escapeHtml(getAnalyticsDeviceLabel(user.device))}</td>
+                <td>${escapeHtml(getAnalyticsBrowserLabel(user.device))}</td>
                 <td>${escapeHtml(formatAnalyticsDate(user.lastSeenAt || user.firstSeenAt))}</td>
             </tr>
         `;
-    }), 'Nenhum visitante registrado ainda.', 5);
+    }), 'Nenhum visitante registrado ainda.', 6);
     renderAnalyticsPagination('analytics-users-pagination', 'users', userPage.page, userPage.totalPages);
 }
 
