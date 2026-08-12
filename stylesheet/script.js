@@ -10,6 +10,17 @@ const STIK_SUPPORTED_LANGUAGES = ['pt', 'en', 'es', 'fr'];
 const STIK_SITE_MEDIA_DB_NAME = 'stik-site-media-preview';
 const STIK_SITE_MEDIA_STORE_NAME = 'media';
 const STIK_SITE_MEDIA_REF_PREFIX = 'stik-media:';
+const STIK_TRACKABLE_EVENT_NAMES = new Set([
+    'page_view',
+    'product_view',
+    'category_view',
+    'search_performed',
+    'whatsapp_click',
+    'catalog_request',
+    'contact_form_submit',
+    'location_shared',
+    'data_consent_update'
+]);
 const STIK_I18N_TEXT_ORIGINALS = new WeakMap();
 const STIK_SITE_MEDIA_URL_CACHE = new Map();
 let stikCurrentLanguage = STIK_DEFAULT_LANGUAGE;
@@ -482,7 +493,7 @@ function sendStikAnalytics(payload) {
 
 function trackStikEvent(eventName, metadata = {}, options = {}) {
     if (!eventName) return Promise.resolve();
-    if (eventName !== 'product_view') return Promise.resolve();
+    if (!STIK_TRACKABLE_EVENT_NAMES.has(eventName)) return Promise.resolve();
     const purpose = options.purpose || 'analytics';
     if (!hasStikConsent(purpose)) return Promise.resolve();
     const { productId, productName, category, ...eventMetadata } = metadata || {};
@@ -499,7 +510,12 @@ function trackStikEvent(eventName, metadata = {}, options = {}) {
 }
 
 function recordStikConsentDecision(consent) {
-    return Promise.resolve(consent);
+    return sendStikAnalytics({
+        event: {
+            eventName: 'data_consent_update',
+            occurredAt: consent.decidedAt || new Date().toISOString()
+        }
+    });
 }
 
 function findProductById(productId) {
@@ -521,7 +537,13 @@ function sendInitialStikPageView() {
     if (window.__stikInitialPageViewSent) return;
     window.__stikInitialPageViewSent = true;
     if (!hasStikConsent('analytics')) return;
-    sendStikAnalytics({});
+    sendStikAnalytics({
+        event: {
+            eventName: 'page_view',
+            path: window.location.pathname,
+            occurredAt: new Date().toISOString()
+        }
+    });
 }
 
 function sendCurrentPageMarketingEvent() {
@@ -1765,9 +1787,14 @@ async function applyHomeSiteContent(root, home) {
             ...item,
             image: await resolveStikAssetUrl(item.image)
         })));
-        catalogTrack.innerHTML = carouselImages.filter(item => item.image).map(item => `
+        const carouselMarkup = carouselImages.filter(item => item.image).map(item => `
             <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.alt)}" loading="lazy" decoding="async">
         `).join('');
+        catalogTrack.innerHTML = carouselMarkup;
+        catalogTrack.dataset.originalMarkup = carouselMarkup;
+        if (carouselMarkup && typeof setupInfiniteNewsletterCarousel === 'function') {
+            setupInfiniteNewsletterCarousel(catalogTrack, { force: true, refreshMarkup: true });
+        }
     }
 }
 
@@ -1918,7 +1945,7 @@ function playStikHeroVideo(video) {
     });
 }
 
-function applyAboutSiteContent(root, about) {
+async function applyAboutSiteContent(root, about) {
     const page = root.querySelector?.('.institutional-page') || (root.classList?.contains('institutional-page') ? root : null);
     if (!page || !about) return;
 
@@ -1932,7 +1959,8 @@ function applyAboutSiteContent(root, about) {
 
     const mainImage = page.querySelector('.institucional-section:first-of-type .image-block img');
     if (mainImage) {
-        mainImage.src = about.mainImage;
+        const mainImageSrc = await resolveStikAssetUrl(about.mainImage);
+        if (mainImageSrc) mainImage.src = mainImageSrc;
         mainImage.alt = about.mainImageAlt;
     }
 
@@ -1941,7 +1969,11 @@ function applyAboutSiteContent(root, about) {
 
     const galleryGrid = page.querySelector('.gallery-grid');
     if (galleryGrid && Array.isArray(about.galleryImages)) {
-        galleryGrid.innerHTML = about.galleryImages.map(item => `
+        const galleryImages = await Promise.all(about.galleryImages.map(async item => ({
+            ...item,
+            image: await resolveStikAssetUrl(item.image)
+        })));
+        galleryGrid.innerHTML = galleryImages.filter(item => item.image).map(item => `
             <div class="gallery-item"><img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.alt)}" loading="lazy" decoding="async"></div>
         `).join('');
     }
@@ -1951,7 +1983,8 @@ function applyAboutSiteContent(root, about) {
 
     const bottomImage = page.querySelector('.institucional-stacked .stacked-image img');
     if (bottomImage) {
-        bottomImage.src = about.bottomImage;
+        const bottomImageSrc = await resolveStikAssetUrl(about.bottomImage);
+        if (bottomImageSrc) bottomImage.src = bottomImageSrc;
         bottomImage.alt = about.bottomImageAlt;
     }
 }
@@ -3201,12 +3234,56 @@ function setupInfiniteCatalogCarousel(carouselElement) {
     }, { passive: true });
 }
 
-function setupInfiniteNewsletterCarousel(trackElement) {
-    if (!trackElement) return;
-    if (trackElement.dataset.infiniteReady === 'true') return;
+function getNewsletterCarouselOriginalImages(trackElement) {
+    const directImages = Array.from(trackElement.children).filter((image) => image.matches?.('img'));
+    if (directImages.length) return directImages;
 
-    if (!trackElement.dataset.originalMarkup) {
-        const originalImages = Array.from(trackElement.children).filter((image) => image.matches('img'));
+    const firstSegment = trackElement.querySelector('.newsletter-carousel-segment');
+    return firstSegment ? Array.from(firstSegment.querySelectorAll('img:not([data-clone])')) : [];
+}
+
+function waitForNewsletterCarouselImages(images, timeoutMs = 2500) {
+    const pending = images.filter(image => image && (!image.complete || !image.naturalWidth));
+    if (!pending.length) return Promise.resolve();
+
+    return new Promise(resolve => {
+        let remaining = pending.length;
+        const finishOne = () => {
+            remaining -= 1;
+            if (remaining <= 0) resolve();
+        };
+        const timer = window.setTimeout(resolve, timeoutMs);
+        pending.forEach(image => {
+            const done = () => {
+                image.removeEventListener('load', done);
+                image.removeEventListener('error', done);
+                finishOne();
+            };
+            image.addEventListener('load', done, { once: true });
+            image.addEventListener('error', done, { once: true });
+        });
+        Promise.allSettled(pending.map(image => image.decode ? image.decode() : Promise.resolve()))
+            .then(() => {
+                window.clearTimeout(timer);
+                resolve();
+            });
+    });
+}
+
+function setupInfiniteNewsletterCarousel(trackElement, options = {}) {
+    if (!trackElement) return;
+    if (trackElement.dataset.infiniteReady === 'true' && !options.force) return;
+
+    if (typeof trackElement.__stikNewsletterCarouselCleanup === 'function') {
+        trackElement.__stikNewsletterCarouselCleanup();
+    }
+
+    const setupId = (Number(trackElement.__stikNewsletterCarouselSetupId) || 0) + 1;
+    trackElement.__stikNewsletterCarouselSetupId = setupId;
+    trackElement.dataset.infiniteReady = 'false';
+
+    const originalImages = getNewsletterCarouselOriginalImages(trackElement);
+    if (options.refreshMarkup || !trackElement.dataset.originalMarkup) {
         if (originalImages.length === 0) return;
         trackElement.dataset.originalMarkup = originalImages.map((image) => image.outerHTML).join('');
     }
@@ -3220,6 +3297,8 @@ function setupInfiniteNewsletterCarousel(trackElement) {
     let lastTimestamp = 0;
     let isRunning = false;
     let isInViewport = !('IntersectionObserver' in window);
+    let observer = null;
+    let resizeTimer = null;
 
     const stopAnimation = () => {
         if (frameId !== null) {
@@ -3311,55 +3390,73 @@ function setupInfiniteNewsletterCarousel(trackElement) {
         stopAnimation();
     };
 
-    buildTrack();
+    const handleResize = () => {
+        if (resizeTimer) {
+            clearTimeout(resizeTimer);
+        }
 
-    if (!trackElement.dataset.resizeBound) {
-        let resizeTimer = null;
-        window.addEventListener('resize', () => {
-            if (resizeTimer) {
-                clearTimeout(resizeTimer);
-            }
+        resizeTimer = setTimeout(() => {
+            lastTimestamp = 0;
+            buildTrack();
+            playAnimation();
+        }, 120);
+    };
 
-            resizeTimer = setTimeout(() => {
-                lastTimestamp = 0;
-                buildTrack();
-                playAnimation();
-            }, 120);
-        }, { passive: true });
-        trackElement.dataset.resizeBound = 'true';
-    }
-
-    if ('IntersectionObserver' in window) {
-        const section = trackElement.closest('.newsletter-section') || trackElement;
-        const observer = new IntersectionObserver((entries) => {
-            isInViewport = entries.some((entry) => entry.isIntersecting);
-            if (isInViewport) {
-                playAnimation();
-            } else {
-                pauseAnimation();
-            }
-        }, { rootMargin: '160px 0px' });
-        observer.observe(section);
-    } else {
-        playAnimation();
-    }
-
-    document.addEventListener('visibilitychange', () => {
+    const handleVisibilityChange = () => {
         if (document.hidden) {
             pauseAnimation();
         } else {
             playAnimation();
         }
-    });
+    };
 
-    trackElement.dataset.infiniteReady = 'true';
+    trackElement.__stikNewsletterCarouselCleanup = () => {
+        pauseAnimation();
+        if (resizeTimer) {
+            clearTimeout(resizeTimer);
+            resizeTimer = null;
+        }
+        window.removeEventListener('resize', handleResize);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        if (observer) {
+            observer.disconnect();
+            observer = null;
+        }
+        trackElement.dataset.infiniteReady = 'false';
+    };
+
+    waitForNewsletterCarouselImages(originalImages).then(() => {
+        if (trackElement.__stikNewsletterCarouselSetupId !== setupId) return;
+        if (!trackElement.isConnected) return;
+        buildTrack();
+
+        window.addEventListener('resize', handleResize, { passive: true });
+
+        if ('IntersectionObserver' in window) {
+            const section = trackElement.closest('.newsletter-section') || trackElement;
+            observer = new IntersectionObserver((entries) => {
+                isInViewport = entries.some((entry) => entry.isIntersecting);
+                if (isInViewport) {
+                    playAnimation();
+                } else {
+                    pauseAnimation();
+                }
+            }, { rootMargin: '160px 0px' });
+            observer.observe(section);
+        } else {
+            playAnimation();
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        trackElement.dataset.infiniteReady = 'true';
+    });
 }
 
-function initNewsletterCarouselEffects() {
+function initNewsletterCarouselEffects(options = {}) {
     const carousel = document.querySelector('.newsletter-section .carousel-bg .carousel-track');
     if (!carousel) return;
 
-    setupInfiniteNewsletterCarousel(carousel);
+    setupInfiniteNewsletterCarousel(carousel, options);
 }
 
 // Função que inicia o carrosel infinito na área da Newsletter
@@ -5380,11 +5477,11 @@ function carregarDetalhesDoProduto() {
     }
 }
 
-function inicializarNewsletterCarousel() {
+async function inicializarNewsletterCarousel() {
     const placeholder = document.getElementById('catalogo-placeholder');
     if (!placeholder) return;
     if (placeholder.dataset.catalogLoaded === 'true') {
-        applySiteContent(placeholder);
+        await applySiteContent(placeholder);
         applyStikTranslations(placeholder);
         return;
     }
@@ -5392,12 +5489,12 @@ function inicializarNewsletterCarousel() {
 
     fetch('catalogo.html')
         .then(response => response.text())
-        .then(html => {
+        .then(async html => {
             placeholder.innerHTML = html; 
-            applySiteContent(placeholder);
+            await applySiteContent(placeholder);
             applyStikTranslations(placeholder);
             inicializarAnimateOnScroll();
-            initNewsletterCarouselEffects();
+            initNewsletterCarouselEffects({ force: true });
             // re-bind do form do catálogo quando o HTML for injetado
             bindCatalogForm();
         })
@@ -6473,6 +6570,33 @@ function countBy(items, getKey) {
         .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'pt-BR'));
 }
 
+function buildEventStats(events = []) {
+    const stats = new Map();
+
+    events.forEach(event => {
+        const eventName = event.eventName || event.name;
+        if (!STIK_TRACKABLE_EVENT_NAMES.has(eventName)) return;
+        const occurredAt = event.occurredAt || event.lastOccurredAt || event.firstOccurredAt || null;
+        const current = stats.get(eventName) || {
+            eventName,
+            count: 0,
+            firstOccurredAt: occurredAt,
+            lastOccurredAt: occurredAt
+        };
+        current.count += Number(event.count) || 1;
+        if (occurredAt && (!current.firstOccurredAt || new Date(occurredAt) < new Date(current.firstOccurredAt))) {
+            current.firstOccurredAt = occurredAt;
+        }
+        if (occurredAt && (!current.lastOccurredAt || new Date(occurredAt) > new Date(current.lastOccurredAt))) {
+            current.lastOccurredAt = occurredAt;
+        }
+        stats.set(eventName, current);
+    });
+
+    return Array.from(stats.values())
+        .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0) || getAnalyticsEventLabel(a.eventName).localeCompare(getAnalyticsEventLabel(b.eventName), 'pt-BR'));
+}
+
 function buildProductInterest(events = []) {
     const products = new Map();
 
@@ -6629,7 +6753,17 @@ function normalizeMinimizedAnalyticsData(data = {}) {
         }))
         .filter(location => location.city || location.state);
 
-    return { users, contacts, productInterests, devices, locations };
+    const eventStats = Array.isArray(data.eventStats)
+        ? data.eventStats.map(eventStat => ({
+            ...eventStat,
+            eventName: eventStat.eventName || eventStat.name,
+            count: Number(eventStat.count) || 1,
+            firstOccurredAt: eventStat.firstOccurredAt || eventStat.occurredAt,
+            lastOccurredAt: eventStat.lastOccurredAt || eventStat.occurredAt
+        })).filter(eventStat => STIK_TRACKABLE_EVENT_NAMES.has(eventStat.eventName))
+        : buildEventStats(Array.isArray(data.events) ? data.events : []);
+
+    return { users, contacts, productInterests, devices, locations, eventStats };
 }
 
 function getAnalyticsPageSize(key) {
@@ -6694,7 +6828,8 @@ function renderAnalyticsMetricCards(data) {
         { label: 'Contatos', value: scopedData.contacts.length, icon: 'fa-envelope-open-text' },
         { label: 'Produtos', value: scopedData.productInterests.length, icon: 'fa-tags' },
         { label: 'Dispositivos', value: scopedData.devices.length, icon: 'fa-laptop' },
-        { label: 'Cidade/estado', value: scopedData.locations.length, icon: 'fa-map-marker-alt' }
+        { label: 'Cidade/estado', value: scopedData.locations.length, icon: 'fa-map-marker-alt' },
+        { label: 'Eventos', value: scopedData.eventStats.length, icon: 'fa-chart-line' }
     ];
 
     metricsEl.innerHTML = metrics.map(metric => `
@@ -6762,7 +6897,7 @@ function setSelectedAnalyticsUserId(userId = '') {
 
 function resetAnalyticsDetailPages() {
     window.__stikAnalyticsPages = window.__stikAnalyticsPages || {};
-    ['contacts', 'products', 'devices', 'locations'].forEach(key => {
+    ['contacts', 'products', 'devices', 'locations', 'events'].forEach(key => {
         window.__stikAnalyticsPages[key] = 1;
     });
 }
@@ -6999,7 +7134,8 @@ function getUserDerivedAnalyticsData(normalized) {
             })),
         productInterests: mergeAnalyticsProductInterestsFromUsers(normalized.users),
         devices: mergeAnalyticsDevicesFromUsers(normalized.users),
-        locations: mergeAnalyticsLocationsFromUsers(normalized.users)
+        locations: mergeAnalyticsLocationsFromUsers(normalized.users),
+        eventStats: normalized.eventStats
     };
 }
 
@@ -7039,6 +7175,7 @@ function getScopedAnalyticsData(data) {
             firstCollectedAt: selectedUser.firstSeenAt,
             lastCollectedAt: selectedUser.lastSeenAt
         }] : [],
+        eventStats: [],
         selectedUser,
         isUserScoped: true
     };
@@ -7137,6 +7274,9 @@ function renderCapturedAnalytics(data) {
     const locations = scopedData.locations
         .slice()
         .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0) || new Date(b.lastCollectedAt || 0) - new Date(a.lastCollectedAt || 0));
+    const eventStats = scopedData.eventStats
+        .slice()
+        .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0) || new Date(b.lastOccurredAt || 0) - new Date(a.lastOccurredAt || 0));
 
     renderAnalyticsMetricCards(data);
 
@@ -7195,6 +7335,18 @@ function renderCapturedAnalytics(data) {
         </tr>
     `), 'Nenhuma cidade/estado registrada. Para aparecer aqui, o usuario precisa permitir localizacao no navegador.', 4);
     renderAnalyticsPagination('analytics-locations-pagination', 'locations', locationPage.page, locationPage.totalPages);
+
+    const eventPage = getAnalyticsPageSlice('events', eventStats);
+    const eventCountEl = document.getElementById('analytics-event-count');
+    if (eventCountEl) eventCountEl.textContent = `${eventStats.length} ${eventStats.length === 1 ? 'evento' : 'eventos'}`;
+    renderAnalyticsRows('analytics-events', eventPage.items.map(eventStat => `
+        <tr>
+            <td><strong>${escapeHtml(getAnalyticsEventLabel(eventStat.eventName))}</strong></td>
+            <td>${escapeHtml(String(Number(eventStat.count) || 1))}</td>
+            <td>${escapeHtml(formatAnalyticsDate(eventStat.lastOccurredAt || eventStat.firstOccurredAt))}</td>
+        </tr>
+    `), scopedData.isUserScoped ? 'Eventos agregados ficam disponiveis na visao geral.' : 'Nenhum evento agregado registrado.', 3);
+    renderAnalyticsPagination('analytics-events-pagination', 'events', eventPage.page, eventPage.totalPages);
 }
 
 function inicializarPaginaDadosCapturados() {
@@ -7698,14 +7850,15 @@ function renderAdminSiteMediaGridV2(items, basePath, options = {}) {
 }
 
 function updateAdminSiteContentPreviewsV2(root) {
-    root.querySelectorAll('[data-site-content-media-card]').forEach(card => {
+    root.querySelectorAll('[data-site-content-media-card]').forEach(async card => {
         const mediaInput = card.querySelector('[data-site-content-path]');
         const altInput = card.querySelector('[data-site-content-path$=".alt"]');
         const image = card.querySelector('.admin-site-media-preview img');
         const video = card.querySelector('.admin-site-media-preview video');
-        if (image && mediaInput) image.src = normalizeStikAssetUrl(mediaInput.value);
+        const mediaSrc = mediaInput ? await resolveStikAssetUrl(mediaInput.value) : '';
+        if (image && mediaInput && mediaSrc) image.src = mediaSrc;
         if (image && altInput) image.alt = altInput.value || 'Preview';
-        if (video && mediaInput) video.src = normalizeStikAssetUrl(mediaInput.value);
+        if (video && mediaInput && mediaSrc) video.src = mediaSrc;
     });
 }
 
@@ -7938,7 +8091,7 @@ function renderAdminSiteContentV2() {
     updateAdminSiteContentPreviewsV2(root);
 }
 
-function setAdminSiteMediaFromFileV2(root, path, file, kind) {
+async function setAdminSiteMediaFromFileV2(root, path, file, kind) {
     const validationMessage = validateAdminSiteMediaFileV2(file, kind);
     if (validationMessage) {
         showEditorFeedback(validationMessage);
@@ -7946,7 +8099,16 @@ function setAdminSiteMediaFromFileV2(root, path, file, kind) {
     }
 
     const content = collectAdminSiteContentFormV2(root);
-    setSiteContentPathValue(content, path, URL.createObjectURL(file));
+    let mediaRef = '';
+    try {
+        mediaRef = await saveStikSiteMediaFile(file);
+    } catch (error) {
+        console.warn('Nao foi possivel salvar midia local:', error);
+        showEditorFeedback('Nao foi possivel salvar o arquivo localmente para preview.');
+        return;
+    }
+
+    setSiteContentPathValue(content, path, mediaRef);
     const heroKindPath = getAdminSiteHeroKindPathV2(path);
     if (kind === 'media' && heroKindPath) {
         setSiteContentPathValue(content, heroKindPath, file.type?.startsWith('video/') ? 'video' : 'image');
@@ -7960,7 +8122,7 @@ function setAdminSiteMediaFromFileV2(root, path, file, kind) {
     showEditorFeedback(`${kind === 'video' ? 'Vídeo' : 'Imagem'} carregado para preview.`);
 }
 
-function addAdminSiteImageFromFileV2(root, path, file) {
+async function addAdminSiteImageFromFileV2(root, path, file) {
     const validationMessage = validateAdminSiteMediaFileV2(file, 'image');
     if (validationMessage) {
         showEditorFeedback(validationMessage);
@@ -7976,7 +8138,16 @@ function addAdminSiteImageFromFileV2(root, path, file) {
 
     const fileName = file.name || 'Nova imagem Stik';
     const altText = fileName.replace(/\.[^.]+$/, '') || 'Nova imagem Stik';
-    list.push({ image: URL.createObjectURL(file), alt: altText });
+    let mediaRef = '';
+    try {
+        mediaRef = await saveStikSiteMediaFile(file);
+    } catch (error) {
+        console.warn('Nao foi possivel salvar imagem local:', error);
+        showEditorFeedback('Nao foi possivel salvar a imagem localmente para preview.');
+        return;
+    }
+
+    list.push({ image: mediaRef, alt: altText });
     setAdminSiteContentDraftV2(root, content);
     renderAdminSiteContentV2();
     showEditorFeedback('Imagem adicionada.');
@@ -7996,14 +8167,14 @@ function setupAdminSiteContentV2() {
         updateAdminSiteContentPreviewsV2(root);
     });
 
-    root.addEventListener('change', event => {
+    root.addEventListener('change', async event => {
         const addInput = event.target.closest('[data-site-content-v2-add-file]');
         if (addInput) {
             const file = addInput.files && addInput.files[0];
             const path = root.dataset.siteContentPendingAddPath;
             delete root.dataset.siteContentPendingAddPath;
             if (!file) return;
-            addAdminSiteImageFromFileV2(root, path, file);
+            await addAdminSiteImageFromFileV2(root, path, file);
             return;
         }
 
@@ -8011,7 +8182,7 @@ function setupAdminSiteContentV2() {
         if (!input) return;
         const file = input.files && input.files[0];
         if (!file) return;
-        setAdminSiteMediaFromFileV2(root, input.dataset.siteContentV2UploadPath, file, input.dataset.siteContentV2Kind || 'image');
+        await setAdminSiteMediaFromFileV2(root, input.dataset.siteContentV2UploadPath, file, input.dataset.siteContentV2Kind || 'image');
     });
 
     root.addEventListener('dragstart', event => {
@@ -8051,7 +8222,7 @@ function setupAdminSiteContentV2() {
         dropzone.classList.remove('is-dragging');
     });
 
-    root.addEventListener('drop', event => {
+    root.addEventListener('drop', async event => {
         const sortableCard = event.target.closest('[data-site-content-v2-sort-base]');
         if (sortableCard && root.dataset.siteContentDragBase === sortableCard.dataset.siteContentV2SortBase) {
             event.preventDefault();
@@ -8070,7 +8241,7 @@ function setupAdminSiteContentV2() {
         dropzone.classList.remove('is-dragging');
         const file = event.dataTransfer?.files?.[0];
         if (!file) return;
-        setAdminSiteMediaFromFileV2(root, dropzone.dataset.siteContentV2DropPath, file, dropzone.dataset.siteContentV2Kind || 'image');
+        await setAdminSiteMediaFromFileV2(root, dropzone.dataset.siteContentV2DropPath, file, dropzone.dataset.siteContentV2Kind || 'image');
     });
 
     root.addEventListener('dragend', () => {

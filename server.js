@@ -33,12 +33,40 @@ const ANALYTICS_LIMITS = {
   productInterests: getPositiveIntEnv('ANALYTICS_MAX_PRODUCT_INTERESTS', 2000),
   devices: getPositiveIntEnv('ANALYTICS_MAX_DEVICES', 2000),
   locations: getPositiveIntEnv('ANALYTICS_MAX_LOCATIONS', 3000),
+  eventStats: getPositiveIntEnv('ANALYTICS_MAX_EVENT_STATS', 100),
   productsPerUser: getPositiveIntEnv('ANALYTICS_MAX_PRODUCTS_PER_USER', 200),
   eventsPerRequest: getPositiveIntEnv('ANALYTICS_MAX_EVENTS_PER_REQUEST', 20)
 };
 
+const ANALYTICS_EVENT_NAMES = new Set([
+  'page_view',
+  'product_view',
+  'category_view',
+  'search_performed',
+  'whatsapp_click',
+  'catalog_request',
+  'contact_form_submit',
+  'location_shared',
+  'data_consent_update'
+]);
+
 // Middlewares de protecao antes dos arquivos estaticos.
 app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com",
+    "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:",
+    "img-src 'self' data: blob: https:",
+    "media-src 'self' blob:",
+    "connect-src 'self' https://www.google.com https://www.gstatic.com https://nominatim.openstreetmap.org",
+    "frame-src 'self' https://www.google.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'self'",
+    "upgrade-insecure-requests"
+  ].join('; '));
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -266,17 +294,18 @@ function ensureAnalyticsStore() {
     const now = new Date().toISOString();
     const initialStore = {
       meta: {
-        version: 'temporary-json-v4-limited',
+        version: 'temporary-json-v5-limited',
         createdAt: now,
         updatedAt: now,
-        note: 'Armazenamento temporario minimizado: cidade/estado, produto de interesse, email informado e dispositivo.',
+        note: 'Armazenamento temporario minimizado: cidade/estado, produto de interesse, email informado, dispositivo e contagem agregada de eventos.',
         limits: ANALYTICS_LIMITS
       },
       users: [],
       contacts: [],
       productInterests: [],
       devices: [],
-      locations: []
+      locations: [],
+      eventStats: []
     };
     fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(initialStore, null, 2), { encoding: 'utf8', mode: 0o600 });
     return initialStore;
@@ -440,6 +469,44 @@ function normalizeProductInterestItem(product = {}, now = new Date().toISOString
   };
 }
 
+function normalizeEventName(value) {
+  const eventName = asString(value, 120);
+  return ANALYTICS_EVENT_NAMES.has(eventName) ? eventName : '';
+}
+
+function normalizeEventStatItem(eventStat = {}, now = new Date().toISOString()) {
+  const eventName = normalizeEventName(eventStat.eventName || eventStat.name);
+  if (!eventName) return null;
+  return {
+    id: eventStat.id || crypto.randomUUID(),
+    eventName,
+    count: Number(eventStat.count) || 1,
+    firstOccurredAt: eventStat.firstOccurredAt || eventStat.occurredAt || eventStat.lastOccurredAt || now,
+    lastOccurredAt: eventStat.lastOccurredAt || eventStat.occurredAt || eventStat.firstOccurredAt || now
+  };
+}
+
+function recordEventStat(store, eventName, occurredAt) {
+  const normalizedEventName = normalizeEventName(eventName);
+  if (!normalizedEventName) return null;
+  return upsertBy(
+    store,
+    'eventStats',
+    item => item.eventName === normalizedEventName,
+    () => ({
+      id: crypto.randomUUID(),
+      eventName: normalizedEventName,
+      count: 0,
+      firstOccurredAt: occurredAt,
+      lastOccurredAt: occurredAt
+    }),
+    item => {
+      item.count += 1;
+      item.lastOccurredAt = occurredAt;
+    }
+  );
+}
+
 function normalizeUserItem(user = {}, now = new Date().toISOString()) {
   const anonymousId = asString(user.anonymousId, 120);
   if (!anonymousId) return null;
@@ -537,6 +604,7 @@ function applyAnalyticsStoreLimits(store) {
   store.productInterests = limitCollection(store.productInterests, ANALYTICS_LIMITS.productInterests, ['lastInterestedAt', 'firstInterestedAt'], 'interestCount');
   store.devices = limitCollection(store.devices, ANALYTICS_LIMITS.devices, ['lastSeenAt', 'firstSeenAt'], 'count');
   store.locations = limitCollection(store.locations, ANALYTICS_LIMITS.locations, ['lastCollectedAt', 'firstCollectedAt'], 'count');
+  store.eventStats = limitCollection(store.eventStats, ANALYTICS_LIMITS.eventStats, ['lastOccurredAt', 'firstOccurredAt'], 'count');
 
   store.users.forEach(user => {
     user.productInterests = limitCollection(
@@ -555,17 +623,20 @@ function normalizeTemporaryAnalyticsStore(store) {
   const now = new Date().toISOString();
   const next = {
     meta: {
-      version: 'temporary-json-v4-limited',
+      version: 'temporary-json-v5-limited',
       createdAt: store?.meta?.createdAt || now,
       updatedAt: store?.meta?.updatedAt || now,
-      note: 'Armazenamento temporario minimizado com visao por usuario: cidade/estado, produto de interesse, email informado e dispositivo.',
+      note: 'Armazenamento temporario minimizado com visao por usuario: cidade/estado, produto de interesse, email informado, dispositivo e contagem agregada de eventos.',
       limits: ANALYTICS_LIMITS
     },
     users: Array.isArray(store?.users) ? store.users.map(user => normalizeUserItem(user, now)).filter(Boolean) : [],
     contacts: [],
     productInterests: [],
     devices: Array.isArray(store?.devices) ? store.devices : [],
-    locations: Array.isArray(store?.locations) ? store.locations : []
+    locations: Array.isArray(store?.locations) ? store.locations : [],
+    eventStats: Array.isArray(store?.eventStats)
+      ? store.eventStats.map(eventStat => normalizeEventStatItem(eventStat, now)).filter(Boolean)
+      : []
   };
 
   const contactSources = Array.isArray(store?.contacts)
@@ -620,9 +691,19 @@ function normalizeTemporaryAnalyticsStore(store) {
     });
   }
 
+  if (!next.eventStats.length && Array.isArray(store?.events)) {
+    store.events.forEach(event => {
+      const eventName = normalizeEventName(event.eventName || event.name);
+      if (!eventName) return;
+      recordEventStat(next, eventName, normalizeIsoDate(event.occurredAt, now));
+    });
+  }
+
   if (!next.productInterests.length && Array.isArray(store?.events)) {
     store.events.forEach(event => {
-      if (event.eventName !== 'product_view') return;
+      const eventName = normalizeEventName(event.eventName || event.name);
+      if (!eventName) return;
+      if (eventName !== 'product_view') return;
       const productName = asString(event.productName || event.metadata?.productName, 180);
       if (!productName) return;
       const productId = asString(event.productId || event.metadata?.productId || productName, 80);
@@ -780,8 +861,10 @@ function recordTemporaryAnalytics(req, payload = {}, options = {}) {
   events.forEach(item => {
     const event = cleanValue(item || {});
     const eventName = asString(event.eventName || event.event_name || event.name, 120);
-    if (eventName !== 'product_view') return;
     const occurredAt = normalizeIsoDate(event.occurredAt, now);
+    if (!normalizeEventName(eventName)) return;
+    recordEventStat(store, eventName, occurredAt);
+    if (eventName !== 'product_view') return;
     const productName = asString(event.productName || event.product_name, 180);
     if (!productName) return;
     const productId = asString(event.productId || event.product_id || productName, 80);
@@ -866,7 +949,8 @@ function recordTemporaryAnalytics(req, payload = {}, options = {}) {
       contacts: store.contacts.length,
       productInterests: store.productInterests.length,
       devices: store.devices.length,
-      locations: store.locations.length
+      locations: store.locations.length,
+      eventStats: store.eventStats.length
     },
     limits: ANALYTICS_LIMITS
   };
@@ -1034,6 +1118,21 @@ app.post('/api/send-contact', async (req, res) => {
     }
   }
 
+  try {
+    recordTemporaryAnalytics(req, {
+      analytics: req.body.analytics,
+      lead: {
+        email: cleanEmail
+      },
+      event: {
+        eventName: 'contact_form_submit',
+        occurredAt: new Date().toISOString()
+      }
+    }, { allowLead: true });
+  } catch (err) {
+    console.error('Falha ao salvar contato no analytics temporario:', err);
+  }
+
   if (!hasConfiguredEmailTransport()) {
     return res.status(500).json({ message: 'Servidor nao configurado para envio de e-mail.' });
   }
@@ -1056,17 +1155,6 @@ app.post('/api/send-contact', async (req, res) => {
       subject: `Contato via site: ${cleanName}`,
       html
     });
-
-    try {
-      recordTemporaryAnalytics(req, {
-        analytics: req.body.analytics,
-        lead: {
-          email: cleanEmail
-        }
-      }, { allowLead: true });
-    } catch (err) {
-      console.error('Falha ao salvar contato no analytics temporario:', err);
-    }
 
     return res.json({
       message: 'Mensagem enviada com sucesso. Entraremos em contato em breve.',
@@ -1126,6 +1214,21 @@ app.post('/api/send-catalog', async (req, res) => {
         }
     }
 
+    try {
+      recordTemporaryAnalytics(req, {
+        analytics: req.body.analytics,
+        lead: {
+          email: cleanEmail
+        },
+        event: {
+          eventName: 'catalog_request',
+          occurredAt: new Date().toISOString()
+        }
+      }, { allowLead: true });
+    } catch (err) {
+      console.error('Falha ao salvar catalogo no analytics temporario:', err);
+    }
+
     if (!hasConfiguredEmailTransport()) {
         return res.status(500).json({ message: 'Servidor nao configurado para envio de e-mail.' });
     }
@@ -1140,17 +1243,6 @@ app.post('/api/send-catalog', async (req, res) => {
       subject: 'Seu catálogo Stik',
       html
     });
-
-    try {
-      recordTemporaryAnalytics(req, {
-        analytics: req.body.analytics,
-        lead: {
-          email: cleanEmail
-        }
-      }, { allowLead: true });
-    } catch (err) {
-      console.error('Falha ao salvar catalogo no analytics temporario:', err);
-    }
 
     return res.json({
       message: 'E-mail enviado com sucesso.',
@@ -1187,6 +1279,10 @@ app.post('/api/send-location', async (req, res) => {
       location: {
         city,
         state
+      },
+      event: {
+        eventName: 'location_shared',
+        occurredAt: new Date().toISOString()
       }
     }, { allowLocation: true });
   } catch (err) {
