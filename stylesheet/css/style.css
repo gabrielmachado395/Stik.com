@@ -4198,6 +4198,101 @@ a,
     }
 }
 
+/* --- Relatorio de Igualdade Salarial --- */
+.report-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top center, color-mix(in srgb, var(--color-accent) 14%, transparent) 0%, transparent 36%),
+        linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface-soft) 100%);
+    color: var(--color-text);
+}
+
+.report-section {
+    min-height: auto;
+    padding: 132px 20px 84px;
+}
+
+.report-container {
+    width: min(980px, 94vw);
+    margin: 0 auto;
+}
+
+.report-header {
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+.report-header span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.report-header h1 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: clamp(1.8rem, 4vw, 3.2rem);
+    line-height: 1.1;
+}
+
+.report-document {
+    margin: 0 auto;
+    padding: clamp(10px, 2vw, 18px);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow:
+        0 24px 64px color-mix(in srgb, var(--color-text) 14%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.report-document img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+html[data-theme="dark"] .report-page {
+    background:
+        radial-gradient(circle at top center, rgba(233, 198, 130, 0.1) 0%, rgba(233, 198, 130, 0) 38%),
+        linear-gradient(180deg, #101722 0%, #0d1420 100%);
+}
+
+html[data-theme="dark"] .report-header h1 {
+    color: var(--color-text);
+}
+
+html[data-theme="dark"] .report-header span {
+    color: var(--color-accent);
+}
+
+html[data-theme="dark"] .report-document {
+    border-color: rgba(248, 248, 255, 0.16);
+    background: #ffffff;
+    box-shadow:
+        0 28px 72px rgba(0, 0, 0, 0.42),
+        0 0 0 1px rgba(233, 198, 130, 0.16);
+}
+
+@media (max-width: 768px) {
+    .report-section {
+        padding: 112px 14px 62px;
+    }
+
+    .report-header {
+        margin-bottom: 20px;
+    }
+
+    .report-document {
+        padding: 8px;
+    }
+}
+
 /* --- Contact Refresh --- */
 .contact-main {
     background:

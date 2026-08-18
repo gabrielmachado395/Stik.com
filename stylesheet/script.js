@@ -1649,7 +1649,7 @@ const siteContentStore = (() => {
                     { image: 'img/optimized/institutional-evolution-03.jpg', alt: 'Cartela de cores e amostras de elásticos STIK' }
                 ],
                 bottomText: 'A Passamanaria do Nordeste S.A continua escrevendo sua história em colaboração com todos os nossos clientes internos e externos, acreditando sempre na parceria contínua e entendendo que é preciso INOVAR para AVANÇAR.',
-                bottomImage: 'img/rel-igualdade-07295413000190-2025-1_page-0001.jpg',
+                bottomImage: '',
                 bottomImageAlt: 'Visão e inovação'
             }
         };
@@ -2173,7 +2173,13 @@ async function applyAboutSiteContent(root, about) {
     const bottomImage = page.querySelector('.institucional-stacked .stacked-image img');
     if (bottomImage) {
         const bottomImageSrc = await resolveStikAssetUrl(about.bottomImage);
-        if (bottomImageSrc) bottomImage.src = bottomImageSrc;
+        const bottomImageWrapper = bottomImage.closest('.stacked-image');
+        if (bottomImageSrc) {
+            bottomImage.src = bottomImageSrc;
+            if (bottomImageWrapper) bottomImageWrapper.hidden = false;
+        } else if (bottomImageWrapper) {
+            bottomImageWrapper.hidden = true;
+        }
         bottomImage.alt = about.bottomImageAlt;
     }
 
