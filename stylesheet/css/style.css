@@ -11447,7 +11447,7 @@ html[data-theme="dark"] .institutional-page {
     .institutional-story-hero {
         padding: 92px 16px 0;
         background:
-            linear-gradient(180deg, var(--institutional-hero-top) 0%, var(--institutional-hero-mid) 74%, var(--institutional-band) 74%, var(--institutional-band) 100%);
+            linear-gradient(180deg, var(--institutional-hero-top) 0%, var(--institutional-hero-mid) 68%, var(--institutional-band) 68%, var(--institutional-band) 100%);
     }
 
     .institutional-story-inner {
@@ -11514,7 +11514,7 @@ html[data-theme="dark"] .institutional-page {
     .institutional-history-card {
         width: 100%;
         margin: 0 auto;
-        padding: 24px 0 38px;
+        padding: 58px 0 46px;
         grid-template-columns: 1fr;
     }
 
@@ -11542,6 +11542,11 @@ html[data-theme="dark"] .institutional-page {
 }
 
 @media (max-width: 460px) {
+    .institutional-story-hero {
+        background:
+            linear-gradient(180deg, var(--institutional-hero-top) 0%, var(--institutional-hero-mid) 62%, var(--institutional-band) 62%, var(--institutional-band) 100%);
+    }
+
     .institutional-values-section .diferenciais-grid {
         grid-template-columns: 1fr;
     }
@@ -11573,6 +11578,10 @@ html[data-theme="dark"] .institutional-page {
     .institutional-top-photo-accent {
         width: 100%;
         aspect-ratio: 1.1 / 1;
+    }
+
+    .institutional-history-card {
+        padding-top: 42px;
     }
 
     .institutional-evolution-media {
