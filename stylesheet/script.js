@@ -1521,14 +1521,17 @@ const siteContentStore = (() => {
     const STORAGE_KEY = 'stik.site.content';
     const HERO_SLIDESHOW_DURATION = 6200;
     const HERO_BANNER_IMAGES = [
-        { image: 'img/optimized/hero-banner-01.jpg', alt: 'Banner institucional STIK 01' },
-        { image: 'img/optimized/hero-banner-02.jpg', alt: 'Banner institucional STIK 02' },
-        { image: 'img/optimized/hero-banner-03.jpg', alt: 'Banner institucional STIK 03' }
+        { image: 'img/optimized/imagens-novas/banners-01.jpg', mobileImage: 'img/Imagens%20novas/banners-01-mobile.jpg', alt: 'Banner institucional STIK 01' },
+        { image: 'img/optimized/imagens-novas/banners-02.jpg', mobileImage: 'img/Imagens%20novas/banners-02-mobile.jpg', alt: 'Banner institucional STIK 02' },
+        { image: 'img/optimized/imagens-novas/banners-03.jpg', mobileImage: 'img/Imagens%20novas/banners-03-mobile.jpg', alt: 'Banner institucional STIK 03' }
     ];
     const HERO_BANNER_IMAGE_ALIASES = {
-        'img/Imagens novas/banners-01.jpg': 'img/optimized/hero-banner-01.jpg',
-        'img/Imagens novas/banners-02.jpg': 'img/optimized/hero-banner-02.jpg',
-        'img/Imagens novas/banners-03.jpg': 'img/optimized/hero-banner-03.jpg'
+        'img/Imagens novas/banners-01.jpg': 'img/optimized/imagens-novas/banners-01.jpg',
+        'img/Imagens novas/banners-02.jpg': 'img/optimized/imagens-novas/banners-02.jpg',
+        'img/Imagens novas/banners-03.jpg': 'img/optimized/imagens-novas/banners-03.jpg',
+        'img/optimized/hero-banner-01.jpg': 'img/optimized/imagens-novas/banners-01.jpg',
+        'img/optimized/hero-banner-02.jpg': 'img/optimized/imagens-novas/banners-02.jpg',
+        'img/optimized/hero-banner-03.jpg': 'img/optimized/imagens-novas/banners-03.jpg'
     };
     const LEGACY_HERO_VIDEO = {
         poster: 'img/optimized/hero-poster.jpg',
@@ -1537,11 +1540,11 @@ const siteContentStore = (() => {
     };
     const gridSlots = ['small-top-left', 'large-center', 'small-top-right', 'small-bottom-left', 'small-bottom-right'];
     const HOME_GRID_IMAGES = [
-        { image: 'img/Imagens novas/MODA INTIMA.png', alt: 'MODA INTIMA' },
-        { image: 'img/Imagens novas/UNIVERSO MASCULINO.png', alt: 'UNIVERSO MASCULINO' },
-        { image: 'img/Imagens novas/MODA ESPORTIVA.png', alt: 'MODA ESPORTIVA' },
-        { image: 'img/Imagens novas/MODA PRAIA.png', alt: 'MODA PRAIA' },
-        { image: 'img/Imagens novas/MODA INFANTIL.png', alt: 'MODA INFANTIL' }
+        { image: 'img/optimized/imagens-novas/moda-intima.jpg', mobileImage: 'img/optimized/imagens-novas/moda-intima-mobile.jpg', alt: 'MODA INTIMA' },
+        { image: 'img/optimized/imagens-novas/universo-masculino.jpg', mobileImage: 'img/optimized/imagens-novas/universo-masculino-mobile.jpg', alt: 'UNIVERSO MASCULINO' },
+        { image: 'img/optimized/imagens-novas/moda-esportiva.jpg', mobileImage: 'img/optimized/imagens-novas/moda-esportiva-mobile.jpg', alt: 'MODA ESPORTIVA' },
+        { image: 'img/optimized/imagens-novas/moda-praia.jpg', mobileImage: 'img/optimized/imagens-novas/moda-praia-mobile.jpg', alt: 'MODA PRAIA' },
+        { image: 'img/optimized/imagens-novas/moda-infantil.jpg', mobileImage: 'img/optimized/imagens-novas/moda-infantil-mobile.jpg', alt: 'MODA INFANTIL' }
     ];
     const legacyHighlightImages = new Set([
         'img/optimized/home-grid-geral.jpg',
@@ -1549,14 +1552,42 @@ const siteContentStore = (() => {
         'img/optimized/home-grid-elasticos.jpg',
         'img/optimized/home-grid-alcas.jpg',
         'img/optimized/home-grid-premium.jpg',
-        'img/Imagens novas/fotos site/MODA ESPORTIVA.png'
+        'img/Imagens novas/fotos site/MODA ESPORTIVA.png',
+        'img/Imagens novas/MODA INTIMA.png',
+        'img/Imagens novas/UNIVERSO MASCULINO.png',
+        'img/Imagens novas/MODA ESPORTIVA.png',
+        'img/Imagens novas/MODA PRAIA.png',
+        'img/Imagens novas/MODA INFANTIL.png'
     ]);
     const highlightImagesByText = {
-        'moda intima': 'img/Imagens novas/MODA INTIMA.png',
-        'universo masculino': 'img/Imagens novas/UNIVERSO MASCULINO.png',
-        'moda esportiva': 'img/Imagens novas/MODA ESPORTIVA.png',
-        'moda praia': 'img/Imagens novas/MODA PRAIA.png',
-        'moda infantil': 'img/Imagens novas/MODA INFANTIL.png'
+        'moda intima': HOME_GRID_IMAGES[0].image,
+        'universo masculino': HOME_GRID_IMAGES[1].image,
+        'moda esportiva': HOME_GRID_IMAGES[2].image,
+        'moda praia': HOME_GRID_IMAGES[3].image,
+        'moda infantil': HOME_GRID_IMAGES[4].image
+    };
+    const optimizedMobileImagesByDesktop = {
+        'img/optimized/imagens-novas/banners-01.jpg': 'img/Imagens%20novas/banners-01-mobile.jpg',
+        'img/optimized/imagens-novas/banners-02.jpg': 'img/Imagens%20novas/banners-02-mobile.jpg',
+        'img/optimized/imagens-novas/banners-03.jpg': 'img/Imagens%20novas/banners-03-mobile.jpg',
+        'img/optimized/imagens-novas/moda-intima.jpg': 'img/optimized/imagens-novas/moda-intima-mobile.jpg',
+        'img/optimized/imagens-novas/universo-masculino.jpg': 'img/optimized/imagens-novas/universo-masculino-mobile.jpg',
+        'img/optimized/imagens-novas/moda-esportiva.jpg': 'img/optimized/imagens-novas/moda-esportiva-mobile.jpg',
+        'img/optimized/imagens-novas/moda-praia.jpg': 'img/optimized/imagens-novas/moda-praia-mobile.jpg',
+        'img/optimized/imagens-novas/moda-infantil.jpg': 'img/optimized/imagens-novas/moda-infantil-mobile.jpg',
+        'img/optimized/imagens-novas/fotos-site-03.jpg': 'img/optimized/imagens-novas/fotos-site-03-mobile.jpg',
+        'img/optimized/imagens-novas/fotos-site-05.jpg': 'img/optimized/imagens-novas/fotos-site-05-mobile.jpg',
+        'img/optimized/imagens-novas/fotos-site-06.jpg': 'img/optimized/imagens-novas/fotos-site-06-mobile.jpg'
+    };
+    const optimizedImageAliases = {
+        'img/Imagens novas/MODA INTIMA.png': HOME_GRID_IMAGES[0].image,
+        'img/Imagens novas/UNIVERSO MASCULINO.png': HOME_GRID_IMAGES[1].image,
+        'img/Imagens novas/MODA ESPORTIVA.png': HOME_GRID_IMAGES[2].image,
+        'img/Imagens novas/MODA PRAIA.png': HOME_GRID_IMAGES[3].image,
+        'img/Imagens novas/MODA INFANTIL.png': HOME_GRID_IMAGES[4].image,
+        'img/Imagens novas/fotos site-03.jpg': 'img/optimized/imagens-novas/fotos-site-03.jpg',
+        'img/Imagens novas/fotos site-05.jpg': 'img/optimized/imagens-novas/fotos-site-05.jpg',
+        'img/Imagens novas/fotos site-06.jpg': 'img/optimized/imagens-novas/fotos-site-06.jpg'
     };
     const legacyCatalogCarouselImages = [
         'img/optimized/catalog-carousel-01.jpg',
@@ -1585,11 +1616,11 @@ const siteContentStore = (() => {
                 highlights: {
                     title: 'PRODUTOS',
                     items: [
-                        { slot: 'small-top-left', image: 'img/Imagens novas/MODA INTIMA.png', alt: 'MODA INTIMA', text: 'MODA INTIMA' },
-                        { slot: 'large-center', image: 'img/Imagens novas/UNIVERSO MASCULINO.png', alt: 'UNIVERSO MASCULINO', text: 'UNIVERSO MASCULINO' },
-                        { slot: 'small-top-right', image: 'img/Imagens novas/MODA ESPORTIVA.png', alt: 'MODA ESPORTIVA', text: 'MODA ESPORTIVA' },
-                        { slot: 'small-bottom-left', image: 'img/Imagens novas/MODA PRAIA.png', alt: 'MODA PRAIA', text: 'MODA PRAIA' },
-                        { slot: 'small-bottom-right', image: 'img/Imagens novas/MODA INFANTIL.png', alt: 'MODA INFANTIL', text: 'MODA INFANTIL' }
+                        { slot: 'small-top-left', ...HOME_GRID_IMAGES[0], text: 'MODA INTIMA' },
+                        { slot: 'large-center', ...HOME_GRID_IMAGES[1], text: 'UNIVERSO MASCULINO' },
+                        { slot: 'small-top-right', ...HOME_GRID_IMAGES[2], text: 'MODA ESPORTIVA' },
+                        { slot: 'small-bottom-left', ...HOME_GRID_IMAGES[3], text: 'MODA PRAIA' },
+                        { slot: 'small-bottom-right', ...HOME_GRID_IMAGES[4], text: 'MODA INFANTIL' }
                     ]
                 },
                 catalog: {
@@ -1607,9 +1638,9 @@ const siteContentStore = (() => {
                 mainImageAlt: 'Onda de inovação',
                 statement: 'Com espírito empreendedor, a STIK nasce da vontade de promover soluções ágeis em sintonia, com um atendimento customizado, acreditando no potencial criativo, e sobretudo, assegurando qualidade em tudo que faz.',
                 galleryImages: [
-                    { image: 'img/Imagens novas/fotos site-03.jpg', alt: 'Máquina 1' },
-                    { image: 'img/Imagens novas/fotos site-05.jpg', alt: 'Máquina 2' },
-                    { image: 'img/Imagens novas/fotos site-06.jpg', alt: 'Máquina 3' },
+                    { image: 'img/optimized/imagens-novas/fotos-site-03.jpg', mobileImage: 'img/optimized/imagens-novas/fotos-site-03-mobile.jpg', alt: 'Máquina 1' },
+                    { image: 'img/optimized/imagens-novas/fotos-site-05.jpg', mobileImage: 'img/optimized/imagens-novas/fotos-site-05-mobile.jpg', alt: 'Máquina 2' },
+                    { image: 'img/optimized/imagens-novas/fotos-site-06.jpg', mobileImage: 'img/optimized/imagens-novas/fotos-site-06-mobile.jpg', alt: 'Máquina 3' },
                     { image: 'img - Copia/stik-inst1.png', alt: 'Máquina 4' }
                 ],
                 evolutionImages: [
@@ -1635,17 +1666,23 @@ const siteContentStore = (() => {
     const getHighlightImageByText = (value) => highlightImagesByText[normalizeHighlightTextKey(value)] || '';
 
     function normalizeImageItem(item = {}, fallback = {}) {
+        const rawImage = item.image || item.src || fallback.image || '';
+        const image = optimizedImageAliases[rawImage] || rawImage;
+        const rawMobileImage = item.mobileImage || item.mobileSrc || fallback.mobileImage || optimizedMobileImagesByDesktop[image] || '';
         return {
-            image: cleanAsset(item.image || item.src || fallback.image, fallback.image || ''),
+            image: cleanAsset(image, fallback.image || ''),
+            mobileImage: cleanAsset(rawMobileImage, ''),
             alt: cleanText(item.alt || fallback.alt || 'Imagem Stik', 120)
         };
     }
 
     function normalizeHeroBannerImageItem(item = {}, fallback = {}) {
         const rawImage = item.image || item.src || fallback.image || '';
+        const image = HERO_BANNER_IMAGE_ALIASES[rawImage] || optimizedImageAliases[rawImage] || rawImage;
         return normalizeImageItem({
             ...item,
-            image: HERO_BANNER_IMAGE_ALIASES[rawImage] || rawImage
+            image,
+            mobileImage: item.mobileImage || item.mobileSrc || fallback.mobileImage || optimizedMobileImagesByDesktop[image] || ''
         }, fallback);
     }
 
@@ -1692,6 +1729,7 @@ const siteContentStore = (() => {
             return {
                 slot: gridSlots[index],
                 image: cleanAsset(image, fallback.image),
+                mobileImage: cleanAsset(item.mobileImage || item.mobileSrc || fallback.mobileImage || optimizedMobileImagesByDesktop[image], ''),
                 alt: cleanText(item.alt || text || fallback.alt, 120),
                 text
             };
@@ -1820,6 +1858,18 @@ async function applySiteContent(root = document) {
     ]);
 }
 
+function setStikResponsiveImage(img, item = {}, sizes = '100vw') {
+    if (!img || !item.image) return;
+    img.src = item.image;
+    if (item.mobileImage && item.mobileImage !== item.image) {
+        img.srcset = `${item.mobileImage} 820w, ${item.image} 1800w`;
+        img.sizes = sizes;
+    } else {
+        img.removeAttribute('srcset');
+        img.removeAttribute('sizes');
+    }
+}
+
 async function applyHomeSiteContent(root, home) {
     const heroContainer = root.querySelector?.('.video-container') || document.querySelector('.video-container');
     if (heroContainer && home?.hero) {
@@ -1830,7 +1880,8 @@ async function applyHomeSiteContent(root, home) {
             resolveStikAssetUrl(home.hero.mobileVideo),
             Promise.all((home.hero.slideshow?.images || []).map(async item => ({
                 ...item,
-                image: await resolveStikAssetUrl(item.image)
+                image: await resolveStikAssetUrl(item.image),
+                mobileImage: await resolveStikAssetUrl(item.mobileImage)
             })))
         ]);
         heroContainer.dataset.heroMode = heroMode;
@@ -1858,8 +1909,11 @@ async function applyHomeSiteContent(root, home) {
         const img = item.querySelector('img');
         const label = item.querySelector('span');
         if (img) {
-            resolveStikAssetUrl(data.image).then(src => {
-                if (src) img.src = src;
+            Promise.all([
+                resolveStikAssetUrl(data.image),
+                resolveStikAssetUrl(data.mobileImage)
+            ]).then(([src, mobileSrc]) => {
+                if (src) setStikResponsiveImage(img, { image: src, mobileImage: mobileSrc }, '(max-width: 768px) 100vw, 33vw');
             });
             img.alt = data.alt;
         }
@@ -1875,10 +1929,11 @@ async function applyHomeSiteContent(root, home) {
     if (catalogTrack && Array.isArray(home?.catalog?.carouselImages)) {
         const carouselImages = await Promise.all(home.catalog.carouselImages.map(async item => ({
             ...item,
-            image: await resolveStikAssetUrl(item.image)
+            image: await resolveStikAssetUrl(item.image),
+            mobileImage: await resolveStikAssetUrl(item.mobileImage)
         })));
         const carouselMarkup = carouselImages.filter(item => item.image).map(item => `
-            <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.alt)}" loading="lazy" decoding="async">
+            <img src="${escapeAttribute(item.image)}" ${item.mobileImage ? `srcset="${escapeAttribute(item.mobileImage)} 820w, ${escapeAttribute(item.image)} 1800w" sizes="(max-width: 768px) 42vw, 240px"` : ''} alt="${escapeAttribute(item.alt)}" loading="lazy" decoding="async">
         `).join('');
         catalogTrack.innerHTML = carouselMarkup;
         catalogTrack.dataset.originalMarkup = carouselMarkup;
@@ -1913,6 +1968,7 @@ function getStikHeroSlideshowImages(container) {
             return images
                 .map(item => ({
                     image: normalizeStikAssetUrl(item?.image || ''),
+                    mobileImage: normalizeStikAssetUrl(item?.mobileImage || ''),
                     alt: item?.alt || 'Imagem principal Stik'
                 }))
                 .filter(item => item.image);
@@ -1927,6 +1983,7 @@ function getStikHeroSlideshowImages(container) {
 function renderStikHeroSlideshow(container, shouldPlay = false) {
     const slides = getStikHeroSlideshowImages(container);
     if (!slides.length) return null;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
     clearStikHeroSlideshow(container);
     container.querySelector('#institutionalVideo, #institutionalHeroImage')?.remove();
@@ -1939,11 +1996,17 @@ function renderStikHeroSlideshow(container, shouldPlay = false) {
         container.appendChild(slideshow);
     }
 
-    const slidesKey = JSON.stringify(slides.map(item => item.image));
+    const slidesKey = JSON.stringify(slides.map(item => [
+        isMobile && item.mobileImage ? item.mobileImage : item.image,
+        isMobile ? 'mobile' : 'desktop'
+    ]));
     if (slideshow.dataset.slidesKey !== slidesKey) {
         slideshow.innerHTML = slides.map((item, index) => {
+            const selectedImage = isMobile && item.mobileImage ? item.mobileImage : item.image;
             const image = document.createElement('img');
-            image.src = item.image;
+            image.src = selectedImage;
+            image.dataset.desktopSrc = item.image;
+            image.dataset.mobileSrc = item.mobileImage || '';
             image.alt = item.alt;
             image.decoding = 'async';
             image.loading = index === 0 ? 'eager' : 'lazy';
@@ -2065,12 +2128,13 @@ async function applyAboutSiteContent(root, about) {
     if (topPhotos.length && Array.isArray(about.galleryImages)) {
         const topImages = await Promise.all(about.galleryImages.slice(0, topPhotos.length).map(async item => ({
             ...item,
-            image: await resolveStikAssetUrl(item.image)
+            image: await resolveStikAssetUrl(item.image),
+            mobileImage: await resolveStikAssetUrl(item.mobileImage)
         })));
         topPhotos.forEach((image, index) => {
             const item = topImages[index];
             if (!item?.image) return;
-            image.src = item.image;
+            setStikResponsiveImage(image, item, '(max-width: 768px) 58vw, 420px');
             image.alt = item.alt;
         });
     }
@@ -7842,7 +7906,7 @@ function setupAdminSiteContent() {
             const content = collectAdminSiteContentForm(root);
             const list = getSiteContentPathValue(content, addButton.dataset.siteContentAdd);
             if (Array.isArray(list)) {
-                list.push({ image: 'img/optimized/home-grid-geral.jpg', alt: 'Nova imagem Stik' });
+                list.push({ image: HOME_GRID_IMAGES[0].image, mobileImage: HOME_GRID_IMAGES[0].mobileImage, alt: 'Nova imagem Stik' });
                 siteContentStore.write(content);
                 renderAdminSiteContent();
                 showEditorFeedback('Imagem adicionada.');
