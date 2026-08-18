@@ -383,11 +383,12 @@ body.sidebar-open .top-header .main-header{
     height: 100vh;
     min-height: 100svh;
     width: 100%;
-    overflow: hidden;
+    /* overflow: hidden; */
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: var(--color-bg);
+    object-fit: fill;
 }
 
 .video-hero-section::after {
@@ -436,7 +437,7 @@ body.sidebar-open .top-header .main-header{
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: fill;
     z-index: 1; /* Para garantir que fique abaixo do conteúdo da overlay */
 }
 
@@ -445,6 +446,14 @@ body.sidebar-open .top-header .main-header{
     background: #000;
     contain: layout paint;
     pointer-events: none;
+}
+
+.hero-slideshow picture {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .hero-slideshow img {
@@ -462,6 +471,11 @@ body.sidebar-open .top-header .main-header{
 .hero-slideshow img.is-active {
     opacity: 1;
     z-index: 2;
+}
+
+.video-hero-section .hero-slideshow img,
+.video-hero-section .hero-slideshow picture img {
+    object-fit: fill !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
