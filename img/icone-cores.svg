@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-label="Ícone de cartela de cores">
+  <path d="M40 10c-17 0-30 11.8-30 27.2C10 54 22.9 67.5 39.8 67.5h5.4c5.4 0 8.7-5.7 6.2-10.4-1.7-3.2.7-7.1 4.4-7.1h4.4C66.6 50 70 45.4 70 39.2 70 22.8 57.6 10 40 10z" fill="none" stroke="#2a394e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="28" cy="29" r="3.5" fill="none" stroke="#2a394e" stroke-width="4"/>
+  <circle cx="40" cy="23.5" r="3.5" fill="none" stroke="#2a394e" stroke-width="4"/>
+  <circle cx="52" cy="30" r="3.5" fill="none" stroke="#2a394e" stroke-width="4"/>
+  <circle cx="30.5" cy="43" r="3.5" fill="none" stroke="#2a394e" stroke-width="4"/>
+  <path d="M45.8 55.5c0 2.5-2.1 4.5-4.7 4.5" fill="none" stroke="#2a394e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

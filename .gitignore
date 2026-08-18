@@ -65,6 +65,7 @@ desktop.ini
 
 # Documentation drafts
 *.md
+*.pdf
 
 # Local agent/tooling state
 .artifacts/

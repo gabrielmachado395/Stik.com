@@ -1519,46 +1519,82 @@ const productStore = (() => {
 
 const siteContentStore = (() => {
     const STORAGE_KEY = 'stik.site.content';
-    const HERO_SLIDESHOW_DURATION = 7000;
+    const HERO_SLIDESHOW_DURATION = 6200;
+    const HERO_BANNER_IMAGES = [
+        { image: 'img/optimized/hero-banner-01.jpg', alt: 'Banner institucional STIK 01' },
+        { image: 'img/optimized/hero-banner-02.jpg', alt: 'Banner institucional STIK 02' },
+        { image: 'img/optimized/hero-banner-03.jpg', alt: 'Banner institucional STIK 03' }
+    ];
+    const HERO_BANNER_IMAGE_ALIASES = {
+        'img/Imagens novas/banners-01.jpg': 'img/optimized/hero-banner-01.jpg',
+        'img/Imagens novas/banners-02.jpg': 'img/optimized/hero-banner-02.jpg',
+        'img/Imagens novas/banners-03.jpg': 'img/optimized/hero-banner-03.jpg'
+    };
+    const LEGACY_HERO_VIDEO = {
+        poster: 'img/optimized/hero-poster.jpg',
+        desktopVideo: 'img/optimized/hero-desktop.mp4',
+        mobileVideo: 'img/optimized/hero-mobile.mp4'
+    };
     const gridSlots = ['small-top-left', 'large-center', 'small-top-right', 'small-bottom-left', 'small-bottom-right'];
+    const HOME_GRID_IMAGES = [
+        { image: 'img/Imagens novas/MODA INTIMA.png', alt: 'MODA INTIMA' },
+        { image: 'img/Imagens novas/UNIVERSO MASCULINO.png', alt: 'UNIVERSO MASCULINO' },
+        { image: 'img/Imagens novas/MODA ESPORTIVA.png', alt: 'MODA ESPORTIVA' },
+        { image: 'img/Imagens novas/MODA PRAIA.png', alt: 'MODA PRAIA' },
+        { image: 'img/Imagens novas/MODA INFANTIL.png', alt: 'MODA INFANTIL' }
+    ];
+    const legacyHighlightImages = new Set([
+        'img/optimized/home-grid-geral.jpg',
+        'img/optimized/home-grid-rendas.jpg',
+        'img/optimized/home-grid-elasticos.jpg',
+        'img/optimized/home-grid-alcas.jpg',
+        'img/optimized/home-grid-premium.jpg',
+        'img/Imagens novas/fotos site/MODA ESPORTIVA.png'
+    ]);
+    const highlightImagesByText = {
+        'moda intima': 'img/Imagens novas/MODA INTIMA.png',
+        'universo masculino': 'img/Imagens novas/UNIVERSO MASCULINO.png',
+        'moda esportiva': 'img/Imagens novas/MODA ESPORTIVA.png',
+        'moda praia': 'img/Imagens novas/MODA PRAIA.png',
+        'moda infantil': 'img/Imagens novas/MODA INFANTIL.png'
+    };
+    const legacyCatalogCarouselImages = [
+        'img/optimized/catalog-carousel-01.jpg',
+        'img/optimized/catalog-carousel-02.jpg',
+        'img/optimized/catalog-carousel-03.jpg',
+        'img/optimized/catalog-carousel-04.jpg',
+        'img/optimized/catalog-carousel-05.jpg'
+    ];
 
     function defaults() {
         return {
             home: {
                 hero: {
-                    mode: 'video',
-                    poster: 'img/optimized/hero-poster.jpg',
-                    desktopVideo: 'img/optimized/hero-desktop.mp4',
-                    mobileVideo: 'img/optimized/hero-mobile.mp4',
-                    desktopKind: 'video',
-                    mobileKind: 'video',
+                    mode: 'slideshow',
+                    poster: HERO_BANNER_IMAGES[0].image,
+                    desktopVideo: LEGACY_HERO_VIDEO.desktopVideo,
+                    mobileVideo: LEGACY_HERO_VIDEO.mobileVideo,
+                    desktopKind: 'image',
+                    mobileKind: 'image',
                     slideshow: {
                         duration: HERO_SLIDESHOW_DURATION,
                         transition: 'fade',
-                        images: [
-                            { image: 'img/optimized/hero-poster.jpg', alt: 'Imagem do hero Stik' }
-                        ]
+                        images: HERO_BANNER_IMAGES
                     }
                 },
                 highlights: {
                     title: 'PRODUTOS',
                     items: [
-                        { slot: 'small-top-left', image: 'img/optimized/home-grid-geral.jpg', alt: 'Rendas', text: 'RENDAS' },
-                        { slot: 'large-center', image: 'img/optimized/home-grid-rendas.jpg', alt: 'Destaque Geral', text: 'E mais...' },
-                        { slot: 'small-top-right', image: 'img/optimized/home-grid-elasticos.jpg', alt: 'Elasticos', text: 'ELÁSTICOS' },
-                        { slot: 'small-bottom-left', image: 'img/optimized/home-grid-alcas.jpg', alt: 'Alças', text: 'ALÇAS' },
-                        { slot: 'small-bottom-right', image: 'img/optimized/home-grid-premium.jpg', alt: 'Bem-Vindo Outono', text: 'Premium' }
+                        { slot: 'small-top-left', image: 'img/Imagens novas/MODA INTIMA.png', alt: 'MODA INTIMA', text: 'MODA INTIMA' },
+                        { slot: 'large-center', image: 'img/Imagens novas/UNIVERSO MASCULINO.png', alt: 'UNIVERSO MASCULINO', text: 'UNIVERSO MASCULINO' },
+                        { slot: 'small-top-right', image: 'img/Imagens novas/MODA ESPORTIVA.png', alt: 'MODA ESPORTIVA', text: 'MODA ESPORTIVA' },
+                        { slot: 'small-bottom-left', image: 'img/Imagens novas/MODA PRAIA.png', alt: 'MODA PRAIA', text: 'MODA PRAIA' },
+                        { slot: 'small-bottom-right', image: 'img/Imagens novas/MODA INFANTIL.png', alt: 'MODA INFANTIL', text: 'MODA INFANTIL' }
                     ]
                 },
                 catalog: {
                     title: 'BAIXE NOSSO CATÁLOGO',
-                    carouselImages: [
-                        { image: 'img/optimized/catalog-carousel-01.jpg', alt: 'Imagem do carrossel Stik' },
-                        { image: 'img/optimized/catalog-carousel-02.jpg', alt: 'Imagem do carrossel Stik' },
-                        { image: 'img/optimized/catalog-carousel-03.jpg', alt: 'Imagem do carrossel Stik' },
-                        { image: 'img/optimized/catalog-carousel-04.jpg', alt: 'Imagem do carrossel Stik' },
-                        { image: 'img/optimized/catalog-carousel-05.jpg', alt: 'Imagem do carrossel Stik' }
-                    ]
+                    carouselImages: HOME_GRID_IMAGES
                 }
             },
             about: {
@@ -1571,10 +1607,15 @@ const siteContentStore = (() => {
                 mainImageAlt: 'Onda de inovação',
                 statement: 'Com espírito empreendedor, a STIK nasce da vontade de promover soluções ágeis em sintonia, com um atendimento customizado, acreditando no potencial criativo, e sobretudo, assegurando qualidade em tudo que faz.',
                 galleryImages: [
-                    { image: 'img - Copia/stik-inst4.png', alt: 'Máquina 1' },
-                    { image: 'img - Copia/stik-inst3.png', alt: 'Máquina 2' },
-                    { image: 'img - Copia/stik-inst2.png', alt: 'Máquina 3' },
+                    { image: 'img/Imagens novas/fotos site-03.jpg', alt: 'Máquina 1' },
+                    { image: 'img/Imagens novas/fotos site-05.jpg', alt: 'Máquina 2' },
+                    { image: 'img/Imagens novas/fotos site-06.jpg', alt: 'Máquina 3' },
                     { image: 'img - Copia/stik-inst1.png', alt: 'Máquina 4' }
+                ],
+                evolutionImages: [
+                    { image: 'img/optimized/institutional-evolution-01.jpg', alt: 'Bobinas coloridas no parque fabril da STIK' },
+                    { image: 'img/optimized/institutional-evolution-02.jpg', alt: 'Operador acompanhando equipamento industrial da STIK' },
+                    { image: 'img/optimized/institutional-evolution-03.jpg', alt: 'Cartela de cores e amostras de elásticos STIK' }
                 ],
                 bottomText: 'A Passamanaria do Nordeste S.A continua escrevendo sua história em colaboração com todos os nossos clientes internos e externos, acreditando sempre na parceria contínua e entendendo que é preciso INOVAR para AVANÇAR.',
                 bottomImage: 'img/rel-igualdade-07295413000190-2025-1_page-0001.jpg',
@@ -1585,6 +1626,13 @@ const siteContentStore = (() => {
 
     const cleanText = (value, maxLength = 500) => String(value || '').trim().slice(0, maxLength);
     const cleanAsset = (value, fallback = '') => normalizeStikAssetUrl(value, fallback);
+    const normalizeHighlightTextKey = (value) => String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+    const getHighlightImageByText = (value) => highlightImagesByText[normalizeHighlightTextKey(value)] || '';
 
     function normalizeImageItem(item = {}, fallback = {}) {
         return {
@@ -1593,12 +1641,31 @@ const siteContentStore = (() => {
         };
     }
 
+    function normalizeHeroBannerImageItem(item = {}, fallback = {}) {
+        const rawImage = item.image || item.src || fallback.image || '';
+        return normalizeImageItem({
+            ...item,
+            image: HERO_BANNER_IMAGE_ALIASES[rawImage] || rawImage
+        }, fallback);
+    }
+
+    function normalizeCatalogCarouselImageItem(item = {}, fallback = {}, index = 0) {
+        const rawImage = item.image || item.src || fallback.image || '';
+        const legacyIndex = legacyCatalogCarouselImages.indexOf(rawImage);
+        const gridFallback = HOME_GRID_IMAGES[index % HOME_GRID_IMAGES.length] || fallback;
+        return normalizeImageItem({
+            ...item,
+            image: legacyIndex >= 0 ? HOME_GRID_IMAGES[legacyIndex % HOME_GRID_IMAGES.length].image : rawImage
+        }, gridFallback);
+    }
+
     function normalizeHeroMode(value) {
         return value === 'slideshow' ? 'slideshow' : 'video';
     }
 
     function inferHeroMode(hero = {}) {
         if (hero.mode === 'video' || hero.mode === 'slideshow') return hero.mode;
+        if (Array.isArray(hero.slideshow?.images) && hero.slideshow.images.length) return 'slideshow';
         const desktopKind = normalizeStikHeroMediaKind(hero.desktopKind) || inferStikMediaKind(hero.desktopVideo || hero.desktopSrc, 'video');
         const mobileKind = normalizeStikHeroMediaKind(hero.mobileKind) || inferStikMediaKind(hero.mobileVideo || hero.mobileSrc, 'video');
         return desktopKind === 'image' || mobileKind === 'image' ? 'slideshow' : 'video';
@@ -1616,18 +1683,24 @@ const siteContentStore = (() => {
         const highlightSource = Array.isArray(highlights.items) ? highlights.items : [];
         const highlightItems = base.home.highlights.items.map((fallback, index) => {
             const item = highlightSource[index] || {};
+            const text = cleanText(item.text || item.label || fallback.text, 80);
+            const rawImage = item.image || item.src || '';
+            const relatedImage = getHighlightImageByText(text);
+            const image = relatedImage && (!rawImage || legacyHighlightImages.has(rawImage))
+                ? relatedImage
+                : rawImage || fallback.image;
             return {
                 slot: gridSlots[index],
-                image: cleanAsset(item.image || item.src || fallback.image, fallback.image),
-                alt: cleanText(item.alt || fallback.alt, 120),
-                text: cleanText(item.text || item.label || fallback.text, 80)
+                image: cleanAsset(image, fallback.image),
+                alt: cleanText(item.alt || text || fallback.alt, 120),
+                text
             };
         });
 
         const catalogImages = (Array.isArray(catalog.carouselImages) && catalog.carouselImages.length
             ? catalog.carouselImages
             : base.home.catalog.carouselImages)
-            .map((item, index) => normalizeImageItem(item, base.home.catalog.carouselImages[index] || base.home.catalog.carouselImages[0]))
+            .map((item, index) => normalizeCatalogCarouselImageItem(item, base.home.catalog.carouselImages[index] || base.home.catalog.carouselImages[0], index))
             .filter(item => item.image)
             .slice(0, 12);
 
@@ -1637,6 +1710,12 @@ const siteContentStore = (() => {
             .map((item, index) => normalizeImageItem(item, base.about.galleryImages[index] || base.about.galleryImages[0]))
             .filter(item => item.image)
             .slice(0, 8);
+        const aboutEvolutionImages = (Array.isArray(about.evolutionImages) && about.evolutionImages.length
+            ? about.evolutionImages
+            : base.about.evolutionImages)
+            .map((item, index) => normalizeImageItem(item, base.about.evolutionImages[index] || base.about.evolutionImages[0]))
+            .filter(item => item.image)
+            .slice(0, 3);
         const legacyHeroSlides = [
             normalizeStikHeroMediaKind(hero.desktopKind) === 'image' || inferStikMediaKind(hero.desktopVideo || hero.desktopSrc, 'video') === 'image'
                 ? { image: hero.desktopVideo || hero.desktopSrc, alt: 'Imagem desktop do hero' }
@@ -1645,21 +1724,31 @@ const siteContentStore = (() => {
                 ? { image: hero.mobileVideo || hero.mobileSrc, alt: 'Imagem mobile do hero' }
                 : null
         ].filter(Boolean);
-        const slideshowSource = Array.isArray(hero.slideshow?.images) && hero.slideshow.images.length
+        const usesLegacyHeroVideo = (
+            hero.mode === 'video'
+            && (!hero.poster || hero.poster === LEGACY_HERO_VIDEO.poster)
+            && (!hero.desktopVideo || hero.desktopVideo === LEGACY_HERO_VIDEO.desktopVideo || hero.desktopSrc === LEGACY_HERO_VIDEO.desktopVideo)
+            && (!hero.mobileVideo || hero.mobileVideo === LEGACY_HERO_VIDEO.mobileVideo || hero.mobileSrc === LEGACY_HERO_VIDEO.mobileVideo)
+        );
+        const slideshowSource = Array.isArray(hero.slideshow?.images) && hero.slideshow.images.length && !usesLegacyHeroVideo
             ? hero.slideshow.images
             : legacyHeroSlides.length
                 ? legacyHeroSlides
-                : base.home.hero.slideshow.images;
+                : HERO_BANNER_IMAGES;
         const slideshowImages = slideshowSource
-            .map((item, index) => normalizeImageItem(item, base.home.hero.slideshow.images[index] || base.home.hero.slideshow.images[0]))
+            .map((item, index) => normalizeHeroBannerImageItem(item, HERO_BANNER_IMAGES[index] || HERO_BANNER_IMAGES[0]))
             .filter(item => item.image)
             .slice(0, 12);
+        const hasHeroConfig = Boolean(home.hero && Object.keys(hero).length);
+        const heroMode = usesLegacyHeroVideo || !hasHeroConfig
+            ? 'slideshow'
+            : normalizeHeroMode(inferHeroMode(hero));
 
         return {
             home: {
                 hero: {
-                    mode: normalizeHeroMode(inferHeroMode(hero)),
-                    poster: cleanAsset(hero.poster, base.home.hero.poster),
+                    mode: heroMode,
+                    poster: cleanAsset(HERO_BANNER_IMAGE_ALIASES[hero.poster] || (usesLegacyHeroVideo ? base.home.hero.poster : hero.poster), base.home.hero.poster),
                     desktopVideo: cleanAsset(hero.desktopVideo || hero.desktopSrc, base.home.hero.desktopVideo),
                     mobileVideo: cleanAsset(hero.mobileVideo || hero.mobileSrc, base.home.hero.mobileVideo),
                     desktopKind: normalizeStikHeroMediaKind(hero.desktopKind) || inferStikMediaKind(hero.desktopVideo || hero.desktopSrc, 'video'),
@@ -1689,6 +1778,7 @@ const siteContentStore = (() => {
                 mainImageAlt: cleanText(about.mainImageAlt, 120) || base.about.mainImageAlt,
                 statement: cleanText(about.statement, 800) || base.about.statement,
                 galleryImages: aboutGallery.length ? aboutGallery : base.about.galleryImages,
+                evolutionImages: aboutEvolutionImages.length ? aboutEvolutionImages : base.about.evolutionImages,
                 bottomText: cleanText(about.bottomText, 900) || base.about.bottomText,
                 bottomImage: cleanAsset(about.bottomImage, base.about.bottomImage),
                 bottomImageAlt: cleanText(about.bottomImageAlt, 120) || base.about.bottomImageAlt
@@ -1866,13 +1956,17 @@ function renderStikHeroSlideshow(container, shouldPlay = false) {
 
     container.closest('.video-hero-section')?.classList.add('video-ready');
     const images = Array.from(slideshow.querySelectorAll('img'));
+    const duration = Math.max(3200, Number(container.dataset.slideshowDuration) || 6200);
     if (shouldPlay && images.length > 1) {
-        const duration = Math.max(2500, Number(container.dataset.slideshowDuration) || 7000);
         container.__stikHeroSlideshowTimer = window.setInterval(() => {
+            if (document.hidden) return;
             const currentIndex = Number(slideshow.dataset.activeIndex || 0);
             const nextIndex = (currentIndex + 1) % images.length;
+            const nextImage = images[nextIndex];
+            if (!nextImage) return;
+
             images[currentIndex]?.classList.remove('is-active');
-            images[nextIndex]?.classList.add('is-active');
+            nextImage.classList.add('is-active');
             slideshow.dataset.activeIndex = String(nextIndex);
         }, duration);
     }
@@ -1949,7 +2043,7 @@ async function applyAboutSiteContent(root, about) {
     const page = root.querySelector?.('.institutional-page') || (root.classList?.contains('institutional-page') ? root : null);
     if (!page || !about) return;
 
-    const title = page.querySelector('.institucional-section:first-of-type .title-section');
+    const title = page.querySelector('.institutional-story-title, .institucional-section:first-of-type .title-section');
     if (title) setStikRawText(title, about.title);
 
     const paragraphs = page.querySelectorAll('.institucional-section:first-of-type .text-block p');
@@ -1964,8 +2058,22 @@ async function applyAboutSiteContent(root, about) {
         mainImage.alt = about.mainImageAlt;
     }
 
-    const statement = page.querySelector('.institucional-section:first-of-type .values-block h3');
+    const statement = page.querySelector('.institutional-story-quote, .institucional-section:first-of-type .values-block h3');
     if (statement) setStikRawText(statement, about.statement);
+
+    const topPhotos = page.querySelectorAll('.institutional-top-photo img');
+    if (topPhotos.length && Array.isArray(about.galleryImages)) {
+        const topImages = await Promise.all(about.galleryImages.slice(0, topPhotos.length).map(async item => ({
+            ...item,
+            image: await resolveStikAssetUrl(item.image)
+        })));
+        topPhotos.forEach((image, index) => {
+            const item = topImages[index];
+            if (!item?.image) return;
+            image.src = item.image;
+            image.alt = item.alt;
+        });
+    }
 
     const galleryGrid = page.querySelector('.gallery-grid');
     if (galleryGrid && Array.isArray(about.galleryImages)) {
@@ -1981,12 +2089,31 @@ async function applyAboutSiteContent(root, about) {
     const bottomText = page.querySelector('.institucional-stacked .stacked-text p');
     if (bottomText) setStikRawText(bottomText, about.bottomText);
 
+    const evolutionImages = page.querySelectorAll('.institutional-evolution-media img');
+    const evolutionMediaSource = Array.isArray(about.evolutionImages) && about.evolutionImages.length
+        ? about.evolutionImages
+        : (Array.isArray(about.galleryImages) ? about.galleryImages.slice(2, 2 + evolutionImages.length) : []);
+    if (evolutionImages.length && evolutionMediaSource.length) {
+        const mediaImages = await Promise.all(evolutionMediaSource.slice(0, evolutionImages.length).map(async item => ({
+            ...item,
+            image: await resolveStikAssetUrl(item.image)
+        })));
+        evolutionImages.forEach((image, index) => {
+            const item = mediaImages[index] || mediaImages[0];
+            if (!item?.image) return;
+            image.src = item.image;
+            image.alt = item.alt;
+        });
+    }
+
     const bottomImage = page.querySelector('.institucional-stacked .stacked-image img');
     if (bottomImage) {
         const bottomImageSrc = await resolveStikAssetUrl(about.bottomImage);
         if (bottomImageSrc) bottomImage.src = bottomImageSrc;
         bottomImage.alt = about.bottomImageAlt;
     }
+
+    initInstitutionalTopImagesAnimation();
 }
 
 productStore.hydrate();
@@ -5628,12 +5755,92 @@ function initDiferenciaisSequence() {
     observer.observe(section);
 }
 
+function initInstitutionalTopImagesAnimation() {
+    const section = document.querySelector('.institutional-story-hero');
+    if (!section || section.dataset.topImagesAnimationReady === 'true') return;
+
+    const photos = Array.from(section.querySelectorAll('.institutional-top-photo'));
+    if (photos.length !== 3) return;
+
+    section.dataset.topImagesAnimationReady = 'true';
+
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || !Element.prototype.animate) {
+        section.classList.add('photos-waapi-ready');
+        photos.forEach(photo => {
+            photo.style.opacity = '1';
+        });
+        return;
+    }
+
+    const rotations = [-4, -3, 7];
+    const verticalDrift = [-8, 10, -6];
+    const entryOffsets = [-620, -560, -700];
+    const entryRotations = [rotations[0] - 320, rotations[1] - 300, rotations[2] - 340];
+    const revealPhoto = () => {
+        section.classList.add('photos-waapi-ready');
+
+        const revealAnimations = photos.map((photo, index) => photo.animate([
+            {
+                opacity: 0,
+                transform: `translate3d(${entryOffsets[index]}px, 30px, 0) rotate(${entryRotations[index]}deg) scale(0.9)`
+            },
+            {
+                opacity: 0.92,
+                transform: `translate3d(${entryOffsets[index] * 0.32}px, 8px, 0) rotate(${rotations[index] - 74}deg) scale(0.98)`
+            },
+            {
+                opacity: 1,
+                transform: `translate3d(0, 0, 0) rotate(${rotations[index]}deg) scale(1)`
+            }
+        ], {
+            duration: 1350,
+            delay: index * 170,
+            easing: 'cubic-bezier(.2, .9, .18, 1)',
+            fill: 'both'
+        }));
+
+        Promise.all(revealAnimations.map(animation => animation.finished.catch(() => null))).then(() => {
+            photos.forEach((photo, index) => {
+                photo.animate([
+                    { transform: `translate3d(0, 0, 0) rotate(${rotations[index]}deg)` },
+                    { transform: `translate3d(0, ${verticalDrift[index]}px, 0) rotate(${rotations[index] + (index === 1 ? -1 : 1)}deg)` }
+                ], {
+                    duration: 4200 + index * 520,
+                    delay: index * 220,
+                    easing: 'ease-in-out',
+                    iterations: Infinity,
+                    direction: 'alternate'
+                });
+            });
+        });
+    };
+
+    if (!('IntersectionObserver' in window)) {
+        revealPhoto();
+        return;
+    }
+
+    let started = false;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting || started) return;
+            started = true;
+            revealPhoto();
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.22 });
+
+    observer.observe(section);
+}
+
 function inicializarAnimateOnScroll() {
     const elementosAnimar = Array.from(document.querySelectorAll('.animate-on-scroll'))
         .filter(elemento => elemento.dataset.scrollAnimationReady !== 'true' && !elemento.classList.contains('is-visible'));
 
     if (!elementosAnimar.length) {
         initDiferenciaisSequence();
+        initInstitutionalTopImagesAnimation();
         return;
     }
 
@@ -5643,6 +5850,7 @@ function inicializarAnimateOnScroll() {
             elemento.classList.add('is-visible');
         });
         initDiferenciaisSequence();
+        initInstitutionalTopImagesAnimation();
         return;
     }
 
@@ -5685,6 +5893,7 @@ function inicializarAnimateOnScroll() {
     });
 
     initDiferenciaisSequence();
+    initInstitutionalTopImagesAnimation();
 
     // Reaproveita aqui para observar o hero e alternar a visibilidade do FAB
     const hero = document.querySelector('.video-hero-section');
