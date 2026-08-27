@@ -603,12 +603,12 @@ section {
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: cover;
+    object-fit: fill;
     border-radius: 4px;
     transition: transform 0.6s cubic-bezier(.2,.9,.2,1);
 }
 
-.highlight-item::after {
+/* .highlight-item::after {
     content: "";
     position: absolute;
     left: 24px;
@@ -629,7 +629,7 @@ section {
 .highlight-item:focus-within::after {
     opacity: 1;
     transform: scaleX(1);
-}
+} */
 
 .highlight-item span {
     position: absolute;
@@ -5351,7 +5351,6 @@ html[data-theme="dark"] .report-document {
 }
 
 /* --- Desktop mouse: diagonal accent hover for product/category cards --- */
-.highlight-item::after,
 .catalogo-grid .produto-card::after,
 .category-grid .produto-card::after,
 .veja-tambem-grid .produto-card::after {
@@ -5359,14 +5358,12 @@ html[data-theme="dark"] .report-document {
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .highlight-item,
     .catalogo-grid .produto-card,
     .category-grid .produto-card,
     .veja-tambem-grid .produto-card {
         isolation: isolate;
     }
 
-    .highlight-item img,
     .catalogo-grid .produto-card img,
     .category-grid .produto-card img,
     .veja-tambem-grid .produto-card img {
@@ -5382,12 +5379,6 @@ html[data-theme="dark"] .report-document {
         transition: color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
     }
 
-    .highlight-item span {
-        z-index: 4;
-        transition: color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
-    }
-
-    .highlight-item::after,
     .catalogo-grid .produto-card::after,
     .category-grid .produto-card::after,
     .veja-tambem-grid .produto-card::after {
@@ -5417,7 +5408,6 @@ html[data-theme="dark"] .report-document {
         will-change: transform, opacity;
     }
 
-    .highlight-item:hover::after,
     .catalogo-grid .produto-card:hover::after,
     .category-grid .produto-card:hover::after,
     .veja-tambem-grid .produto-card:hover::after,
@@ -5463,13 +5453,6 @@ html[data-theme="dark"] .report-document {
             0 14px 32px rgba(15, 23, 42, 0.16);
     }
 
-    .highlight-item:hover,
-    .highlight-item:focus-within {
-        box-shadow:
-            0 28px 62px rgba(15, 23, 42, 0.22),
-            0 12px 26px rgba(15, 23, 42, 0.14);
-    }
-
     .catalogo-grid .produto-card:hover h3,
     .category-grid .produto-card:hover h3,
     .veja-tambem-grid .produto-card:hover h3,
@@ -5480,12 +5463,6 @@ html[data-theme="dark"] .report-document {
         text-shadow: 0 1px 12px rgba(36, 48, 65, 0.18);
     }
 
-    .highlight-item:hover span,
-    .highlight-item:focus-within span {
-        color: #fff;
-        background-color: rgba(36, 48, 65, 0.24);
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
-    }
 }
 
 @property --stik-card-border-angle {
