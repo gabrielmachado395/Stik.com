@@ -415,7 +415,7 @@ body.sidebar-open .top-header .main-header{
 
 @media (max-width: 768px) {
     .video-container {
-        background-image: url("../../img/Imagens%20novas/banners-01-mobile.jpg");
+        background-image: url("../../img/optimized/imagens-novas/banners-01-mobile.jpg");
     }
 }
 
@@ -603,7 +603,7 @@ section {
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: fill;
+    object-fit: cover;
     border-radius: 4px;
     transition: transform 0.6s cubic-bezier(.2,.9,.2,1);
 }
@@ -1203,26 +1203,50 @@ body.veja-tambem-grid .produto-card {
 
 /* --- Estilos do Rodapé --- */
 .main-footer {
+    --footer-watermark-opacity: 0.56;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     background-color: var(--color-bg);
     padding: 80px 0px 0;
     color: var(--color-text);
-    
+}
+
+.main-footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url("../../img/optimized/imagens-novas/tramas-footer.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: fill;
+    opacity: var(--footer-watermark-opacity);
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .main-footer::before {
+        background-image: url("../../img/optimized/imagens-novas/tramas-footer-mobile.png");
+    }
 }
 
 .footer-content {
+    position: relative;
+    z-index: 1;
     max-width: 1400px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding-bottom: 40px;
+    padding-bottom: 20px;
     gap: 20px;
 
 }
 
 .footer-logo {
     flex-grow: 1;
-    max-width: 100px;
+    max-width: 190px;
 }
 
 .footer-logo img {
@@ -1263,12 +1287,16 @@ body.veja-tambem-grid .produto-card {
 }
 
 .footer-bottom {
-    background-color: var(--color-surface);
+    position: relative;
+    z-index: 1;
+    /* background-color: rgba(248, 249, 250, 0); */
+    /* -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px); */
     padding: 22px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #222;
+    /* border-top: 1px solid #222; */
     max-width: 100%;
     margin-top: 0;
 }
@@ -3158,10 +3186,10 @@ a,
     color: var(--color-text);
 }
 
-.footer-bottom {
-    background-color: var(--color-surface-soft);
+/* .footer-bottom {
+    background-color: rgba(238, 242, 247, 0.82);
     border-top: 1px solid var(--color-border);
-}
+} */
 
 .main-footer {
     border-top: 1px solid #e5e9f1;
@@ -9363,13 +9391,18 @@ html[data-theme="dark"] .carousel-btn:focus-visible {
     background: var(--color-surface-strong);
 }
 
-html[data-theme="dark"] .footer-bottom {
-    background-color: var(--color-contrast-surface);
+/* html[data-theme="dark"] .footer-bottom {
+    background-color: rgba(11, 17, 26, 0.84);
     border-top-color: rgba(238, 243, 248, 0.1);
-}
+} */
 
 html[data-theme="dark"] .main-footer {
+    --footer-watermark-opacity: 0.5;
     border-top-color: rgba(233, 198, 130, 0.14);
+}
+
+html[data-theme="dark"] .institutional-principle-card + .institutional-principle-card::before {
+    background: rgba(248, 248, 255, 0.12);
 }
 
 html[data-theme="dark"] .bottom-icons a {
@@ -11423,6 +11456,124 @@ html[data-theme="dark"] .institutional-page {
     transform: translateY(0) scale(1);
 }
 
+.institutional-principles-section {
+    padding: clamp(54px, 6.5vw, 86px) 20px;
+    background: var(--institutional-values-bg) !important;
+    color: var(--institutional-values-text) !important;
+}
+
+.institutional-principles-grid {
+    width: min(1180px, 94vw);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+}
+
+.institutional-principle-card {
+    position: relative;
+    min-height: 190px;
+    padding: 0 clamp(28px, 4vw, 58px);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 26px;
+    justify-items: center;
+    color: var(--institutional-values-text);
+}
+
+.institutional-principle-card + .institutional-principle-card::before {
+    content: "";
+    position: absolute;
+    top: 80px;
+    bottom: 16px;
+    left: 0;
+    width: 1px;
+    background: rgba(39, 50, 65, 0.14);
+}
+
+.institutional-principle-heading {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    text-align: left;
+}
+
+.institutional-principle-icon {
+    flex: 0 0 clamp(42px, 4.8vw, 58px);
+    width: clamp(42px, 4.8vw, 58px);
+    height: clamp(42px, 4.8vw, 58px);
+    color: var(--institutional-values-text);
+    stroke: currentColor;
+    stroke-width: 4.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    transform-origin: center;
+    transition: opacity 560ms ease, transform 760ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.institutional-principle-heading h2 {
+    max-width: none;
+    margin: 0;
+    overflow: hidden;
+    color: var(--institutional-values-text);
+    font-size: clamp(2.45rem, 4vw, 3.35rem);
+    font-weight: 900;
+    line-height: 1;
+    text-align: left;
+    white-space: nowrap;
+    clip-path: inset(0 0 0 0);
+    transform-origin: left center;
+    transition: opacity 620ms ease, max-width 860ms cubic-bezier(.16, 1, .3, 1), clip-path 860ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.institutional-principle-card p {
+    max-width: 330px;
+    margin: 0;
+    color: var(--institutional-values-muted) !important;
+    font-size: clamp(1.05rem, 1.48vw, 1.34rem);
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: center;
+    transition: opacity 700ms ease, clip-path 980ms cubic-bezier(.16, 1, .3, 1), transform 980ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.institutional-principles-section.principles-ready .institutional-principle-icon {
+    opacity: 0;
+    transform: translateX(0) scale(0.84);
+}
+
+.institutional-principles-section.principles-ready .institutional-principle-heading h2 {
+    max-width: 0;
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+}
+
+.institutional-principles-section.principles-ready .institutional-principle-card p {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-16px);
+}
+
+.institutional-principle-card.is-icon-visible .institutional-principle-icon {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+.institutional-principle-card.is-title-visible .institutional-principle-heading h2 {
+    max-width: 260px;
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+}
+
+.institutional-principles-section.principles-ready .institutional-principle-card.is-text-visible p {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0);
+}
+
 .institutional-evolution-section {
     padding: clamp(64px, 9vw, 120px) 20px;
     background: var(--institutional-evolution-bg);
@@ -11536,6 +11687,26 @@ html[data-theme="dark"] .institutional-page {
     .institutional-values-section .diferenciais-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+
+    .institutional-principles-grid {
+        width: min(100%, 900px);
+    }
+
+    .institutional-principle-card {
+        padding: 0 clamp(18px, 3vw, 34px);
+    }
+
+    .institutional-principle-heading {
+        gap: 12px;
+    }
+
+    .institutional-principle-heading h2 {
+        font-size: clamp(2rem, 4.6vw, 2.75rem);
+    }
+
+    .institutional-principle-card p {
+        font-size: clamp(0.98rem, 1.9vw, 1.16rem);
+    }
 }
 
 @media (max-width: 760px) {
@@ -11620,6 +11791,51 @@ html[data-theme="dark"] .institutional-page {
 
     .institutional-values-section .diferencial-item {
         min-height: 132px;
+    }
+
+    .institutional-principles-section {
+        padding: 58px 16px 64px;
+    }
+
+    .institutional-principles-grid {
+        width: min(100%, 560px);
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .institutional-principle-card {
+        min-height: 0;
+        padding: 34px 0;
+        gap: 20px;
+    }
+
+    .institutional-principle-card + .institutional-principle-card::before {
+        top: 0;
+        bottom: auto;
+        left: 50%;
+        width: min(240px, 64vw);
+        height: 1px;
+        transform: translateX(-50%);
+    }
+
+    .institutional-principle-heading {
+        min-height: 50px;
+    }
+
+    .institutional-principle-icon {
+        flex-basis: 48px;
+        width: 48px;
+        height: 48px;
+        stroke-width: 4.2;
+    }
+
+    .institutional-principle-heading h2 {
+        font-size: clamp(2.25rem, 11vw, 3rem);
+    }
+
+    .institutional-principle-card p {
+        max-width: 360px;
+        font-size: 1.08rem;
     }
 
     .institutional-evolution-media {

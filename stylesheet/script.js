@@ -1519,11 +1519,11 @@ const productStore = (() => {
 
 const siteContentStore = (() => {
     const STORAGE_KEY = 'stik.site.content';
-    const HERO_SLIDESHOW_DURATION = 6200;
+    const HERO_SLIDESHOW_DURATION = 10000;
     const HERO_BANNER_IMAGES = [
-        { image: 'img/optimized/imagens-novas/banners-01.jpg', mobileImage: 'img/Imagens%20novas/banners-01-mobile.jpg', alt: 'Banner institucional STIK 01' },
-        { image: 'img/optimized/imagens-novas/banners-02.jpg', mobileImage: 'img/Imagens%20novas/banners-02-mobile.jpg', alt: 'Banner institucional STIK 02' },
-        { image: 'img/optimized/imagens-novas/banners-03.jpg', mobileImage: 'img/Imagens%20novas/banners-03-mobile.jpg', alt: 'Banner institucional STIK 03' }
+        { image: 'img/optimized/imagens-novas/banners-01.jpg', mobileImage: 'img/optimized/imagens-novas/banners-01-mobile.jpg', alt: 'Banner institucional STIK 01' },
+        { image: 'img/optimized/imagens-novas/banners-02.jpg', mobileImage: 'img/optimized/imagens-novas/banners-02-mobile.jpg', alt: 'Banner institucional STIK 02' },
+        { image: 'img/optimized/imagens-novas/banners-03.jpg', mobileImage: 'img/optimized/imagens-novas/banners-03-mobile.jpg', alt: 'Banner institucional STIK 03' }
     ];
     const HERO_BANNER_IMAGE_ALIASES = {
         'img/Imagens novas/banners-01.jpg': 'img/optimized/imagens-novas/banners-01.jpg',
@@ -1567,9 +1567,9 @@ const siteContentStore = (() => {
         'moda infantil': HOME_GRID_IMAGES[4].image
     };
     const optimizedMobileImagesByDesktop = {
-        'img/optimized/imagens-novas/banners-01.jpg': 'img/Imagens%20novas/banners-01-mobile.jpg',
-        'img/optimized/imagens-novas/banners-02.jpg': 'img/Imagens%20novas/banners-02-mobile.jpg',
-        'img/optimized/imagens-novas/banners-03.jpg': 'img/Imagens%20novas/banners-03-mobile.jpg',
+        'img/optimized/imagens-novas/banners-01.jpg': 'img/optimized/imagens-novas/banners-01-mobile.jpg',
+        'img/optimized/imagens-novas/banners-02.jpg': 'img/optimized/imagens-novas/banners-02-mobile.jpg',
+        'img/optimized/imagens-novas/banners-03.jpg': 'img/optimized/imagens-novas/banners-03-mobile.jpg',
         'img/optimized/imagens-novas/moda-intima.jpg': 'img/optimized/imagens-novas/moda-intima-mobile.jpg',
         'img/optimized/imagens-novas/universo-masculino.jpg': 'img/optimized/imagens-novas/universo-masculino-mobile.jpg',
         'img/optimized/imagens-novas/moda-esportiva.jpg': 'img/optimized/imagens-novas/moda-esportiva-mobile.jpg',
@@ -1614,7 +1614,7 @@ const siteContentStore = (() => {
                     }
                 },
                 highlights: {
-                    title: 'PRODUTOS',
+                    title: 'SEGMENTOS',
                     items: [
                         { slot: 'small-top-left', ...HOME_GRID_IMAGES[0], text: 'MODA INTIMA' },
                         { slot: 'large-center', ...HOME_GRID_IMAGES[1], text: 'UNIVERSO MASCULINO' },
@@ -1890,7 +1890,7 @@ async function applyHomeSiteContent(root, home) {
         heroContainer.dataset.mobileSrc = mobileSrc;
         heroContainer.dataset.desktopKind = heroMode === 'video' ? 'video' : (home.hero.desktopKind || inferStikMediaKind(home.hero.desktopVideo, 'video'));
         heroContainer.dataset.mobileKind = heroMode === 'video' ? 'video' : (home.hero.mobileKind || inferStikMediaKind(home.hero.mobileVideo, 'video'));
-        heroContainer.dataset.slideshowDuration = String(home.hero.slideshow?.duration || 7000);
+        heroContainer.dataset.slideshowDuration = String(home.hero.slideshow?.duration || 10000);
         heroContainer.dataset.slideshowImages = JSON.stringify(slideshowImages.filter(item => item.image));
         if (posterSrc) {
             heroContainer.style.backgroundImage = `url("${posterSrc.replace(/"/g, '\\"')}")`;
@@ -2019,7 +2019,7 @@ function renderStikHeroSlideshow(container, shouldPlay = false) {
 
     container.closest('.video-hero-section')?.classList.add('video-ready');
     const images = Array.from(slideshow.querySelectorAll('img'));
-    const duration = Math.max(3200, Number(container.dataset.slideshowDuration) || 6200);
+    const duration = Math.max(3200, Number(container.dataset.slideshowDuration) || 10000);
     if (shouldPlay && images.length > 1) {
         container.__stikHeroSlideshowTimer = window.setInterval(() => {
             if (document.hidden) return;
@@ -2184,6 +2184,7 @@ async function applyAboutSiteContent(root, about) {
     }
 
     initInstitutionalTopImagesAnimation();
+    initInstitutionalPrinciplesAnimation();
 }
 
 productStore.hydrate();
@@ -5825,6 +5826,57 @@ function initDiferenciaisSequence() {
     observer.observe(section);
 }
 
+function initInstitutionalPrinciplesAnimation() {
+    const section = document.querySelector('.institutional-principles-section');
+    if (!section || section.dataset.principlesAnimationReady === 'true') return;
+
+    const cards = Array.from(section.querySelectorAll('.institutional-principle-card'));
+    if (!cards.length) return;
+
+    section.dataset.principlesAnimationReady = 'true';
+    section.classList.add('principles-ready');
+
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    const finishInstantly = () => {
+        cards.forEach(card => {
+            card.classList.add('is-icon-visible', 'is-title-visible', 'is-text-visible');
+        });
+    };
+
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+        finishInstantly();
+        return;
+    }
+
+    const revealCard = (card, onComplete) => {
+        card.classList.add('is-icon-visible');
+        window.setTimeout(() => card.classList.add('is-title-visible'), 520);
+        window.setTimeout(() => card.classList.add('is-text-visible'), 1220);
+        window.setTimeout(() => {
+            if (typeof onComplete === 'function') onComplete();
+        }, 1700);
+    };
+
+    const revealNextCard = (index = 0) => {
+        const card = cards[index];
+        if (!card) return;
+        revealCard(card, () => revealNextCard(index + 1));
+    };
+
+    let started = false;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting || started) return;
+            started = true;
+            revealNextCard();
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.24 });
+
+    observer.observe(section);
+}
+
 function initInstitutionalTopImagesAnimation() {
     const section = document.querySelector('.institutional-story-hero');
     if (!section || section.dataset.topImagesAnimationReady === 'true') return;
@@ -5911,6 +5963,7 @@ function inicializarAnimateOnScroll() {
     if (!elementosAnimar.length) {
         initDiferenciaisSequence();
         initInstitutionalTopImagesAnimation();
+        initInstitutionalPrinciplesAnimation();
         return;
     }
 
@@ -5921,6 +5974,7 @@ function inicializarAnimateOnScroll() {
         });
         initDiferenciaisSequence();
         initInstitutionalTopImagesAnimation();
+        initInstitutionalPrinciplesAnimation();
         return;
     }
 
@@ -5964,6 +6018,7 @@ function inicializarAnimateOnScroll() {
 
     initDiferenciaisSequence();
     initInstitutionalTopImagesAnimation();
+    initInstitutionalPrinciplesAnimation();
 
     // Reaproveita aqui para observar o hero e alternar a visibilidade do FAB
     const hero = document.querySelector('.video-hero-section');
