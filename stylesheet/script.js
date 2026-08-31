@@ -1920,6 +1920,11 @@ async function applyHomeSiteContent(root, home) {
         if (label) setStikRawText(label, data.text);
     });
 
+    const highlightsSection = root.querySelector?.('.product-highlights');
+    if (highlightsSection) {
+        applyStikTranslations(highlightsSection);
+    }
+
     const catalogTitle = root.querySelector?.('.newsletter-content h2');
     if (catalogTitle && home?.catalog?.title) {
         setStikRawText(catalogTitle, home.catalog.title);
