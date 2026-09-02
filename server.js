@@ -237,9 +237,8 @@ app.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store');
   }
 
-  if ((normalizedPath === '/admin' || normalizedPath === '/admin.html' || normalizedPath === '/create-article' || normalizedPath === '/create-article.html')
-    && !isLocalRequest(req)) {
-    return res.status(403).send('Preview administrativo disponivel apenas em ambiente local.');
+  if (normalizedPath === '/admin' || normalizedPath === '/admin.html' || normalizedPath === '/create-article' || normalizedPath === '/create-article.html') {
+    res.setHeader('Cache-Control', 'no-store');
   }
 
   return next();

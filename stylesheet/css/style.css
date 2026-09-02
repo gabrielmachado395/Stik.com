@@ -494,6 +494,20 @@ body.sidebar-open .top-header .main-header{
     object-position: center;
 }
 
+@media (max-width: 768px) {
+    .video-hero-section::after {
+        height: 72px;
+        background-image: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    .video-hero-section .hero-slideshow img,
+    .video-hero-section .hero-slideshow picture img {
+        object-fit: contain !important;
+        object-position: center;
+        background: #000;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .hero-slideshow img {
         transition: opacity 240ms ease;
