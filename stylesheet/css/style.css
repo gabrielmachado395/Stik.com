@@ -3816,7 +3816,7 @@ a,
         min-height: 210px;
         background:
             linear-gradient(90deg, rgba(29, 24, 21, 0.30) 0%, rgba(127, 88, 58, 0.10) 50%, rgba(29, 24, 21, 0.26) 100%),
-            url("../../img/optimized/categoria-banner-mobile.jpg") center 38% / cover no-repeat;
+            url("../../img/optimized/categoria-banner-mobile.png") center 38% / cover no-repeat;
     }
 
     .category-hero-overlay {
