@@ -502,9 +502,8 @@ body.sidebar-open .top-header .main-header{
 
     .video-hero-section .hero-slideshow img,
     .video-hero-section .hero-slideshow picture img {
-        object-fit: contain !important;
+        object-fit: cover !important;
         object-position: center;
-        background: #000;
     }
 }
 
