@@ -502,7 +502,7 @@ body.sidebar-open .top-header .main-header{
 
     .video-hero-section .hero-slideshow img,
     .video-hero-section .hero-slideshow picture img {
-        object-fit: fill !important;
+        object-fit: cover !important;
         object-position: center;
     }
 }
