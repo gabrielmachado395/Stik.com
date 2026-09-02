@@ -388,7 +388,6 @@ body.sidebar-open .top-header .main-header{
     justify-content: center;
     align-items: center;
     background-color: var(--color-bg);
-    object-fit: fill;
 }
 
 .video-hero-section::after {
@@ -437,7 +436,7 @@ body.sidebar-open .top-header .main-header{
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: fill;
+    object-fit: cover;
     z-index: 1; /* Para garantir que fique abaixo do conteúdo da overlay */
 }
 
@@ -463,6 +462,8 @@ body.sidebar-open .top-header .main-header{
     height: 100%;
     display: block;
     object-fit: cover;
+    object-position: center;
+    image-rendering: auto;
     opacity: 0;
     z-index: 1;
     transition: opacity 850ms ease-in-out;
@@ -473,9 +474,24 @@ body.sidebar-open .top-header .main-header{
     z-index: 2;
 }
 
+.hero-whatsapp-link {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.hero-whatsapp-link:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -8px;
+}
+
 .video-hero-section .hero-slideshow img,
 .video-hero-section .hero-slideshow picture img {
-    object-fit: fill !important;
+    object-fit: cover !important;
+    object-position: center;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2626,7 +2642,7 @@ body.veja-tambem-grid .produto-card {
     #article-image {
         display: block;
         border-radius: 8px;
-        object-fit: cover;
+        object-fit: fill;
         height: auto;
     }
 
@@ -5835,7 +5851,7 @@ html[data-theme="dark"] .report-document {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: fill;
+    object-fit: cover;
     z-index: -2;
     transition: transform 0.55s ease, filter 0.55s ease;
 }
@@ -6190,7 +6206,7 @@ html[data-theme="dark"] .report-document {
 .blog-article-cover img {
     width: 100%;
     aspect-ratio: 16 / 7.6;
-    object-fit: cover;
+    object-fit: fill;
     display: block;
 }
 
@@ -6326,7 +6342,7 @@ html[data-theme="dark"] .report-document {
 .blog-article-body.article-content figure img {
     width: 100%;
     aspect-ratio: 16 / 7.6;
-    object-fit: cover;
+    object-fit: fill;
     display: block;
     border-radius: 0;
 }

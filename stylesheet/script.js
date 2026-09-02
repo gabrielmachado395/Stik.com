@@ -10,6 +10,7 @@ const STIK_SUPPORTED_LANGUAGES = ['pt', 'en', 'es', 'fr'];
 const STIK_SITE_MEDIA_DB_NAME = 'stik-site-media-preview';
 const STIK_SITE_MEDIA_STORE_NAME = 'media';
 const STIK_SITE_MEDIA_REF_PREFIX = 'stik-media:';
+const STIK_WHATSAPP_PHONE = '558532025400';
 const STIK_TRACKABLE_EVENT_NAMES = new Set([
     'page_view',
     'product_view',
@@ -25,6 +26,18 @@ const STIK_I18N_TEXT_ORIGINALS = new WeakMap();
 const STIK_SITE_MEDIA_URL_CACHE = new Map();
 let stikCurrentLanguage = STIK_DEFAULT_LANGUAGE;
 let stikCurrentMessages = null;
+
+function buildStikWhatsappUrl(message = '') {
+    const baseUrl = `https://api.whatsapp.com/send/?phone=${STIK_WHATSAPP_PHONE}`;
+    const cleanMessage = String(message || '').trim();
+    return cleanMessage ? `${baseUrl}&text=${encodeURIComponent(cleanMessage)}` : baseUrl;
+}
+
+function setStikWhatsappLinksMessage(message, root = document) {
+    root.querySelectorAll?.('a[href*="whatsapp"], a[href*="wa.me"]').forEach(link => {
+        link.href = buildStikWhatsappUrl(message);
+    });
+}
 
 function normalizeStikLanguage(language) {
     const lang = String(language || '').toLowerCase();
@@ -2010,11 +2023,19 @@ function renderStikHeroSlideshow(container, shouldPlay = false) {
             const selectedImage = isMobile && item.mobileImage ? item.mobileImage : item.image;
             const image = document.createElement('img');
             image.src = selectedImage;
+            if (isMobile && item.mobileImage) {
+                image.srcset = `${item.mobileImage} 1200w`;
+                image.sizes = '100vw';
+            } else if (item.image) {
+                image.srcset = `${item.image} 2400w`;
+                image.sizes = '100vw';
+            }
             image.dataset.desktopSrc = item.image;
             image.dataset.mobileSrc = item.mobileImage || '';
             image.alt = item.alt;
             image.decoding = 'async';
             image.loading = index === 0 ? 'eager' : 'lazy';
+            if (index === 0) image.fetchPriority = 'high';
             image.className = index === 0 ? 'is-active' : '';
             return image.outerHTML;
         }).join('');
@@ -5653,6 +5674,9 @@ function carregarDetalhesDoProduto() {
         }
 
         // Renderiza cards 'Veja também' (produtos da mesma categoria, exceto o atual)
+        const productWhatsappMessage = `Ol\u00e1! Tenho interesse no produto ${nomeFormatado} (${categoriaFormatada}) e gostaria de conversar sobre aplica\u00e7\u00e3o, volume e acabamento.`;
+        setStikWhatsappLinksMessage(productWhatsappMessage);
+
         const grid = document.querySelector('.veja-tambem-grid');
         if (grid) {
             grid.innerHTML = '';
