@@ -341,8 +341,34 @@ function isStikInternalPreviewPage() {
     return isStikAdminPage() || isStikCreateArticlePage();
 }
 
+function isStikLocalPreviewHost() {
+    return ['localhost', '127.0.0.1', '::1', ''].includes(window.location.hostname);
+}
+
+function removeStikAdminLinksOnPublicHost(root = document) {
+    if (isStikLocalPreviewHost()) return;
+    root.querySelectorAll?.('a[href="admin.html"], .footer-admin-link').forEach(link => link.remove());
+}
+
 function guardStikInternalPreviewPage() {
-    return false;
+    if (!isStikInternalPreviewPage() || isStikLocalPreviewHost()) return false;
+    try {
+        localStorage.removeItem('stik.admin.session');
+    } catch (error) {
+        /* Preview interno nao deve depender de storage fora do ambiente local. */
+    }
+
+    const main = document.querySelector('main') || document.body;
+    main.innerHTML = `
+        <section class="admin-page">
+            <div class="admin-login-card">
+                <span class="admin-eyebrow">Preview local</span>
+                <h1>Acesso indisponivel</h1>
+                <p>Esta tela interna e apenas um preview local. O backend definitivo precisa autenticar o CRUD antes de uso em producao.</p>
+            </div>
+        </section>
+    `;
+    return true;
 }
 
 function getStikConsent() {
@@ -6183,12 +6209,15 @@ function inicializarHeroVideo() {
 
 // Função principal de inicialização da página
 async function inicializarPagina() {
+    if (window.STIK_ADMIN_FRONTEND_BLOCKED) return;
+
     // Carrega todos os componentes em paralelo e espera que todos terminem
     await Promise.all([
         carregarComponente('header-placeholder', 'header.html'),
         carregarComponente('sidebar-placeholder', 'sidebar.html'),
         carregarComponente('footer-placeholder', 'footer.html')
     ]);
+    removeStikAdminLinksOnPublicHost();
     await initializeStikI18n();
     renderDynamicSidebarCategories();
     inicializarTema();
@@ -8682,6 +8711,23 @@ async function setupAdminPage() {
     const SESSION_KEY = 'stik.admin.session';
     const loginForm = document.getElementById('admin-login-form');
     const logoutButton = document.getElementById('admin-logout');
+    const isLocalPreview = isStikLocalPreviewHost();
+
+    if (!isLocalPreview) {
+        try {
+            localStorage.removeItem(SESSION_KEY);
+        } catch (error) {
+            /* Admin preview nao deve depender de storage fora do ambiente local. */
+        }
+        dashboardView.hidden = true;
+        loginView.hidden = false;
+        if (loginForm) loginForm.hidden = true;
+        const description = loginView.querySelector('p');
+        if (description) {
+            description.textContent = 'Este painel administrativo e apenas um preview local. O CRUD definitivo precisa de backend autenticado antes de uso em producao.';
+        }
+        return;
+    }
 
     const showDashboard = async () => {
         loginView.hidden = true;

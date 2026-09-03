@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Stik</title>
+    <script src="stylesheet/adminGuard.js"></script>
     <link rel="stylesheet" href="stylesheet/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
@@ -17,14 +18,14 @@
             <div class="admin-login-card">
                 <span class="admin-eyebrow">Painel administrativo</span>
                 <h1 id="admin-login-title">Acessar admin</h1>
-                <p>Use suas credenciais para gerenciar artigos, produtos e categorias.</p>
+                <p>Use o login simulado para gerenciar artigos, produtos e categorias localmente.</p>
 
                 <form id="admin-login-form" class="admin-login-form">
                     <label for="admin-email">E-mail</label>
                     <input type="email" id="admin-email" autocomplete="username" placeholder="admin@stik.com" required>
 
                     <label for="admin-password">Senha</label>
-                    <input type="password" id="admin-password" autocomplete="current-password" placeholder="Digite sua senha" required>
+                    <input type="password" id="admin-password" autocomplete="current-password" placeholder="Preview local" required>
 
                     <button type="submit" class="blog-editor-btn blog-editor-btn-primary">
                         <i class="fas fa-lock-open"></i>
