@@ -4940,6 +4940,7 @@ html[data-theme="dark"] .report-document {
     font-weight: 500;
     line-height: 1.65;
     text-align: left;
+    white-space: pre-line;
 }
 
 .product-detail-shell {
@@ -5215,6 +5216,7 @@ html[data-theme="dark"] .report-document {
     font-size: 1rem;
     line-height: 1.75;
     opacity: 1;
+    white-space: pre-line;
 }
 
 .product-contact-card p {
@@ -6589,6 +6591,19 @@ html[data-theme="dark"] .report-document {
     transform: translateY(-1px);
 }
 
+.blog-editor-btn:disabled,
+.blog-editor-btn.is-loading {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+    pointer-events: none;
+}
+
+.blog-editor-btn.is-loading .fa-spinner,
+.blog-editor-progress-head .fa-spinner {
+    animation: blog-editor-spin 0.8s linear infinite;
+}
+
 .blog-editor-btn-primary {
     color: #fff;
     background: var(--color-accent);
@@ -7227,6 +7242,45 @@ html[data-theme="dark"] .report-document {
 .blog-editor-toast.is-visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+.blog-editor-toast.is-progress {
+    width: min(360px, calc(100% - 44px));
+    padding: 16px;
+}
+
+.blog-editor-progress-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.35;
+}
+
+.blog-editor-progress-head span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.blog-editor-progress-track {
+    height: 6px;
+    margin-top: 12px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.blog-editor-progress-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #fff;
+    transition: width 0.28s ease;
+}
+
+@keyframes blog-editor-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .blog-tag-impact-modal {
@@ -8684,6 +8738,52 @@ html[data-theme="dark"] .report-document {
     font-size: 0.82rem;
 }
 
+.admin-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.admin-status-badge {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.admin-status-badge.admin-status-badge--published {
+    border-color: rgba(22, 163, 74, 0.22);
+    background: rgba(22, 163, 74, 0.12);
+    color: #15803d;
+}
+
+.admin-status-badge.admin-status-badge--pending {
+    border-color: rgba(217, 119, 6, 0.24);
+    background: rgba(245, 158, 11, 0.14);
+    color: #92400e;
+}
+
+.admin-status-badge.admin-status-badge--translation-error {
+    border-color: rgba(220, 38, 38, 0.22);
+    background: rgba(220, 38, 38, 0.11);
+    color: #b91c1c;
+}
+
+.admin-status-badge.admin-status-badge--publication-error {
+    border-color: rgba(190, 18, 60, 0.25);
+    background: rgba(190, 18, 60, 0.12);
+    color: #9f1239;
+}
+
 .admin-list-actions,
 .admin-form-actions,
 .admin-inline-form {
@@ -9497,6 +9597,25 @@ html[data-theme="dark"] .admin-list-item span,
 html[data-theme="dark"] .admin-category-item span,
 html[data-theme="dark"] .admin-empty {
     color: var(--color-text-muted);
+}
+
+html[data-theme="dark"] .admin-status-badge.admin-status-badge--published {
+    border-color: rgba(74, 222, 128, 0.26);
+    background: rgba(22, 163, 74, 0.18);
+    color: #86efac;
+}
+
+html[data-theme="dark"] .admin-status-badge.admin-status-badge--pending {
+    border-color: rgba(251, 191, 36, 0.26);
+    background: rgba(217, 119, 6, 0.2);
+    color: #fcd34d;
+}
+
+html[data-theme="dark"] .admin-status-badge.admin-status-badge--translation-error,
+html[data-theme="dark"] .admin-status-badge.admin-status-badge--publication-error {
+    border-color: rgba(248, 113, 113, 0.3);
+    background: rgba(220, 38, 38, 0.18);
+    color: #fca5a5;
 }
 
 html[data-theme="dark"] .blog-field input:focus,

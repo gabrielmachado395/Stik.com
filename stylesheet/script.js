@@ -5,12 +5,16 @@ const STIK_DATA_CONSENT_KEY = 'stik-data-consent';
 const STIK_DATA_NOTICE_VERSION = 'data-notice-2026-08-10';
 const STIK_LOCATION_REQUEST_SESSION_KEY = 'stik-location-requested-this-session';
 const STIK_LANGUAGE_STORAGE_KEY = 'stik-language';
+const STIK_DYNAMIC_TRANSLATION_STORAGE_KEY = 'stik-dynamic-translations-v1';
+const STIK_CATEGORY_TRANSLATION_STATUS_STORAGE_KEY = 'stik-category-translation-statuses-v1';
 const STIK_DEFAULT_LANGUAGE = 'pt';
 const STIK_SUPPORTED_LANGUAGES = ['pt', 'en', 'es', 'fr'];
 const STIK_SITE_MEDIA_DB_NAME = 'stik-site-media-preview';
 const STIK_SITE_MEDIA_STORE_NAME = 'media';
 const STIK_SITE_MEDIA_REF_PREFIX = 'stik-media:';
 const STIK_WHATSAPP_PHONE = '558532025400';
+const STIK_DEFAULT_WHATSAPP_MESSAGE = 'Olá! Tenho interesse nas soluções da STIK.';
+const STIK_PRODUCT_WHATSAPP_MESSAGE = 'Olá! Tenho interesse no produto {product} ({category}) e gostaria de conversar sobre aplicação, volume e acabamento.';
 const STIK_TRACKABLE_EVENT_NAMES = new Set([
     'page_view',
     'product_view',
@@ -33,18 +37,77 @@ function buildStikWhatsappUrl(message = '') {
     return cleanMessage ? `${baseUrl}&text=${encodeURIComponent(cleanMessage)}` : baseUrl;
 }
 
-function setStikWhatsappLinksMessage(message, root = document) {
-    root.querySelectorAll?.('a[href*="whatsapp"], a[href*="wa.me"]').forEach(link => {
-        link.href = buildStikWhatsappUrl(message);
+function getStikWhatsappSourceMessage(link) {
+    if (link?.dataset?.stikWhatsappMessage) return link.dataset.stikWhatsappMessage;
+
+    try {
+        const url = new URL(link.href, window.location.href);
+        return url.searchParams.get('text') || STIK_DEFAULT_WHATSAPP_MESSAGE;
+    } catch (error) {
+        return STIK_DEFAULT_WHATSAPP_MESSAGE;
+    }
+}
+
+function getStikWhatsappMessageVariables(link) {
+    try {
+        return JSON.parse(link?.dataset?.stikWhatsappVariables || '{}') || {};
+    } catch (error) {
+        return {};
+    }
+}
+
+function formatStikWhatsappVariable(name, value) {
+    const text = String(value || '');
+    return name === 'category' ? translateStikPhrase(text) : text;
+}
+
+function translateStikWhatsappMessage(message, variables = {}) {
+    const template = translateStikPhrase(message);
+    return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, name) => {
+        return formatStikWhatsappVariable(name, variables[name]);
     });
 }
 
-function normalizeStikLanguage(language) {
+function refreshStikWhatsappLinks(root = document) {
+    root.querySelectorAll?.('a[href*="whatsapp"], a[href*="wa.me"]').forEach(link => {
+        const sourceMessage = getStikWhatsappSourceMessage(link);
+        link.dataset.stikWhatsappMessage = sourceMessage;
+        link.href = buildStikWhatsappUrl(translateStikWhatsappMessage(sourceMessage, getStikWhatsappMessageVariables(link)));
+    });
+}
+
+function setStikWhatsappLinksMessage(message, root = document, variables = {}) {
+    root.querySelectorAll?.('a[href*="whatsapp"], a[href*="wa.me"]').forEach(link => {
+        link.dataset.stikWhatsappMessage = message;
+        link.dataset.stikWhatsappVariables = JSON.stringify(variables || {});
+        link.href = buildStikWhatsappUrl(translateStikWhatsappMessage(message, variables));
+    });
+}
+
+function detectStikLanguage(language) {
     const lang = String(language || '').toLowerCase();
     if (lang.startsWith('pt')) return 'pt';
     if (lang.startsWith('en')) return 'en';
     if (lang.startsWith('es')) return 'es';
     if (lang.startsWith('fr')) return 'fr';
+    return null;
+}
+
+function normalizeStikLanguage(language) {
+    return detectStikLanguage(language) || STIK_DEFAULT_LANGUAGE;
+}
+
+function getBrowserStikLanguage() {
+    const browserLanguages = [
+        ...Array.from(navigator.languages || []),
+        navigator.language
+    ];
+
+    for (const language of browserLanguages) {
+        const detected = detectStikLanguage(language);
+        if (detected) return detected;
+    }
+
     return STIK_DEFAULT_LANGUAGE;
 }
 
@@ -61,7 +124,7 @@ function getInitialStikLanguage() {
     const params = new URLSearchParams(window.location.search);
     const fromUrl = params.get('lang');
     if (fromUrl) return normalizeStikLanguage(fromUrl);
-    return getStoredStikLanguage() || STIK_DEFAULT_LANGUAGE;
+    return getStoredStikLanguage() || getBrowserStikLanguage();
 }
 
 async function loadStikMessages(language) {
@@ -115,6 +178,269 @@ function setStikLanguagePreference(language) {
         localStorage.setItem(STIK_LANGUAGE_STORAGE_KEY, stikCurrentLanguage);
     } catch (error) {
         /* Preferencia de idioma e apenas uma melhoria local. */
+    }
+}
+
+function getStikTranslationTargets() {
+    return STIK_SUPPORTED_LANGUAGES.filter(language => language !== STIK_DEFAULT_LANGUAGE);
+}
+
+function getStikTextHash(value) {
+    const text = String(value || '');
+    let hash = 2166136261;
+    for (let index = 0; index < text.length; index += 1) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36);
+}
+
+function getStikDynamicTranslationKey(from, to, format, text) {
+    return [from, to, format, getStikTextHash(text), String(text || '').length].join('|');
+}
+
+function readStikDynamicTranslationMemory() {
+    try {
+        const value = localStorage.getItem(STIK_DYNAMIC_TRANSLATION_STORAGE_KEY);
+        const parsed = value ? JSON.parse(value) : {};
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+        return {};
+    }
+}
+
+function writeStikDynamicTranslationMemory(memory) {
+    try {
+        const entries = Object.entries(memory || {});
+        const limited = Object.fromEntries(entries.slice(Math.max(entries.length - 500, 0)));
+        localStorage.setItem(STIK_DYNAMIC_TRANSLATION_STORAGE_KEY, JSON.stringify(limited));
+    } catch (error) {
+        /* O backend continua com a memoria principal. */
+    }
+}
+
+function rememberStikDynamicTranslation({ from = STIK_DEFAULT_LANGUAGE, to, format = 'plain', source, translated }) {
+    const cleanSource = String(source || '').trim();
+    const cleanTranslated = String(translated || '').trim();
+    if (!to || !cleanSource || !cleanTranslated) return;
+    const memory = readStikDynamicTranslationMemory();
+    memory[getStikDynamicTranslationKey(from, to, format, cleanSource)] = {
+        from,
+        to,
+        format,
+        source: cleanSource,
+        translated: cleanTranslated,
+        updatedAt: new Date().toISOString()
+    };
+    writeStikDynamicTranslationMemory(memory);
+}
+
+function getStikDynamicTranslation(source, format = 'plain', language = stikCurrentLanguage) {
+    const cleanSource = String(source || '').trim();
+    const targetLanguage = normalizeStikLanguage(language);
+    if (!cleanSource || targetLanguage === STIK_DEFAULT_LANGUAGE) return '';
+    const memory = readStikDynamicTranslationMemory();
+    const item = memory[getStikDynamicTranslationKey(STIK_DEFAULT_LANGUAGE, targetLanguage, format, cleanSource)];
+    return item && item.source === cleanSource ? item.translated : '';
+}
+
+function translateStikDynamicText(source, format = 'plain', language = stikCurrentLanguage) {
+    return getStikDynamicTranslation(source, format, language) || translateStikPhrase(source) || source;
+}
+
+function getStikI18nField(source, i18n, field, format = 'plain') {
+    if (stikCurrentLanguage === STIK_DEFAULT_LANGUAGE) return source;
+    const translated = i18n?.[stikCurrentLanguage]?.[field];
+    return translated || translateStikDynamicText(source, format);
+}
+
+function mergeStikI18n(existing, translations) {
+    const next = { ...(existing || {}) };
+    Object.entries(translations || {}).forEach(([language, fields]) => {
+        next[language] = { ...(next[language] || {}) };
+        Object.entries(fields || {}).forEach(([field, value]) => {
+            if (value) {
+                next[language][field] = value;
+            }
+        });
+    });
+    return next;
+}
+
+function hasCompleteStikI18n(i18n, fields) {
+    const requiredFields = (fields || []).filter(Boolean);
+    if (!requiredFields.length) return true;
+    return getStikTranslationTargets().every(language => (
+        requiredFields.every(field => String(i18n?.[language]?.[field] || '').trim())
+    ));
+}
+
+function getStikAdminStatusMeta({ publicationStatus = '', translationStatus = '', i18n = null, fields = [], forcePending = false } = {}) {
+    const cleanPublicationStatus = String(publicationStatus || '').toLowerCase();
+    const cleanTranslationStatus = String(translationStatus || '').toLowerCase();
+
+    if (['error', 'erro', 'failed', 'publish_error', 'publication_error'].includes(cleanPublicationStatus)) {
+        return { key: 'publication-error', label: 'Erro na publicação', icon: 'fa-exclamation-triangle' };
+    }
+
+    if (['error', 'erro', 'failed', 'translation_error'].includes(cleanTranslationStatus)) {
+        return { key: 'translation-error', label: 'Erro na tradução', icon: 'fa-language' };
+    }
+
+    if (forcePending || ['pending', 'queued', 'translating'].includes(cleanTranslationStatus)) {
+        return { key: 'pending', label: 'Pendente', icon: 'fa-clock' };
+    }
+
+    if (cleanTranslationStatus && !hasCompleteStikI18n(i18n, fields)) {
+        return { key: 'pending', label: 'Pendente', icon: 'fa-clock' };
+    }
+
+    return { key: 'published', label: 'Publicado', icon: 'fa-check' };
+}
+
+function renderAdminStatusBadge(statusMeta) {
+    const meta = statusMeta || getStikAdminStatusMeta();
+    return `
+        <span class="admin-status-badge admin-status-badge--${escapeAttribute(meta.key)}">
+            <i class="fas ${escapeAttribute(meta.icon)}" aria-hidden="true"></i>
+            ${escapeHtml(meta.label)}
+        </span>
+    `;
+}
+
+function getStikCategoryStatusKey(category) {
+    return normalizeBlogSearch(normalizeCategoria(category));
+}
+
+function readStikCategoryTranslationStatuses() {
+    try {
+        const value = localStorage.getItem(STIK_CATEGORY_TRANSLATION_STATUS_STORAGE_KEY);
+        const parsed = value ? JSON.parse(value) : {};
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+        return {};
+    }
+}
+
+function writeStikCategoryTranslationStatuses(statuses) {
+    try {
+        localStorage.setItem(STIK_CATEGORY_TRANSLATION_STATUS_STORAGE_KEY, JSON.stringify(statuses || {}));
+    } catch (error) {
+        console.warn('Nao foi possivel salvar status de traducao das categorias:', error);
+    }
+}
+
+function setStikCategoryTranslationStatus(category, status) {
+    const key = getStikCategoryStatusKey(category);
+    if (!key) return;
+    const statuses = readStikCategoryTranslationStatuses();
+    if (!status) {
+        delete statuses[key];
+    } else {
+        statuses[key] = {
+            status,
+            updatedAt: new Date().toISOString()
+        };
+    }
+    writeStikCategoryTranslationStatuses(statuses);
+}
+
+function getStikCategoryTranslationStatus(category) {
+    const statuses = readStikCategoryTranslationStatuses();
+    return statuses[getStikCategoryStatusKey(category)]?.status || '';
+}
+
+async function requestStikDynamicTranslations(entries, options = {}) {
+    const normalizedEntries = (entries || [])
+        .map(entry => ({
+            id: String(entry.id || '').trim(),
+            text: String(entry.text || '').trim(),
+            format: entry.format === 'html' ? 'html' : 'plain'
+        }))
+        .filter(entry => entry.id && entry.text);
+
+    if (!normalizedEntries.length) return {};
+
+    const sourceLanguage = normalizeStikLanguage(options.sourceLanguage || STIK_DEFAULT_LANGUAGE);
+    const targetLanguages = (options.targetLanguages || getStikTranslationTargets())
+        .map(normalizeStikLanguage)
+        .filter(language => language !== sourceLanguage)
+        .filter((language, index, list) => list.indexOf(language) === index);
+
+    if (!targetLanguages.length) return {};
+
+    const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            sourceLanguage,
+            targetLanguages,
+            entries: normalizedEntries
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Nao foi possivel traduzir o conteudo.');
+    }
+
+    const data = await response.json();
+    const output = {};
+
+    Object.entries(data.translations || {}).forEach(([language, fields]) => {
+        output[language] = {};
+        Object.entries(fields || {}).forEach(([id, item]) => {
+            const entry = normalizedEntries.find(candidate => candidate.id === id);
+            const translated = String(item?.text || '').trim();
+            if (!entry || !translated) return;
+            output[language][id] = translated;
+            rememberStikDynamicTranslation({
+                from: sourceLanguage,
+                to: language,
+                format: entry.format,
+                source: entry.text,
+                translated
+            });
+        });
+    });
+
+    return output;
+}
+
+async function translateStikCrudFields(fieldMap, existingI18n = null, options = {}) {
+    const sourceLanguage = normalizeStikLanguage(options.sourceLanguage || STIK_DEFAULT_LANGUAGE);
+    const targetLanguages = (options.targetLanguages || getStikTranslationTargets())
+        .map(normalizeStikLanguage)
+        .filter(language => language !== sourceLanguage)
+        .filter((language, index, list) => list.indexOf(language) === index);
+    const existingTranslations = existingI18n && typeof existingI18n === 'object' ? existingI18n : {};
+    const hasExistingTranslationForAllTargets = (field) => targetLanguages.every(language => (
+        String(existingTranslations?.[language]?.[field] || '').trim()
+    ));
+    const entries = Object.entries(fieldMap || {})
+        .map(([id, config]) => {
+            const value = typeof config === 'object' ? config.text : config;
+            const format = typeof config === 'object' ? config.format : 'plain';
+            return { id, text: value, format };
+        })
+        .filter(entry => String(entry.text || '').trim())
+        .filter(entry => options.skipExisting === true ? !hasExistingTranslationForAllTargets(entry.id) : true);
+
+    if (!entries.length) return existingI18n || {};
+
+    try {
+        const translations = await requestStikDynamicTranslations(entries, {
+            sourceLanguage,
+            targetLanguages
+        });
+        return mergeStikI18n(existingI18n, translations);
+    } catch (error) {
+        console.warn('Traducao dinamica indisponivel:', error);
+        if (options.throwOnFailure === true) throw error;
+        if (options.showFailureFeedback !== false) {
+            showEditorFeedback?.('Conteudo salvo. Traducao automatica indisponivel agora.');
+        }
+        return {};
     }
 }
 
@@ -268,6 +594,7 @@ function applyStikTranslations(root = document) {
     }
 
     translateStikAttributes(root, messages);
+    refreshStikWhatsappLinks(root);
 }
 
 function bindStikLanguageControls() {
@@ -296,9 +623,16 @@ function refreshStikDynamicTranslations() {
         applySiteContent(document);
     } else if (/\/categoria(\.html)?$/.test(pathname)) {
         renderCategoriaPage();
+    } else if (/\/produto(\.html)?$/.test(pathname)) {
+        carregarDetalhesDoProduto();
+    } else if (/\/blog(\.html)?$/.test(pathname)) {
+        displayArticles();
+    } else if (/\/artigo(\.html)?$/.test(pathname)) {
+        carregarArtigo();
     } else if (/\/institucional(\.html)?$/.test(pathname)) {
         applySiteContent(document);
     }
+    renderDynamicSidebarCategories();
 }
 
 async function initializeStikI18n() {
@@ -1357,6 +1691,22 @@ const productStore = (() => {
     const limitText = (value, maxLength) => String(value || '').trim().slice(0, maxLength);
     const cleanCategory = (value) => normalizeCategoria(String(value || '').trim());
 
+    const normalizeProductI18n = (i18n) => {
+        const source = i18n && typeof i18n === 'object' ? i18n : {};
+        return Object.fromEntries(STIK_SUPPORTED_LANGUAGES
+            .filter(language => language !== STIK_DEFAULT_LANGUAGE)
+            .map(language => {
+                const values = source[language] && typeof source[language] === 'object' ? source[language] : {};
+                return [language, {
+                    categoria: limitText(values.categoria, 120),
+                    material: limitText(values.material, 120),
+                    descricao: limitText(values.descricao, 5000),
+                    details: limitText(values.details || values.detalhes, 2000)
+                }];
+            })
+            .filter(([, values]) => Object.values(values).some(Boolean)));
+    };
+
     const normalizeProductImageItem = (item) => {
         const source = typeof item === 'string' ? { url: item } : (item || {});
         const url = normalizeStikAssetUrl(source.url || source.src || source.imagem || source.image || '');
@@ -1398,7 +1748,16 @@ const productStore = (() => {
         imagem: imagens[0]?.url || '',
         imagens,
         descricao: limitText(payload.descricao || payload.description || '', 5000),
-        material: limitText(payload.material || '', 120) || 'Elástico'
+        details: limitText(payload.details || payload.detalhes || payload.productDetails || payload.product_details || '', 2000),
+        material: limitText(payload.material || '', 120) || 'Elástico',
+        publicationStatus: limitText(payload.publicationStatus || payload.publication_status || '', 40),
+        translationStatus: limitText(payload.translationStatus || payload.translation_status || '', 40),
+        translationUpdatedAt: payload.translationUpdatedAt || payload.translation_updated_at || null,
+        translationAttemptedAt: payload.translationAttemptedAt || payload.translation_attempted_at || null,
+        translationFailedAt: payload.translationFailedAt || payload.translation_failed_at || null,
+        translationSourceSignature: limitText(payload.translationSourceSignature || payload.translation_source_signature || '', 80),
+        translationLastError: limitText(payload.translationLastError || payload.translation_last_error || '', 500),
+        i18n: normalizeProductI18n(payload.i18n)
         };
     };
 
@@ -1675,6 +2034,19 @@ const siteContentStore = (() => {
 
     const cleanText = (value, maxLength = 500) => String(value || '').trim().slice(0, maxLength);
     const cleanAsset = (value, fallback = '') => normalizeStikAssetUrl(value, fallback);
+    const normalizeSiteContentI18n = (i18n) => {
+        const source = i18n && typeof i18n === 'object' ? i18n : {};
+        return Object.fromEntries(STIK_SUPPORTED_LANGUAGES
+            .filter(language => language !== STIK_DEFAULT_LANGUAGE)
+            .map(language => {
+                const values = source[language] && typeof source[language] === 'object' ? source[language] : {};
+                const cleaned = Object.fromEntries(Object.entries(values)
+                    .map(([key, value]) => [String(key).slice(0, 160), cleanText(value, 1600)])
+                    .filter(([key, value]) => key && value));
+                return [language, cleaned];
+            })
+            .filter(([, values]) => Object.keys(values).length));
+    };
     const normalizeHighlightTextKey = (value) => String(value || '')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -1838,7 +2210,8 @@ const siteContentStore = (() => {
                 bottomText: cleanText(about.bottomText, 900) || base.about.bottomText,
                 bottomImage: cleanAsset(about.bottomImage, base.about.bottomImage),
                 bottomImageAlt: cleanText(about.bottomImageAlt, 120) || base.about.bottomImageAlt
-            }
+            },
+            i18n: normalizeSiteContentI18n(source.i18n)
         };
     }
 
@@ -1869,7 +2242,7 @@ const siteContentStore = (() => {
 })();
 
 async function applySiteContent(root = document) {
-    const content = siteContentStore.read();
+    const content = localizeStikSiteContent(siteContentStore.read());
     await Promise.all([
         applyHomeSiteContent(root, content.home),
         applyAboutSiteContent(root, content.about)
@@ -2222,6 +2595,18 @@ productStore.hydrate();
 window.productStore = productStore;
 window.siteContentStore = siteContentStore;
 let artigos = null;
+
+function localizeStikSiteContent(content) {
+    if (!content || stikCurrentLanguage === STIK_DEFAULT_LANGUAGE) return content;
+    const translations = content.i18n?.[stikCurrentLanguage];
+    if (!translations || typeof translations !== 'object') return content;
+
+    const localized = JSON.parse(JSON.stringify(content));
+    Object.entries(translations).forEach(([path, value]) => {
+        if (value) setSiteContentPathValue(localized, path, value);
+    });
+    return localized;
+}
 
 function mediaMatches(query) {
     return typeof window !== 'undefined' && 'matchMedia' in window && window.matchMedia(query).matches;
@@ -2776,11 +3161,36 @@ function formatNome(nome) {
         .join(' ');
 }
 
+function getLocalizedCategoryName(category, productList = produtos) {
+    const source = normalizeCategoria(category);
+    if (stikCurrentLanguage === STIK_DEFAULT_LANGUAGE) return source;
+    const productWithTranslation = (productList || []).find(product => (
+        normalizeCategoria(product.categoria) === source
+        && product.i18n?.[stikCurrentLanguage]?.categoria
+    ));
+    return productWithTranslation?.i18n?.[stikCurrentLanguage]?.categoria
+        || translateStikDynamicText(source);
+}
+
+function getLocalizedProduct(product) {
+    if (!product) return product;
+    const sourceName = formatNome(product.nome);
+    const sourceCategory = normalizeCategoria(product.categoria);
+    return {
+        ...product,
+        displayNome: sourceName,
+        displayCategoria: getStikI18nField(sourceCategory, product.i18n, 'categoria'),
+        displayMaterial: getStikI18nField(product.material || 'Elástico', product.i18n, 'material'),
+        displayDescricao: getStikI18nField(product.descricao || '', product.i18n, 'descricao'),
+        displayDetails: getStikI18nField(getProductDetailsSourceText(product), product.i18n, 'details')
+    };
+}
+
 function criarProdutoCard(produto) {
     const produtoCard = document.createElement('a'); 
     produtoCard.classList.add('produto-card');
     produtoCard.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
-    const categoryName = normalizeCategoria(produto.categoria);
+    const categoryName = getLocalizedCategoryName(produto.categoria);
     produtoCard.innerHTML = `
         ${optimizedImageMarkup(produto.imagem, categoryName)}
         <h3>${escapeHtml(categoryName)}</h3>
@@ -2790,11 +3200,12 @@ function criarProdutoCard(produto) {
 
 function criarCategoriaCard(categoria, imagemRepresentativa) {
     const card = document.createElement('a');
+    const displayCategory = getLocalizedCategoryName(categoria);
     card.classList.add('produto-card');
     card.href = `categoria.html?categoria=${encodeURIComponent(categoria)}`;
     card.innerHTML = `
-        ${optimizedImageMarkup(imagemRepresentativa, categoria)}
-        <h3>${escapeHtml(categoria)}</h3>
+        ${optimizedImageMarkup(imagemRepresentativa, displayCategory)}
+        <h3>${escapeHtml(displayCategory)}</h3>
     `;
     return card;
 }
@@ -2852,12 +3263,21 @@ function renderAdminSelectedCategoryProducts() {
     }
 
     container.innerHTML = products
-        .map(product => `
+        .map(product => {
+            const statusMeta = getStikAdminStatusMeta({
+                publicationStatus: product.publicationStatus,
+                translationStatus: product.translationStatus,
+                i18n: product.i18n,
+                fields: getProductTranslationFields(product),
+                forcePending: !hasCompleteStikI18n(product.i18n, getProductTranslationFields(product))
+            });
+            return `
             <article class="admin-category-selected-product">
                 <img src="${escapeAttribute(normalizeStikAssetUrl(product.imagem))}" alt="${escapeAttribute(formatNome(product.nome))}" loading="lazy" decoding="async">
                 <div>
                     <strong>${escapeHtml(formatNome(product.nome))}</strong>
-                    <span>${escapeHtml(product.material || 'Material não informado')}</span>
+                    <span class="admin-item-subtitle">${escapeHtml(product.material || 'Material não informado')}</span>
+                    <div class="admin-item-meta">${renderAdminStatusBadge(statusMeta)}</div>
                 </div>
                 <div class="admin-list-actions">
                     <a class="admin-icon-btn" href="produto.html?id=${escapeAttribute(encodeURIComponent(product.id))}" target="_blank" rel="noopener" aria-label="Abrir produto">
@@ -2868,7 +3288,8 @@ function renderAdminSelectedCategoryProducts() {
                     </button>
                 </div>
             </article>
-        `)
+        `;
+        })
         .join('');
 
     container.querySelectorAll('[data-admin-edit-product-from-category]').forEach(button => {
@@ -2876,6 +3297,7 @@ function renderAdminSelectedCategoryProducts() {
             loadAdminProductIntoForm(button.dataset.adminEditProductFromCategory);
         });
     });
+
 }
 
 async function renameAdminCategory(oldName, nextName) {
@@ -2910,7 +3332,9 @@ async function renameAdminCategory(oldName, nextName) {
         return;
     }
 
+    setStikCategoryTranslationStatus(oldName, '');
     productStore.renameCategory(oldName, nextName);
+    translateStikCategoryInBackground(nextName);
     if (normalizeBlogSearch(adminSelectedCategory) === normalizeBlogSearch(oldName)) {
         adminSelectedCategory = nextName;
     }
@@ -2930,6 +3354,7 @@ function loadAdminProductIntoForm(productId) {
     setAdminProductImages(product.imagens && product.imagens.length ? product.imagens : [product.imagem], formatNome(product.nome));
     document.getElementById('admin-product-material').value = product.material || 'Elástico';
     document.getElementById('admin-product-description').value = product.descricao || '';
+    document.getElementById('admin-product-details').value = product.details || '';
     refreshAdminCategoryOptions();
     setAdminProductCategory(normalizeCategoria(product.categoria));
     document.getElementById('admin-product-form-title').textContent = 'Editar produto';
@@ -2941,13 +3366,16 @@ function renderDynamicSidebarCategories() {
     if (!submenu || !window.productStore) return;
 
     submenu.innerHTML = productStore.listCategories()
-        .map(category => `
+        .map(category => {
+            const displayCategory = getLocalizedCategoryName(category, productStore.listProducts());
+            return `
             <li>
                 <a href="categoria.html?categoria=${encodeURIComponent(category)}" class="sidebar-link" data-sidebar-category="${escapeAttribute(category)}">
-                    ${escapeHtml(category)}
+                    ${escapeHtml(displayCategory)}
                 </a>
             </li>
-        `)
+        `;
+        })
         .join('');
 }
 
@@ -2992,12 +3420,13 @@ function inicializarPesquisa() {
 
         if (termoBusca.length > 1) {
             const produtosFiltrados = produtos.filter(produto => {
+                const displayProduct = getLocalizedProduct(produto);
                 // Normaliza e remove acentos dos nomes e categorias dos produtos
-                const nomeNormalizado = produto.nome.toLowerCase()
+                const nomeNormalizado = [produto.nome, displayProduct.displayNome].join(' ').toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "");
                 const nomeSemEspacos = nomeNormalizado.replace(/\s+/g, '');
-                const categoriaNormalizada = normalizeCategoria(produto.categoria).toLowerCase()
+                const categoriaNormalizada = [normalizeCategoria(produto.categoria), displayProduct.displayCategoria].join(' ').toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "");
                 const categoriaSemEspacos = categoriaNormalizada.replace(/\s+/g, '');
@@ -3009,12 +3438,13 @@ function inicializarPesquisa() {
 
             if (produtosFiltrados.length > 0) {
                 produtosFiltrados.forEach(produto => {
+                    const displayProduct = getLocalizedProduct(produto);
                     const item = document.createElement('a');
                     item.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
                     item.classList.add('search-result-item');
                     item.innerHTML = `
-                        ${optimizedImageMarkup(produto.imagem, formatNome(produto.nome))}
-                        <span>${escapeHtml(formatNome(produto.nome))} <small>(${escapeHtml(normalizeCategoria(produto.categoria))})</small></span>
+                        ${optimizedImageMarkup(produto.imagem, displayProduct.displayNome)}
+                        <span>${escapeHtml(displayProduct.displayNome)} <small>(${escapeHtml(displayProduct.displayCategoria)})</small></span>
                     `;
                     searchResultsList.appendChild(item);
                 });
@@ -4087,7 +4517,32 @@ function normalizeBlogArticle(article) {
         blocos: article.blocos,
         contentHtml: article.contentHtml || article.content_html || article.conteudoCompleto || '',
         contentJson: article.contentJson || article.content_json || null,
-        status: article.status || 'published'
+        status: article.status || 'published',
+        publicationStatus: article.publicationStatus || article.publication_status || '',
+        translationStatus: article.translationStatus || article.translation_status || '',
+        translationUpdatedAt: article.translationUpdatedAt || article.translation_updated_at || null,
+        translationAttemptedAt: article.translationAttemptedAt || article.translation_attempted_at || null,
+        translationFailedAt: article.translationFailedAt || article.translation_failed_at || null,
+        translationSourceSignature: article.translationSourceSignature || article.translation_source_signature || '',
+        translationLastError: article.translationLastError || article.translation_last_error || '',
+        i18n: article.i18n && typeof article.i18n === 'object' ? article.i18n : {}
+    };
+}
+
+function getLocalizedBlogArticle(article) {
+    if (!article || stikCurrentLanguage === STIK_DEFAULT_LANGUAGE) return article;
+    const i18n = article.i18n?.[stikCurrentLanguage] || {};
+    const tags = getBlogTags(article);
+    const translatedTags = tags.map((tag, index) => (
+        i18n[`tag:${index}`] || translateStikDynamicText(tag)
+    ));
+
+    return {
+        ...article,
+        titulo: i18n.title || translateStikDynamicText(article.titulo) || article.titulo,
+        resumo: i18n.summary || translateStikDynamicText(article.resumo) || article.resumo,
+        tags: translatedTags,
+        contentHtml: i18n.contentHtml || getStikDynamicTranslation(article.contentHtml, 'html') || article.contentHtml
     };
 }
 
@@ -4341,7 +4796,9 @@ async function displayArticles() {
 
     if (!featuredGrid || !mostReadGrid || !chipsContainer || !categorySections) return;
 
-    const articles = (await getBlogArticlesForScreen()).filter(article => article.status !== 'draft');
+    const articles = (await getBlogArticlesForScreen())
+        .filter(article => article.status !== 'draft')
+        .map(getLocalizedBlogArticle);
     const existingCategories = getExistingBlogCategories(articles);
     let activeCategory = '';
     let submittedSearchTerm = '';
@@ -4552,9 +5009,10 @@ async function carregarArtigo() {
     const id = params.get('id');
     const slug = params.get('slug');
     const screenArticles = await getBlogArticlesForScreen();
-    const artigo = screenArticles.find(item => (
+    const sourceArticle = screenArticles.find(item => (
         (id && String(item.id) === String(id)) || (slug && item.slug === slug)
     ));
+    const artigo = getLocalizedBlogArticle(sourceArticle);
 
     const articleTitleEl = document.getElementById('article-title');
     const articleMetaEl = document.getElementById('article-meta');
@@ -4610,7 +5068,8 @@ async function carregarArtigo() {
     if (relatedGrid) {
         const currentTags = getBlogTags(artigo).map(normalizeBlogSearch);
         const relatedCandidates = screenArticles
-            .filter(item => String(item.id) !== String(artigo.id) && item.status !== 'draft');
+            .filter(item => String(item.id) !== String(artigo.id) && item.status !== 'draft')
+            .map(getLocalizedBlogArticle);
         const relatedByTag = relatedCandidates
             .filter(item => getBlogTags(item).some(tag => currentTags.includes(normalizeBlogSearch(tag))));
         const fallbackArticles = relatedCandidates
@@ -4685,11 +5144,62 @@ function showEditorFeedback(message) {
         document.body.appendChild(toast);
     }
     toast.textContent = message;
+    toast.classList.remove('is-progress');
     toast.classList.add('is-visible');
     window.clearTimeout(showEditorFeedback.timeout);
     showEditorFeedback.timeout = window.setTimeout(() => {
         toast.classList.remove('is-visible');
     }, 2200);
+}
+
+function showEditorProgress(message, progress = 8) {
+    let toast = document.querySelector('.blog-editor-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'blog-editor-toast';
+        document.body.appendChild(toast);
+    }
+
+    const setProgress = (nextMessage, nextProgress = progress) => {
+        const percent = Math.max(4, Math.min(100, Number(nextProgress) || 4));
+        toast.classList.add('is-visible', 'is-progress');
+        toast.innerHTML = `
+            <div class="blog-editor-progress-head">
+                <i class="fas fa-spinner" aria-hidden="true"></i>
+                <span>${escapeHtml(nextMessage)}</span>
+            </div>
+            <div class="blog-editor-progress-track" aria-hidden="true">
+                <span style="width: ${percent}%"></span>
+            </div>
+        `;
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+    };
+
+    window.clearTimeout(showEditorFeedback.timeout);
+    setProgress(message, progress);
+
+    return {
+        update: setProgress,
+        done(finalMessage) {
+            toast.classList.remove('is-progress');
+            toast.textContent = finalMessage;
+            toast.classList.add('is-visible');
+            window.clearTimeout(showEditorFeedback.timeout);
+            showEditorFeedback.timeout = window.setTimeout(() => {
+                toast.classList.remove('is-visible');
+            }, 2200);
+        },
+        fail(finalMessage) {
+            toast.classList.remove('is-progress');
+            toast.textContent = finalMessage;
+            toast.classList.add('is-visible');
+            window.clearTimeout(showEditorFeedback.timeout);
+            showEditorFeedback.timeout = window.setTimeout(() => {
+                toast.classList.remove('is-visible');
+            }, 3200);
+        }
+    };
 }
 
 // Mostra as decisões quando uma alteração de tag pode afetar outros artigos.
@@ -4876,6 +5386,93 @@ function buildArticlePayload(editorController, status = 'draft', coverState = {}
     };
 }
 
+async function translateStikArticlePayload(payload, existingI18n = null) {
+    return translateStikCrudFields(getArticleTranslationSourceFields(payload), existingI18n, {
+        showFailureFeedback: false,
+        throwOnFailure: true,
+        skipExisting: true
+    });
+}
+
+function getArticleTranslationSourceFields(article) {
+    const fieldMap = {
+        title: article?.title || article?.titulo || '',
+        summary: article?.summary || article?.resumo || '',
+        contentHtml: {
+            text: article?.contentHtml || article?.content_html || article?.conteudoCompleto || '',
+            format: 'html'
+        }
+    };
+
+    getBlogTags(article || {}).forEach((tag, index) => {
+        fieldMap[`tag:${index}`] = tag;
+    });
+
+    return fieldMap;
+}
+
+function getArticleTranslationFields(article) {
+    return Object.entries(getArticleTranslationSourceFields(article))
+        .filter(([, config]) => {
+            const value = typeof config === 'object' ? config.text : config;
+            return String(value || '').trim();
+        })
+        .map(([field]) => field);
+}
+
+function hasArticleTranslatableContent(article) {
+    return getArticleTranslationFields(article).length > 0;
+}
+
+function getArticleTranslationSignature(article) {
+    return getStikTextHash(JSON.stringify(getArticleTranslationSourceFields(article)));
+}
+
+function getArticleTranslationStatus(article, i18n = article?.i18n) {
+    if (!hasArticleTranslatableContent(article)) return 'published';
+    return hasCompleteStikI18n(i18n, getArticleTranslationFields(article)) ? 'published' : 'pending';
+}
+
+function getArticleI18nWithoutChangedSourceFields(existingArticle, nextArticle) {
+    const existingI18n = existingArticle?.i18n || {};
+    if (!existingArticle) return {};
+
+    const getValue = (config) => typeof config === 'object' ? config.text : config;
+    const previousSources = getArticleTranslationSourceFields(existingArticle);
+    const nextSources = getArticleTranslationSourceFields(nextArticle);
+    const changedFields = new Set(Object.keys(nextSources).filter(field => (
+        String(getValue(previousSources[field]) || '').trim() !== String(getValue(nextSources[field]) || '').trim()
+    )));
+
+    if (!changedFields.size) return existingI18n;
+
+    return Object.fromEntries(Object.entries(existingI18n)
+        .map(([language, values]) => {
+            const nextValues = { ...(values || {}) };
+            changedFields.forEach(field => {
+                delete nextValues[field];
+            });
+            return [language, nextValues];
+        })
+        .filter(([, values]) => Object.values(values || {}).some(value => String(value || '').trim())));
+}
+
+function shouldTranslateArticleAfterSave(existingArticle, nextArticle, i18n) {
+    if (!hasArticleTranslatableContent(nextArticle)) return false;
+    const nextSignature = getArticleTranslationSignature(nextArticle);
+    if (!existingArticle) return true;
+    if (getArticleTranslationSignature(existingArticle) !== nextSignature) return true;
+    const existingTranslationStatus = String(existingArticle.translationStatus || '').toLowerCase();
+    const hasSameTranslationSource = String(existingArticle.translationSourceSignature || '') === nextSignature;
+    if (['pending', 'error'].includes(existingTranslationStatus) && hasSameTranslationSource) {
+        return false;
+    }
+    if (existingTranslationStatus === 'error') {
+        return String(existingArticle.translationSourceSignature || '') !== nextSignature;
+    }
+    return !hasCompleteStikI18n(i18n, getArticleTranslationFields(nextArticle));
+}
+
 // Versão final para testes locais: rascunho, visualização e publicação usam localStorage via blogApi.
 async function setupArticleForm() {
     const form = document.getElementById('article-form');
@@ -4899,8 +5496,38 @@ async function setupArticleForm() {
     let currentArticleId = null;
     let currentStatus = 'draft';
     let availableTagCache = [];
+    let isArticleSaving = false;
 
     const editorController = await createTipTapArticleEditor(freeEditor);
+
+    const setArticleSavingState = (isSaving, message = 'Publicando...') => {
+        isArticleSaving = Boolean(isSaving);
+        form.classList.toggle('is-saving', isArticleSaving);
+        form.setAttribute('aria-busy', String(isArticleSaving));
+        const editorActions = document.querySelectorAll('[data-editor-action], button[type="submit"][form="article-form"], #article-form button[type="submit"]');
+
+        editorActions.forEach(button => {
+            if (isArticleSaving) {
+                button.dataset.previousDisabled = button.disabled ? 'true' : 'false';
+                button.disabled = true;
+                button.classList.add('is-loading');
+
+                if (button.type === 'submit') {
+                    button.dataset.previousLabel = button.innerHTML;
+                    button.innerHTML = `<i class="fas fa-spinner" aria-hidden="true"></i> ${escapeHtml(message)}`;
+                }
+                return;
+            }
+
+            button.disabled = button.dataset.previousDisabled === 'true';
+            button.classList.remove('is-loading');
+            if (button.type === 'submit' && button.dataset.previousLabel) {
+                button.innerHTML = button.dataset.previousLabel;
+            }
+            delete button.dataset.previousDisabled;
+            delete button.dataset.previousLabel;
+        });
+    };
 
     const updateStatusPill = (status) => {
         currentStatus = status || currentStatus;
@@ -4909,7 +5536,59 @@ async function setupArticleForm() {
         statusPill.dataset.status = currentStatus;
     };
 
+    const translateArticleInBackground = (article, existingI18n = null) => {
+        if (!article?.id || !window.blogApi) return;
+        if (!hasArticleTranslatableContent(article)) return;
+        const sourceSignature = getArticleTranslationSignature(article);
+        const attemptedAt = new Date().toISOString();
+
+        Promise.resolve()
+            .then(async () => {
+                const i18n = await translateStikArticlePayload(article, existingI18n);
+                const latestArticle = await window.blogApi.getArticle(article.id).catch(() => null);
+                if (!latestArticle || getArticleTranslationSignature(latestArticle) !== sourceSignature) return;
+                const mergedI18n = mergeStikI18n(latestArticle.i18n, i18n);
+
+                const translatedArticle = await window.blogApi.updateArticle(article.id, {
+                    ...latestArticle,
+                    i18n: mergedI18n,
+                    translationStatus: getArticleTranslationStatus(latestArticle, mergedI18n),
+                    translationUpdatedAt: new Date().toISOString(),
+                    translationAttemptedAt: attemptedAt,
+                    translationFailedAt: null,
+                    translationSourceSignature: sourceSignature,
+                    translationLastError: ''
+                });
+
+                window.dispatchEvent(new CustomEvent('stik:article-saved', { detail: translatedArticle }));
+                showEditorFeedback('Traduções do artigo concluídas.');
+            })
+            .catch(error => {
+                console.warn('Traducao do artigo em segundo plano indisponivel:', error);
+                window.blogApi.getArticle(article.id)
+                    .then(latestArticle => {
+                        if (!latestArticle || getArticleTranslationSignature(latestArticle) !== sourceSignature) return null;
+                        return window.blogApi.updateArticle(article.id, {
+                            ...latestArticle,
+                            translationStatus: 'error',
+                            translationAttemptedAt: attemptedAt,
+                            translationFailedAt: new Date().toISOString(),
+                            translationSourceSignature: sourceSignature,
+                            translationLastError: String(error?.message || error || 'Falha ao traduzir artigo.').slice(0, 500)
+                        });
+                    })
+                    .then(updatedArticle => {
+                        if (updatedArticle) {
+                            window.dispatchEvent(new CustomEvent('stik:article-saved', { detail: updatedArticle }));
+                        }
+                    })
+                    .catch(updateError => console.warn('Nao foi possivel registrar erro de traducao do artigo:', updateError));
+                showEditorFeedback('Artigo salvo. Tradução automática indisponível agora.');
+            });
+    };
+
     const saveArticle = async (status) => {
+        if (isArticleSaving) return null;
         const titleInput = document.getElementById('article-title');
         if (!titleInput || !titleInput.value.trim()) {
             showEditorFeedback('Preencha o título antes de salvar.');
@@ -4917,8 +5596,47 @@ async function setupArticleForm() {
             return null;
         }
 
+        const progress = showEditorProgress(status === 'published'
+            ? 'Preparando publicação...'
+            : 'Preparando rascunho...', 12);
+        setArticleSavingState(true, status === 'published' ? 'Publicando...' : 'Salvando...');
+
         try {
+            progress.update('Organizando conteúdo do artigo...', 24);
             const payload = buildArticlePayload(editorController, status, coverState);
+            progress.update(status === 'published'
+                ? 'Salvando artigo publicado...'
+                : 'Salvando rascunho...', 58);
+            const existingArticle = currentArticleId && window.blogApi
+                ? await window.blogApi.getArticle(currentArticleId).catch(() => null)
+                : null;
+            payload.i18n = getArticleI18nWithoutChangedSourceFields(existingArticle, payload);
+            payload.publicationStatus = status === 'published' ? 'published' : '';
+            const shouldTranslateArticle = shouldTranslateArticleAfterSave(existingArticle, payload, payload.i18n);
+            const articleSourceSignature = getArticleTranslationSignature(payload);
+            const existingTranslationStatus = String(existingArticle?.translationStatus || '').toLowerCase();
+            const hasSameFailedTranslationSource = existingTranslationStatus === 'error'
+                && String(existingArticle?.translationSourceSignature || '') === articleSourceSignature;
+            payload.translationStatus = shouldTranslateArticle
+                ? 'pending'
+                : hasSameFailedTranslationSource
+                    ? 'error'
+                    : getArticleTranslationStatus(payload, payload.i18n);
+            payload.translationSourceSignature = shouldTranslateArticle
+                ? articleSourceSignature
+                : existingArticle?.translationSourceSignature || articleSourceSignature;
+            payload.translationAttemptedAt = shouldTranslateArticle
+                ? new Date().toISOString()
+                : existingArticle?.translationAttemptedAt || null;
+            payload.translationFailedAt = shouldTranslateArticle
+                ? null
+                : existingArticle?.translationFailedAt || null;
+            payload.translationLastError = shouldTranslateArticle
+                ? ''
+                : existingArticle?.translationLastError || '';
+            progress.update(status === 'published'
+                ? 'Finalizando publicação...'
+                : 'Finalizando rascunho...', 84);
             const saved = window.blogApi
                 ? (currentArticleId
                     ? await window.blogApi.updateArticle(currentArticleId, payload)
@@ -4928,15 +5646,20 @@ async function setupArticleForm() {
             currentArticleId = saved.id || currentArticleId;
             updateStatusPill(saved.status || status);
             window.dispatchEvent(new CustomEvent('stik:article-saved', { detail: saved }));
-            showEditorFeedback(status === 'published'
-                ? 'Artigo publicado localmente. Ele já aparece no blog.'
-                : 'Rascunho salvo localmente.');
+            progress.done(status === 'published'
+                ? 'Artigo publicado. Tradução automática em segundo plano.'
+                : 'Rascunho salvo. Tradução automática em segundo plano.');
+            if (shouldTranslateArticle) {
+                translateArticleInBackground(saved, payload.i18n);
+            }
 
             return saved;
         } catch (error) {
             console.error('Erro ao salvar artigo localmente:', error);
-            showEditorFeedback('Não foi possível salvar. Tente remover imagens muito grandes e salvar novamente.');
+            progress.fail('Não foi possível salvar. Tente remover imagens muito grandes e salvar novamente.');
             return null;
+        } finally {
+            setArticleSavingState(false);
         }
     };
 
@@ -5193,7 +5916,10 @@ async function setupArticleForm() {
         const article = typeof articleOrId === 'object'
             ? articleOrId
             : (window.blogApi ? await window.blogApi.getArticle(articleOrId).catch(() => null) : null);
-        if (!article) return false;
+        if (!article) {
+            showEditorFeedback('Não foi possível carregar o artigo.');
+            return false;
+        }
 
         resetArticleEditor();
         currentArticleId = article.id;
@@ -5598,9 +6324,13 @@ function carregarDetalhesDoProduto() {
     const produto = produtos.find(p => p.id === produtoId);
 
     if (produto) {
-        const nomeFormatado = formatNome(produto.nome);
-        const categoriaFormatada = normalizeCategoria(produto.categoria);
-        const materialFormatado = produto.material || 'Não informado';
+        const produtoLocalizado = getLocalizedProduct(produto);
+        const nomeFormatado = produtoLocalizado.displayNome;
+        const categoriaFormatada = produtoLocalizado.displayCategoria;
+        const categoriaOriginal = normalizeCategoria(produto.categoria);
+        const materialFormatado = produtoLocalizado.displayMaterial || translateStikPhrase('Não informado');
+        const descricaoLocalizada = produtoLocalizado.displayDescricao || produto.descricao || '';
+        const detalhesLocalizados = produtoLocalizado.displayDetails || produto.details || '';
         const imagensProduto = getProductGalleryImages(produto, nomeFormatado);
         const mainProductImage = document.getElementById('main-product-image');
         if (mainProductImage) {
@@ -5618,7 +6348,7 @@ function carregarDetalhesDoProduto() {
         const breadcrumbCategory = document.querySelector('.product-breadcrumb-category');
         if (breadcrumbCategory) {
             breadcrumbCategory.textContent = categoriaFormatada;
-            breadcrumbCategory.href = `categoria.html?categoria=${encodeURIComponent(categoriaFormatada)}`;
+            breadcrumbCategory.href = `categoria.html?categoria=${encodeURIComponent(categoriaOriginal)}`;
         }
 
         const breadcrumbCurrent = document.querySelector('.product-breadcrumb-current');
@@ -5630,71 +6360,36 @@ function carregarDetalhesDoProduto() {
         const materialValue = document.querySelector('.product-material-value');
         if (materialValue) materialValue.textContent = materialFormatado;
 
-        // Subtítulo = primeira frase da descrição
-        const extrairPrimeiraFrase = (texto) => {
-            if (!texto) return { primeira: '', resto: '' };
-            const m = texto.match(/^[^.!?]+[.!?]/);
-            if (m) {
-                const primeira = m[0].trim();
-                const resto = texto.slice(m[0].length).trim();
-                return { primeira, resto };
-            }
-            return { primeira: texto.trim(), resto: '' };
-        };
-
-        const { primeira, resto } = extrairPrimeiraFrase(produto.descricao || '');
         const subEl = document.querySelector('.product-subtitle');
-        if (subEl) subEl.textContent = primeira;
-
-        // Descrição em parágrafos (quebra por sentenças e agrupa em blocos de 1-2 sentenças)
-        const toParagraphs = (texto) => {
-            if (!texto) return [];
-            const sentencas = texto.split(/(?<=[.!?])\s+/).filter(Boolean);
-            const paragrafos = [];
-            for (let i = 0; i < sentencas.length; i += 2) {
-                paragrafos.push(sentencas.slice(i, i + 2).join(' '));
-            }
-            return paragrafos;
-        };
-
-        const descEl = document.querySelector('.product-description-modern');
-        if (descEl) {
-            descEl.innerHTML = '';
-            const paragrafos = toParagraphs(resto);
-            if (paragrafos.length === 0 && primeira) {
-                // Se não houver resto, cria um parágrafo com a descrição completa (fallback)
-                paragrafos.push(resto || produto.descricao);
-            }
-            paragrafos.forEach(txt => {
-                const p = document.createElement('p');
-                p.textContent = txt;
-                descEl.appendChild(p);
-            });
-        }
+        if (subEl) subEl.textContent = descricaoLocalizada;
 
         // Linha meta (Material | Categoria)
         const metaEl = document.querySelector('.product-meta');
         if (metaEl) {
-            metaEl.textContent = `${nomeFormatado} combina material ${materialFormatado} com aplicação na categoria ${categoriaFormatada}.`;
+            metaEl.textContent = detalhesLocalizados
+                || getProductDetailsSourceText(produto);
         }
 
         // Renderiza cards 'Veja também' (produtos da mesma categoria, exceto o atual)
-        const productWhatsappMessage = `Ol\u00e1! Tenho interesse no produto ${nomeFormatado} (${categoriaFormatada}) e gostaria de conversar sobre aplica\u00e7\u00e3o, volume e acabamento.`;
-        setStikWhatsappLinksMessage(productWhatsappMessage);
+        setStikWhatsappLinksMessage(STIK_PRODUCT_WHATSAPP_MESSAGE, document, {
+            product: nomeFormatado,
+            category: categoriaFormatada
+        });
 
         const grid = document.querySelector('.veja-tambem-grid');
         if (grid) {
             grid.innerHTML = '';
             const mesmaCategoria = produtos
-                .filter(p => normalizeCategoria(p.categoria) === categoriaFormatada && p.id !== produto.id);
+                .filter(p => normalizeCategoria(p.categoria) === categoriaOriginal && p.id !== produto.id);
             const outrasCategorias = produtos
-                .filter(p => normalizeCategoria(p.categoria) !== categoriaFormatada && p.id !== produto.id);
+                .filter(p => normalizeCategoria(p.categoria) !== categoriaOriginal && p.id !== produto.id);
 
             [...mesmaCategoria, ...outrasCategorias].slice(0, 3).forEach(p => {
+                const relatedProduct = getLocalizedProduct(p);
                 const card = document.createElement('a');
                 card.classList.add('produto-card');
                 card.href = `produto.html?id=${encodeURIComponent(p.id)}`;
-                card.innerHTML = `${optimizedImageMarkup(p.imagem, formatNome(p.nome))}<h3>${escapeHtml(formatNome(p.nome))}</h3>`;
+                card.innerHTML = `${optimizedImageMarkup(p.imagem, relatedProduct.displayNome)}<h3>${escapeHtml(relatedProduct.displayNome)}</h3>`;
                 grid.appendChild(card);
             });
         }
@@ -6750,15 +7445,16 @@ function renderCategoriaPage() {
 
     const catNorm = normalizeCategoria(categoria);
     const categoryName = catNorm || 'Categoria';
+    const displayCategoryName = getLocalizedCategoryName(categoryName);
     const container = document.getElementById('categoria-container');
 
     if (!container) return;
 
     const titulo = document.getElementById('categoria-title');
-    if (titulo) setStikRawText(titulo, categoryName);
+    if (titulo) setStikRawText(titulo, displayCategoryName);
 
     const breadcrumbCurrent = document.getElementById('categoria-breadcrumb-current');
-    if (breadcrumbCurrent) setStikRawText(breadcrumbCurrent, categoryName);
+    if (breadcrumbCurrent) setStikRawText(breadcrumbCurrent, displayCategoryName);
 
     const countEl = document.getElementById('categoria-count');
     const sortEl = document.getElementById('categoria-sort');
@@ -6779,9 +7475,9 @@ function renderCategoriaPage() {
         const ordered = [...items];
 
         if (sortValue === 'name-asc') {
-            ordered.sort((a, b) => formatNome(a.nome).localeCompare(formatNome(b.nome), 'pt-BR'));
+            ordered.sort((a, b) => getLocalizedProduct(a).displayNome.localeCompare(getLocalizedProduct(b).displayNome, stikCurrentLanguage === 'pt' ? 'pt-BR' : stikCurrentLanguage));
         } else if (sortValue === 'name-desc') {
-            ordered.sort((a, b) => formatNome(b.nome).localeCompare(formatNome(a.nome), 'pt-BR'));
+            ordered.sort((a, b) => getLocalizedProduct(b).displayNome.localeCompare(getLocalizedProduct(a).displayNome, stikCurrentLanguage === 'pt' ? 'pt-BR' : stikCurrentLanguage));
         }
 
         return ordered;
@@ -6799,13 +7495,14 @@ function renderCategoriaPage() {
 
         const frag = document.createDocumentFragment();
         itens.slice(0, visibleItemsCount).forEach(produto => {
+            const displayProduct = getLocalizedProduct(produto);
             const card = document.createElement('a');
             card.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
             card.classList.add('produto-card');
 
             card.innerHTML = `
-                ${optimizedImageMarkup(produto.imagem, formatNome(produto.nome))}
-                <h3>${escapeHtml(formatNome(produto.nome))}</h3>
+                ${optimizedImageMarkup(produto.imagem, displayProduct.displayNome)}
+                <h3>${escapeHtml(displayProduct.displayNome)}</h3>
             `;
 
             frag.appendChild(card);
@@ -8241,6 +8938,43 @@ function collectAdminSiteContentFormV2(root) {
     return setAdminSiteContentDraftV2(root, content);
 }
 
+function shouldTranslateSiteContentPath(path, value) {
+    const text = String(value || '').trim();
+    if (!text) return false;
+    if (/\.?(image|mobileImage|poster|desktopVideo|mobileVideo|desktopKind|mobileKind|mode|transition)$/i.test(path)) return false;
+    if (/^(https?:)?\/\//i.test(text) || /^stik-media:/i.test(text) || /^img[\\/]/i.test(text)) return false;
+    return true;
+}
+
+function collectStikSiteContentTranslationEntries(source, basePath = '') {
+    if (!source || typeof source !== 'object') return [];
+    return Object.entries(source).flatMap(([key, value]) => {
+        if (key === 'i18n') return [];
+        const path = basePath ? `${basePath}.${key}` : key;
+        if (typeof value === 'string') {
+            return shouldTranslateSiteContentPath(path, value)
+                ? [{ id: path, text: value, format: 'plain' }]
+                : [];
+        }
+        if (Array.isArray(value)) {
+            return value.flatMap((item, index) => collectStikSiteContentTranslationEntries(item, `${path}.${index}`));
+        }
+        if (value && typeof value === 'object') {
+            return collectStikSiteContentTranslationEntries(value, path);
+        }
+        return [];
+    });
+}
+
+async function translateStikSiteContentPayload(content) {
+    const entries = collectStikSiteContentTranslationEntries(content);
+    const translations = await requestStikDynamicTranslations(entries);
+    return {
+        ...content,
+        i18n: mergeStikI18n(content.i18n, translations)
+    };
+}
+
 function isAdminSiteSortDragEventV2(event, root) {
     const types = Array.from(event.dataTransfer?.types || []);
     return types.includes('application/x-stik-site-content-sort') || Boolean(root?.dataset.siteContentDragBase);
@@ -8619,9 +9353,15 @@ function setupAdminSiteContentV2() {
         clearAdminSiteSortStateV2(root);
     });
 
-    root.addEventListener('submit', event => {
+    root.addEventListener('submit', async event => {
         event.preventDefault();
-        const content = collectAdminSiteContentFormV2(root);
+        let content = collectAdminSiteContentFormV2(root);
+        try {
+            content = await translateStikSiteContentPayload(content);
+        } catch (error) {
+            console.warn('Traducao de conteudo do site indisponivel:', error);
+            showEditorFeedback('Conteudo salvo. Traducao automatica indisponivel agora.');
+        }
         const savedContent = siteContentStore.write(content);
         setAdminSiteContentDraftV2(root, savedContent);
         renderAdminSiteContentV2();
@@ -8798,11 +9538,19 @@ async function refreshAdminArticles() {
     list.innerHTML = articles
         .map(article => {
             const isLocal = localIds.has(String(article.id));
+            const statusMeta = getStikAdminStatusMeta({
+                publicationStatus: article.publicationStatus,
+                translationStatus: article.translationStatus,
+                i18n: article.i18n,
+                fields: getArticleTranslationFields(article),
+                forcePending: isLocal && article.status !== 'published'
+            });
             return `
             <article class="admin-list-item">
                 <div>
                     <strong>${escapeHtml(article.titulo || article.title || 'Artigo sem título')}</strong>
-                    <span>${escapeHtml(isLocal ? (article.status === 'published' ? 'Publicado local' : 'Rascunho local') : 'Artigo inicial')}</span>
+                    <span class="admin-item-subtitle">${escapeHtml(isLocal ? (article.status === 'published' ? 'Publicado local' : 'Rascunho local') : 'Artigo inicial')}</span>
+                    <div class="admin-item-meta">${renderAdminStatusBadge(statusMeta)}</div>
                 </div>
                 <div class="admin-list-actions">
                     <button type="button" class="admin-icon-btn" data-admin-edit-article="${escapeAttribute(article.id)}" aria-label="Editar artigo">
@@ -8836,13 +9584,198 @@ async function refreshAdminArticles() {
                 ]
             });
             if (action !== 'delete') return;
-            await window.blogApi.deleteArticle(button.dataset.adminDeleteArticle);
-            window.stikArticleEditor?.reset();
-            setAdminArticleEditorOpen(false);
-            await refreshAdminArticles();
-            showEditorFeedback('Artigo excluído.');
+            try {
+                await window.blogApi.deleteArticle(button.dataset.adminDeleteArticle);
+                window.stikArticleEditor?.reset();
+                setAdminArticleEditorOpen(false);
+                await refreshAdminArticles();
+                showEditorFeedback('Artigo excluído.');
+            } catch (error) {
+                console.warn('Nao foi possivel excluir o artigo:', error);
+                showEditorFeedback('Não foi possível excluir o artigo.');
+            }
         });
     });
+}
+
+async function translateStikProductPayload(payload, existingI18n = null) {
+    return translateStikCrudFields(getProductTranslationSourceFields(payload), existingI18n, {
+        showFailureFeedback: false,
+        throwOnFailure: true,
+        skipExisting: true
+    });
+}
+
+function getProductDetailsSourceText(product) {
+    const customDetails = String(product?.details || product?.detalhes || '').trim();
+    if (customDetails) return customDetails;
+
+    const name = formatNome(product?.nome || '');
+    const material = String(product?.material || 'Elástico').trim();
+    const category = normalizeCategoria(product?.categoria);
+    if (!name && !material && !category) return '';
+    return `${name} combina material ${material} com aplicação na categoria ${category}.`;
+}
+
+function getProductTranslationSourceFields(product) {
+    return {
+        categoria: normalizeCategoria(product?.categoria),
+        material: product?.material || '',
+        descricao: product?.descricao || '',
+        details: getProductDetailsSourceText(product)
+    };
+}
+
+function getProductTranslationFields(product) {
+    return Object.entries(getProductTranslationSourceFields(product))
+        .filter(([, value]) => String(value || '').trim())
+        .map(([field]) => field);
+}
+
+function hasProductTranslatableContent(product) {
+    return getProductTranslationFields(product).length > 0;
+}
+
+function getProductTranslationSignature(product) {
+    return getStikTextHash(JSON.stringify(getProductTranslationSourceFields(product)));
+}
+
+function getProductTranslationStatus(product, i18n = product?.i18n) {
+    if (!hasProductTranslatableContent(product)) return 'published';
+    return hasCompleteStikI18n(i18n, getProductTranslationFields(product)) ? 'published' : 'pending';
+}
+
+function getProductI18nWithoutChangedSourceFields(existingProduct, nextProduct) {
+    const existingI18n = existingProduct?.i18n || {};
+    if (!existingProduct) return {};
+
+    const previousSources = getProductTranslationSourceFields(existingProduct);
+    const nextSources = getProductTranslationSourceFields(nextProduct);
+    const changedFields = new Set(Object.keys(nextSources).filter(field => (
+        String(previousSources[field] || '').trim() !== String(nextSources[field] || '').trim()
+    )));
+
+    if (!changedFields.size) return existingI18n;
+
+    return Object.fromEntries(Object.entries(existingI18n)
+        .map(([language, values]) => {
+            const nextValues = { ...(values || {}) };
+            changedFields.forEach(field => {
+                delete nextValues[field];
+            });
+            return [language, nextValues];
+        })
+        .filter(([, values]) => Object.values(values || {}).some(value => String(value || '').trim())));
+}
+
+function shouldTranslateProductAfterSave(existingProduct, nextProduct, i18n) {
+    if (!hasProductTranslatableContent(nextProduct)) return false;
+    const nextSignature = getProductTranslationSignature(nextProduct);
+    if (!existingProduct) return true;
+    if (getProductTranslationSignature(existingProduct) !== nextSignature) return true;
+    const existingTranslationStatus = String(existingProduct.translationStatus || '').toLowerCase();
+    const hasSameTranslationSource = String(existingProduct.translationSourceSignature || '') === nextSignature;
+    if (['pending', 'error'].includes(existingTranslationStatus) && hasSameTranslationSource) {
+        return false;
+    }
+    if (existingTranslationStatus === 'error') {
+        return String(existingProduct.translationSourceSignature || '') !== nextSignature;
+    }
+    return !hasCompleteStikI18n(i18n, getProductTranslationFields(nextProduct));
+}
+
+function getAdminProductFormPayload() {
+    return {
+        nome: document.getElementById('admin-product-name')?.value || '',
+        categoria: document.getElementById('admin-product-category')?.value || '',
+        imagem: document.getElementById('admin-product-image')?.value || '',
+        imagens: getAdminProductImages(),
+        material: document.getElementById('admin-product-material')?.value || '',
+        descricao: document.getElementById('admin-product-description')?.value || '',
+        details: document.getElementById('admin-product-details')?.value || ''
+    };
+}
+
+function translateStikProductInBackground(product, existingI18n = null) {
+    if (!product?.id || !window.productStore || !hasProductTranslatableContent(product)) return;
+    const sourceSignature = getProductTranslationSignature(product);
+    const attemptedAt = new Date().toISOString();
+
+    Promise.resolve()
+        .then(async () => {
+            const i18n = await translateStikProductPayload(product, existingI18n);
+            const latestProduct = productStore.getProduct(product.id);
+            if (!latestProduct || getProductTranslationSignature(latestProduct) !== sourceSignature) return;
+            const mergedI18n = mergeStikI18n(latestProduct.i18n, i18n);
+
+            productStore.updateProduct(product.id, {
+                ...latestProduct,
+                i18n: mergedI18n,
+                translationStatus: getProductTranslationStatus(latestProduct, mergedI18n),
+                translationUpdatedAt: new Date().toISOString(),
+                translationAttemptedAt: attemptedAt,
+                translationFailedAt: null,
+                translationSourceSignature: sourceSignature,
+                translationLastError: ''
+            });
+            refreshAdminProductsUI();
+            renderDynamicSidebarCategories();
+            showEditorFeedback('Traduções do produto concluídas.');
+        })
+        .catch(error => {
+            console.warn('Traducao do produto em segundo plano indisponivel:', error);
+            const latestProduct = productStore.getProduct(product.id);
+            if (latestProduct && getProductTranslationSignature(latestProduct) === sourceSignature) {
+                productStore.updateProduct(product.id, {
+                    ...latestProduct,
+                    translationStatus: 'error',
+                    translationAttemptedAt: attemptedAt,
+                    translationFailedAt: new Date().toISOString(),
+                    translationSourceSignature: sourceSignature,
+                    translationLastError: String(error?.message || error || 'Falha ao traduzir produto.').slice(0, 500)
+                });
+                refreshAdminProductsUI();
+            }
+            showEditorFeedback('Produto salvo. Tradução automática indisponível agora.');
+        });
+}
+
+async function translateStikCategoryText(category) {
+    const sourceCategory = normalizeCategoria(category);
+    if (!sourceCategory) return;
+    await requestStikDynamicTranslations([
+        { id: 'category', text: sourceCategory, format: 'plain' }
+    ]);
+}
+
+function hasCategoryDynamicTranslations(category) {
+    const sourceCategory = normalizeCategoria(category);
+    if (!sourceCategory) return true;
+    return getStikTranslationTargets().every(language => (
+        Boolean(getStikDynamicTranslation(sourceCategory, 'plain', language))
+    ));
+}
+
+function translateStikCategoryInBackground(category) {
+    const sourceCategory = normalizeCategoria(category);
+    if (!sourceCategory) return;
+    setStikCategoryTranslationStatus(sourceCategory, 'pending');
+    refreshAdminProductsUI();
+
+    Promise.resolve()
+        .then(async () => {
+            await translateStikCategoryText(sourceCategory);
+            setStikCategoryTranslationStatus(sourceCategory, 'published');
+            refreshAdminProductsUI();
+            renderDynamicSidebarCategories();
+            showEditorFeedback('Traduções da categoria concluídas.');
+        })
+        .catch(error => {
+            console.warn('Traducao de categoria indisponivel:', error);
+            setStikCategoryTranslationStatus(sourceCategory, 'error');
+            refreshAdminProductsUI();
+            showEditorFeedback('Categoria salva. Tradução automática indisponível agora.');
+        });
 }
 
 function setupAdminProducts() {
@@ -8901,6 +9834,7 @@ function setupAdminProducts() {
         clearAdminProductImage();
         document.getElementById('admin-product-material').value = '';
         document.getElementById('admin-product-description').value = '';
+        document.getElementById('admin-product-details').value = '';
         document.getElementById('admin-product-form-title').textContent = 'Cadastrar produto';
         refreshAdminCategoryOptions();
         setAdminProductCategory('');
@@ -8939,17 +9873,11 @@ function setupAdminProducts() {
         });
     }
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const id = document.getElementById('admin-product-id').value;
-        const payload = {
-            nome: document.getElementById('admin-product-name').value,
-            categoria: document.getElementById('admin-product-category').value,
-            imagem: document.getElementById('admin-product-image').value,
-            imagens: getAdminProductImages(),
-            material: document.getElementById('admin-product-material').value,
-            descricao: document.getElementById('admin-product-description').value
-        };
+        const existingProduct = id ? productStore.getProduct(id) : null;
+        const payload = getAdminProductFormPayload();
 
         if (!payload.imagem) {
             showEditorFeedback('Adicione uma imagem para o produto.');
@@ -8957,17 +9885,46 @@ function setupAdminProducts() {
             return;
         }
 
+        payload.i18n = getProductI18nWithoutChangedSourceFields(existingProduct, payload);
+        payload.publicationStatus = 'published';
+        const shouldTranslateProduct = shouldTranslateProductAfterSave(existingProduct, payload, payload.i18n);
+        const productSourceSignature = getProductTranslationSignature(payload);
+        const existingTranslationStatus = String(existingProduct?.translationStatus || '').toLowerCase();
+        const hasSameFailedTranslationSource = existingTranslationStatus === 'error'
+            && String(existingProduct?.translationSourceSignature || '') === productSourceSignature;
+        payload.translationStatus = shouldTranslateProduct
+            ? 'pending'
+            : hasSameFailedTranslationSource
+                ? 'error'
+            : getProductTranslationStatus(payload, payload.i18n);
+        payload.translationSourceSignature = shouldTranslateProduct
+            ? productSourceSignature
+            : existingProduct?.translationSourceSignature || productSourceSignature;
+        payload.translationAttemptedAt = shouldTranslateProduct
+            ? new Date().toISOString()
+            : existingProduct?.translationAttemptedAt || null;
+        payload.translationFailedAt = shouldTranslateProduct
+            ? null
+            : existingProduct?.translationFailedAt || null;
+        payload.translationLastError = shouldTranslateProduct
+            ? ''
+            : existingProduct?.translationLastError || '';
+        let savedProduct = null;
+
         if (id) {
-            productStore.updateProduct(id, payload);
+            savedProduct = productStore.updateProduct(id, payload);
             showEditorFeedback('Produto atualizado.');
         } else {
-            productStore.createProduct(payload);
+            savedProduct = productStore.createProduct(payload);
             showEditorFeedback('Produto criado.');
         }
 
         resetProductForm();
         refreshAdminProductsUI();
         renderDynamicSidebarCategories();
+        if (shouldTranslateProduct) {
+            translateStikProductInBackground(savedProduct, payload.i18n);
+        }
     });
 
     categoryForm.addEventListener('submit', async (event) => {
@@ -8989,6 +9946,7 @@ function setupAdminProducts() {
             const createdCategory = productStore.createCategory(nextName);
             if (createdCategory) adminSelectedCategory = createdCategory;
             showEditorFeedback('Categoria criada.');
+            translateStikCategoryInBackground(createdCategory || nextName);
         } else if (normalizeBlogSearch(original) !== normalizeBlogSearch(nextName)) {
             const count = productStore.countProductsByCategory(original);
             const action = await showBlogTagImpactDialog({
@@ -9002,8 +9960,10 @@ function setupAdminProducts() {
                 ]
             });
             if (action !== 'rename') return;
+            setStikCategoryTranslationStatus(original, '');
             productStore.renameCategory(original, nextName);
             showEditorFeedback('Categoria atualizada.');
+            translateStikCategoryInBackground(nextName);
         }
 
         originalInput.value = '';
@@ -9523,7 +10483,8 @@ function renderAdminProductList() {
                 product.nome,
                 product.categoria,
                 product.material,
-                product.descricao
+                product.descricao,
+                product.details
             ].some(value => normalizeBlogSearch(value).includes(searchTerm));
         });
 
@@ -9533,12 +10494,21 @@ function renderAdminProductList() {
     }
 
     list.innerHTML = products
-        .map(product => `
+        .map(product => {
+            const statusMeta = getStikAdminStatusMeta({
+                publicationStatus: product.publicationStatus,
+                translationStatus: product.translationStatus,
+                i18n: product.i18n,
+                fields: getProductTranslationFields(product),
+                forcePending: !hasCompleteStikI18n(product.i18n, getProductTranslationFields(product))
+            });
+            return `
             <article class="admin-list-item admin-product-row">
                 <img src="${escapeAttribute(normalizeStikAssetUrl(product.imagem))}" alt="${escapeAttribute(formatNome(product.nome))}" loading="lazy" decoding="async">
                 <div>
                     <strong>${escapeHtml(formatNome(product.nome))}</strong>
-                    <span>${escapeHtml(normalizeCategoria(product.categoria))}</span>
+                    <span class="admin-item-subtitle">${escapeHtml(normalizeCategoria(product.categoria))}</span>
+                    <div class="admin-item-meta">${renderAdminStatusBadge(statusMeta)}</div>
                 </div>
                 <div class="admin-list-actions">
                     <button type="button" class="admin-icon-btn" data-admin-edit-product="${escapeAttribute(product.id)}" aria-label="Editar produto">
@@ -9549,7 +10519,8 @@ function renderAdminProductList() {
                     </button>
                 </div>
             </article>
-        `)
+        `;
+        })
         .join('');
 
     list.querySelectorAll('[data-admin-edit-product]').forEach(button => {
@@ -9561,6 +10532,7 @@ function renderAdminProductList() {
             setAdminProductImages(product.imagens && product.imagens.length ? product.imagens : [product.imagem], formatNome(product.nome));
             document.getElementById('admin-product-material').value = product.material || 'Elástico';
             document.getElementById('admin-product-description').value = product.descricao || '';
+            document.getElementById('admin-product-details').value = product.details || '';
             refreshAdminCategoryOptions();
             setAdminProductCategory(normalizeCategoria(product.categoria));
             document.getElementById('admin-product-form-title').textContent = 'Editar produto';
@@ -9602,6 +10574,11 @@ function renderAdminCategoryList() {
             const count = products.filter(product => normalizeBlogSearch(product.categoria) === normalizeBlogSearch(category)).length;
             const isSelected = normalizeBlogSearch(category) === normalizeBlogSearch(adminSelectedCategory);
             const isEditing = normalizeBlogSearch(category) === normalizeBlogSearch(adminEditingCategory);
+            const categoryTranslationStatus = getStikCategoryTranslationStatus(category);
+            const statusMeta = getStikAdminStatusMeta({
+                translationStatus: categoryTranslationStatus,
+                forcePending: categoryTranslationStatus === '' ? false : !hasCategoryDynamicTranslations(category)
+            });
             const mainContent = isEditing
                 ? `
                     <form class="admin-category-inline-edit" data-admin-category-inline-form="${escapeAttribute(category)}">
@@ -9614,7 +10591,8 @@ function renderAdminCategoryList() {
                 : `
                     <button type="button" class="admin-category-open" data-admin-category-open="${escapeAttribute(category)}">
                         <strong>${escapeHtml(category)}</strong>
-                        <span>${count} produto${count === 1 ? '' : 's'}</span>
+                        <span class="admin-item-subtitle">${count} produto${count === 1 ? '' : 's'}</span>
+                        <span class="admin-item-meta">${renderAdminStatusBadge(statusMeta)}</span>
                     </button>
                 `;
 
@@ -9692,6 +10670,7 @@ function renderAdminCategoryList() {
                 ]
             });
             if (action !== 'delete') return;
+            setStikCategoryTranslationStatus(category, '');
             productStore.deleteCategory(category);
             refreshAdminProductsUI();
             renderDynamicSidebarCategories();

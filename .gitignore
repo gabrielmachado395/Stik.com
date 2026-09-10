@@ -42,6 +42,7 @@ pnpm-debug.log*
 *.bak
 *.backup
 .stik-analytics/
+.stik-translation-memory/
 uploads/
 tmp/
 temp/

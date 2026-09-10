@@ -16,11 +16,18 @@ if (TRUST_PROXY_CONFIGURED) {
 const PORT = process.env.PORT || 3000;
 const ANALYTICS_DIR = path.join(__dirname, '.stik-analytics');
 const ANALYTICS_FILE = path.join(ANALYTICS_DIR, 'analytics.json');
+const TRANSLATION_MEMORY_DIR = path.join(__dirname, process.env.STIK_TRANSLATION_MEMORY_DIR || '.stik-translation-memory');
+const TRANSLATION_MEMORY_FILE = path.join(TRANSLATION_MEMORY_DIR, 'translations.json');
 const RATE_LIMIT_MAX_BUCKETS = 10000;
 const rateLimitBuckets = new Map();
 const RECAPTCHA_TIMEOUT_MS = getPositiveIntEnv('RECAPTCHA_TIMEOUT_MS', 6000);
 const EMAIL_API_TIMEOUT_MS = getPositiveIntEnv('EMAIL_API_TIMEOUT_MS', 12000);
+const AZURE_TRANSLATOR_TIMEOUT_MS = getPositiveIntEnv('AZURE_TRANSLATOR_TIMEOUT_MS', 12000);
+const TRANSLATION_BATCH_MAX_ITEMS = getPositiveIntEnv('STIK_TRANSLATION_BATCH_MAX_ITEMS', 40);
+const TRANSLATION_BATCH_MAX_CHARS = getPositiveIntEnv('STIK_TRANSLATION_BATCH_MAX_CHARS', 18000);
 const ALLOWED_ORIGIN_HOSTS = getConfiguredAllowedOriginHosts();
+const STIK_SUPPORTED_TRANSLATION_LANGUAGES = new Set(['pt', 'en', 'es', 'fr']);
+const STIK_TRANSLATION_SOURCE_LANGUAGE = 'pt';
 
 function getPositiveIntEnv(name, fallback) {
   const value = Number.parseInt(process.env[name], 10);
@@ -223,6 +230,13 @@ function shouldExposeApiDetails(req) {
   return process.env.DEBUG_API === 'true' && isLocalRequest(req);
 }
 
+function hasTranslationAccess(req) {
+  if (isLocalRequest(req)) return true;
+  const token = process.env.STIK_TRANSLATION_API_TOKEN;
+  if (!token) return false;
+  return safeStringEquals(req.get('x-stik-translation-token'), token);
+}
+
 app.use((req, res, next) => {
   const normalizedPath = normalizeRequestPathForAccess(req);
   if (/^\/(?:server\.js|package(?:-lock)?\.json|node_modules(?:\/|$)|\.stik-analytics(?:\/|$)|\.agents(?:\/|$)|\.artifacts(?:\/|$)|\.bg-shell(?:\/|$)|\.gsd(?:\/|$)|\.vscode(?:\/|$)|.*\.(?:md|lock|log|bak|old|tmp|map|config|ps1|sh|pem|key|crt|pfx|db|sqlite))$/i.test(normalizedPath)
@@ -269,6 +283,11 @@ app.use('/api/send-location', createRateLimiter({
   windowMs: 10 * 60 * 1000,
   max: 10,
   message: 'Muitas tentativas de localizacao. Tente novamente mais tarde.'
+}));
+app.use('/api/translate', createRateLimiter({
+  windowMs: 60 * 1000,
+  max: 20,
+  message: 'Muitas solicitacoes de traducao. Tente novamente em instantes.'
 }));
 
 app.use(express.static(path.join(__dirname), { dotfiles: 'deny' }));
@@ -396,6 +415,275 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function normalizeTranslationLanguage(value, fallback = '') {
+  const lang = asString(value, 20).toLowerCase();
+  if (lang.startsWith('pt')) return 'pt';
+  if (lang.startsWith('en')) return 'en';
+  if (lang.startsWith('es')) return 'es';
+  if (lang.startsWith('fr')) return 'fr';
+  return fallback;
+}
+
+function normalizeTranslationFormat(value) {
+  return asString(value, 20).toLowerCase() === 'html' ? 'html' : 'plain';
+}
+
+function normalizeTranslationText(value, format) {
+  const maxLength = format === 'html' ? 50000 : 8000;
+  return String(value || '').trim().slice(0, maxLength);
+}
+
+function normalizeTranslationEntry(entry, index) {
+  const source = typeof entry === 'string' ? { text: entry } : (entry || {});
+  const format = normalizeTranslationFormat(source.format || source.textType);
+  const text = normalizeTranslationText(source.text || source.Text, format);
+  if (!text) return null;
+  return {
+    id: asString(source.id || source.key || String(index), 120) || String(index),
+    format,
+    text
+  };
+}
+
+function ensureTranslationMemoryStore() {
+  if (!fs.existsSync(TRANSLATION_MEMORY_DIR)) {
+    fs.mkdirSync(TRANSLATION_MEMORY_DIR, { recursive: true });
+  }
+
+  if (!fs.existsSync(TRANSLATION_MEMORY_FILE)) {
+    const now = new Date().toISOString();
+    const initialStore = {
+      meta: {
+        version: 'azure-translator-memory-v1',
+        createdAt: now,
+        updatedAt: now
+      },
+      items: {}
+    };
+    fs.writeFileSync(TRANSLATION_MEMORY_FILE, JSON.stringify(initialStore, null, 2), { encoding: 'utf8', mode: 0o600 });
+    return initialStore;
+  }
+
+  try {
+    const raw = fs.readFileSync(TRANSLATION_MEMORY_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return {
+      meta: {
+        version: 'azure-translator-memory-v1',
+        createdAt: parsed?.meta?.createdAt || new Date().toISOString(),
+        updatedAt: parsed?.meta?.updatedAt || new Date().toISOString()
+      },
+      items: parsed && typeof parsed.items === 'object' && parsed.items ? parsed.items : {}
+    };
+  } catch (error) {
+    const now = new Date().toISOString();
+    return {
+      meta: {
+        version: 'azure-translator-memory-v1',
+        createdAt: now,
+        updatedAt: now
+      },
+      items: {}
+    };
+  }
+}
+
+function writeTranslationMemoryStore(store) {
+  if (!fs.existsSync(TRANSLATION_MEMORY_DIR)) {
+    fs.mkdirSync(TRANSLATION_MEMORY_DIR, { recursive: true });
+  }
+  const now = new Date().toISOString();
+  store.meta = {
+    ...(store.meta || {}),
+    version: 'azure-translator-memory-v1',
+    updatedAt: now
+  };
+  const tempPath = `${TRANSLATION_MEMORY_FILE}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tempPath, JSON.stringify(store, null, 2), { encoding: 'utf8', mode: 0o600 });
+  fs.renameSync(tempPath, TRANSLATION_MEMORY_FILE);
+}
+
+function buildTranslationMemoryKey({ from, to, format, text }) {
+  return crypto
+    .createHash('sha256')
+    .update([from, to, format, text].join('\u0000'))
+    .digest('hex');
+}
+
+function getCachedTranslation(store, from, to, entry) {
+  const key = buildTranslationMemoryKey({ from, to, format: entry.format, text: entry.text });
+  const item = store.items[key];
+  if (!item || item.source !== entry.text) return null;
+  item.hits = (Number(item.hits) || 0) + 1;
+  item.lastUsedAt = new Date().toISOString();
+  return item.translated;
+}
+
+function rememberTranslation(store, from, to, entry, translated) {
+  const now = new Date().toISOString();
+  const key = buildTranslationMemoryKey({ from, to, format: entry.format, text: entry.text });
+  store.items[key] = {
+    from,
+    to,
+    format: entry.format,
+    source: entry.text,
+    translated: String(translated || '').trim(),
+    sourceHash: key,
+    createdAt: store.items[key]?.createdAt || now,
+    updatedAt: now,
+    lastUsedAt: now,
+    hits: Number(store.items[key]?.hits) || 0
+  };
+  return store.items[key].translated;
+}
+
+function buildAzureTranslatorUrl(format, from, to) {
+  const endpoint = asString(process.env.AZURE_TRANSLATOR_ENDPOINT || 'https://api.cognitive.microsofttranslator.com', 1000)
+    .replace(/\/+$/, '');
+  let baseUrl = endpoint;
+  if (!/\/translate$/i.test(baseUrl)) {
+    baseUrl = /\.cognitiveservices\.azure\.com$/i.test(baseUrl)
+      ? `${baseUrl}/translator/text/v3.0/translate`
+      : `${baseUrl}/translate`;
+  }
+  const params = new URLSearchParams();
+  params.set('api-version', process.env.AZURE_TRANSLATOR_API_VERSION || '3.0');
+  params.set('from', from);
+  params.set('to', to);
+  params.set('textType', format);
+  return `${baseUrl}?${params.toString()}`;
+}
+
+function getAzureTranslatorHeaders() {
+  const key = process.env.AZURE_TRANSLATOR_KEY || process.env.AZURE_TRANSLATION_KEY;
+  if (!key) {
+    const error = new Error('Azure Translator nao configurado.');
+    error.status = 503;
+    throw error;
+  }
+
+  const headers = {
+    'Ocp-Apim-Subscription-Key': key,
+    'Content-Type': 'application/json',
+    'X-ClientTraceId': crypto.randomUUID()
+  };
+  const region = process.env.AZURE_TRANSLATOR_REGION || process.env.AZURE_TRANSLATION_REGION;
+  if (region) headers['Ocp-Apim-Subscription-Region'] = region;
+  return headers;
+}
+
+function buildTranslationBatches(entries) {
+  const batches = [];
+  let current = [];
+  let currentChars = 0;
+  const maxItems = Math.max(1, Math.min(TRANSLATION_BATCH_MAX_ITEMS, 100));
+  const maxChars = Math.max(1000, TRANSLATION_BATCH_MAX_CHARS);
+
+  entries.forEach(entry => {
+    const textLength = entry.text.length;
+    if (current.length && (current.length >= maxItems || currentChars + textLength > maxChars)) {
+      batches.push(current);
+      current = [];
+      currentChars = 0;
+    }
+    current.push(entry);
+    currentChars += textLength;
+  });
+
+  if (current.length) batches.push(current);
+  return batches;
+}
+
+async function translateAzureBatch(from, to, format, entries) {
+  const response = await fetchWithTimeout(buildAzureTranslatorUrl(format, from, to), {
+    method: 'POST',
+    headers: getAzureTranslatorHeaders(),
+    body: JSON.stringify(entries.map(entry => ({ Text: entry.text })))
+  }, AZURE_TRANSLATOR_TIMEOUT_MS);
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '');
+    const error = new Error('Falha ao traduzir com Azure Translator.');
+    error.status = response.status >= 400 && response.status < 500 ? 400 : 502;
+    error.detail = detail.slice(0, 1000);
+    throw error;
+  }
+
+  const data = await response.json();
+  if (!Array.isArray(data)) {
+    const error = new Error('Resposta invalida do Azure Translator.');
+    error.status = 502;
+    throw error;
+  }
+
+  return entries.map((entry, index) => ({
+    id: entry.id,
+    source: entry.text,
+    format: entry.format,
+    text: data[index]?.translations?.[0]?.text || entry.text
+  }));
+}
+
+async function translateEntriesWithMemory(entries, sourceLanguage, targetLanguages) {
+  const store = ensureTranslationMemoryStore();
+  let memoryChanged = false;
+  let cacheTouched = false;
+  const translations = {};
+
+  for (const targetLanguage of targetLanguages) {
+    translations[targetLanguage] = {};
+
+    if (targetLanguage === sourceLanguage) {
+      entries.forEach(entry => {
+        translations[targetLanguage][entry.id] = { text: entry.text, cached: true };
+      });
+      continue;
+    }
+
+    const missing = [];
+    entries.forEach(entry => {
+      const cached = getCachedTranslation(store, sourceLanguage, targetLanguage, entry);
+      if (cached !== null) {
+        cacheTouched = true;
+        translations[targetLanguage][entry.id] = { text: cached, cached: true };
+        return;
+      }
+      missing.push(entry);
+    });
+
+    const missingByFormat = missing.reduce((groups, entry) => {
+      if (!groups[entry.format]) groups[entry.format] = [];
+      groups[entry.format].push(entry);
+      return groups;
+    }, {});
+
+    for (const [format, formatEntries] of Object.entries(missingByFormat)) {
+      const uniqueByText = new Map();
+      formatEntries.forEach(entry => {
+        if (!uniqueByText.has(entry.text)) uniqueByText.set(entry.text, entry);
+      });
+
+      for (const batch of buildTranslationBatches(Array.from(uniqueByText.values()))) {
+        const translatedBatch = await translateAzureBatch(sourceLanguage, targetLanguage, format, batch);
+        translatedBatch.forEach(item => {
+          const sourceEntry = uniqueByText.get(item.source);
+          if (!sourceEntry) return;
+          const translatedText = rememberTranslation(store, sourceLanguage, targetLanguage, sourceEntry, item.text);
+          memoryChanged = true;
+          formatEntries
+            .filter(entry => entry.text === sourceEntry.text)
+            .forEach(entry => {
+              translations[targetLanguage][entry.id] = { text: translatedText, cached: false };
+            });
+        });
+      }
+    }
+  }
+
+  if (memoryChanged || cacheTouched) writeTranslationMemoryStore(store);
+  return translations;
 }
 
 function normalizePlaceName(value, maxLength = 120) {
@@ -978,6 +1266,70 @@ app.get('/api/analytics/debug', (req, res) => {
   } catch (err) {
     console.error('Falha ao ler analytics temporario:', err);
     return res.status(500).json({ message: 'Erro ao ler analytics temporario.' });
+  }
+});
+
+app.post('/api/translate', async (req, res) => {
+  try {
+    if (!hasTranslationAccess(req)) {
+      return res.status(403).json({ message: 'Traducao automatica disponivel apenas no admin autorizado.' });
+    }
+
+    const body = req.body || {};
+    const sourceLanguage = normalizeTranslationLanguage(
+      body.sourceLanguage || body.from,
+      STIK_TRANSLATION_SOURCE_LANGUAGE
+    );
+    const requestedTargets = Array.isArray(body.targetLanguages || body.to)
+      ? (body.targetLanguages || body.to)
+      : [body.targetLanguage || body.to].filter(Boolean);
+    const targetLanguages = (requestedTargets.length ? requestedTargets : Array.from(STIK_SUPPORTED_TRANSLATION_LANGUAGES))
+      .map(value => normalizeTranslationLanguage(value, ''))
+      .filter(value => value && STIK_SUPPORTED_TRANSLATION_LANGUAGES.has(value))
+      .filter((value, index, list) => list.indexOf(value) === index);
+
+    if (!STIK_SUPPORTED_TRANSLATION_LANGUAGES.has(sourceLanguage)) {
+      return res.status(400).json({ message: 'Idioma de origem nao suportado.' });
+    }
+    if (!targetLanguages.length) {
+      return res.status(400).json({ message: 'Informe ao menos um idioma de destino suportado.' });
+    }
+
+    const rawEntries = Array.isArray(body.entries)
+      ? body.entries
+      : (Array.isArray(body.texts) ? body.texts : []);
+    const entries = rawEntries
+      .slice(0, 80)
+      .map(normalizeTranslationEntry)
+      .filter(Boolean);
+
+    if (!entries.length) {
+      return res.status(400).json({ message: 'Informe ao menos um texto para traduzir.' });
+    }
+
+    const totalChars = entries.reduce((total, entry) => total + entry.text.length, 0);
+    if (totalChars > 60000) {
+      return res.status(413).json({ message: 'Conteudo muito grande para uma unica traducao.' });
+    }
+
+    const translations = await translateEntriesWithMemory(entries, sourceLanguage, targetLanguages);
+    return res.json({
+      sourceLanguage,
+      targetLanguages,
+      translations
+    });
+  } catch (err) {
+    console.error('Erro em /api/translate:', err);
+    const status = err.status || 500;
+    const message = status === 503
+      ? 'Azure Translator nao configurado.'
+      : status >= 500
+        ? 'Erro interno ao traduzir conteudo.'
+        : 'Nao foi possivel traduzir o conteudo.';
+    if (shouldExposeApiDetails(req)) {
+      return res.status(status).json({ message, detail: err.detail || err.message });
+    }
+    return res.status(status).json({ message });
   }
 });
 
