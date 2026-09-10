@@ -1122,538 +1122,2146 @@ const produtos = [
         nome: "Canoa",
         categoria: "Elásticos Crus",
         imagem: "img - Copia/Elásticos Crus/canoa-stik.png",
-        descricao: "Desbloqueie o potencial máximo da sua linha de produção industrial e garanta um desempenho superior na confecção. O Canoa é o nosso elástico cru de altíssima resistência e robustez, projetado para durar por um longo ciclo de vida. Sua superfície, propositalmente levemente áspera, proporciona uma aderência superior e maior firmeza no processo de costura industrial, garantindo que o acabamento seja sempre firme, seguro e profissional. Ele oferece máxima durabilidade e excelente estabilidade dimensional, sendo a base ideal e robusta para projetos exigentes, onde a qualidade técnica e a autenticidade do material em seu estado natural são a principal prioridade do seu vestuário.",
+        descricao: "Desbloqueie o potencial máximo da sua linha de produção industrial e garanta um desempenho superior na confecção.",
+        details: "O Canoa é o nosso elástico cru de altíssima resistência e robustez, projetado para durar por um longo ciclo de vida. Sua superfície, propositalmente levemente áspera, proporciona uma aderência superior e maior firmeza no processo de costura industrial, garantindo que o acabamento seja sempre firme, seguro e profissional. Ele oferece máxima durabilidade e excelente estabilidade dimensional, sendo a base ideal e robusta para projetos exigentes, onde a qualidade técnica e a autenticidade do material em seu estado natural são a principal prioridade do seu vestuário.",
         material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Raw Elastics",
+                "material": "Elastic",
+                "descricao": "Unlock the maximum potential of your industrial production line and ensure superior manufacturing performance.",
+                "details": "Canoa is our raw elastic of very high strength and robustness, designed to last for a long life cycle. Its surface, purposely slightly rough, provides superior adhesion and greater firmness in the industrial sewing process, ensuring that the finish is always firm, safe and professional. It offers maximum durability and excellent dimensional stability, being the ideal and robust base for demanding projects, where the technical quality and authenticity of the material in its natural state are the main priority of your garment."
+            },
+            "es": {
+                "categoria": "Elásticos en bruto",
+                "material": "Elástico",
+                "descricao": "Desbloquea el máximo potencial de tu línea de producción industrial y asegura un rendimiento de fabricación superior.",
+                "details": "La canoa es nuestro elástico en bruto, de muy alta resistencia y robustez, diseñado para durar un ciclo de vida prolongado. Su superficie, deliberadamente ligeramente rugosa, proporciona una adherencia superior y mayor firmeza en el proceso de costura industrial, asegurando que el acabado sea siempre firme, seguro y profesional. Ofrece la máxima durabilidad y una excelente estabilidad dimensional, siendo la base ideal y robusta para proyectos exigentes, donde la calidad técnica y la autenticidad del material en su estado natural son la prioridad principal de tu prenda."
+            },
+            "fr": {
+                "categoria": "Élastiques bruts",
+                "material": "Élastique",
+                "descricao": "Libérez le potentiel maximal de votre chaîne de production industrielle et assurez-vous de meilleures performances de fabrication.",
+                "details": "Le canoa est notre élastique brut d’une très grande résistance et robustesse, conçu pour durer un long cycle de vie. Sa surface, volontairement légèrement rugueuse, offre une adhérence supérieure et une plus grande fermeté dans le processus de couture industrielle, garantissant une finition toujours ferme, sûre et professionnelle. Elle offre une durabilité maximale et une excellente stabilité dimensionnelle, étant la base idéale et robuste pour des projets exigeants, où la qualité technique et l’authenticité du matériau dans son état naturel sont la priorité principale de votre vêtement."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.599Z",
+        translationSourceSignature: "1kdf4vg",
+        translationLastError: ""
     },
     {
         id: 3,
         nome: "Cinta",
         categoria: "Modeladores",
         imagem: "./img/Modeladores/cinta-stik.png",
-        descricao: "Crie peças que modelam com conforto e segurança inigualáveis, redefinindo o padrão de vestuário de compressão. O elástico Cinta foi desenvolvido especificamente para modeladores e vestuário de compressão, oferecendo uma compressão controlada que esculpe e valoriza a silhueta sem sacrificar o bem-estar do usuário. Sua excelente recuperação elástica e alta resistência ao uso contínuo garantem que a peça jamais perca a forma ou sua capacidade de compressão, mesmo após muitas lavagens. É a escolha definitiva para roupas que buscam um ajuste firme, sustentação localizada e um toque sofisticado de alto padrão, assegurando que o produto final seja valorizado pela performance, durabilidade e caimento.",
+        descricao: "Crie peças que modelam com conforto e segurança inigualáveis, redefinindo o padrão de vestuário de compressão.",
+        details: "O elástico Cinta foi desenvolvido especificamente para modeladores e vestuário de compressão, oferecendo uma compressão controlada que esculpe e valoriza a silhueta sem sacrificar o bem-estar do usuário. Sua excelente recuperação elástica e alta resistência ao uso contínuo garantem que a peça jamais perca a forma ou sua capacidade de compressão, mesmo após muitas lavagens. É a escolha definitiva para roupas que buscam um ajuste firme, sustentação localizada e um toque sofisticado de alto padrão, assegurando que o produto final seja valorizado pela performance, durabilidade e caimento.",
         material: "Políester",
+        i18n: {
+            "en": {
+                "categoria": "Shapewear",
+                "material": "Polyester",
+                "descricao": "Create pieces that shape with unmatched comfort and safety, redefining the standard for compression garments.",
+                "details": "The Cinta elastic was developed specifically for shapewear and compression garments, offering a controlled compression that sculpts and enhances the silhouette without sacrificing the user's well-being. Its excellent elastic recovery and high resistance to continuous use ensure that the garment never loses its shape or compression capacity, even after many washes. It is the definitive choice for garments looking for a firm fit, localized support and a sophisticated touch of high standard, ensuring that the final product is valued for its performance, durability and fit."
+            },
+            "es": {
+                "categoria": "Prendas moldeadoras",
+                "material": "Poliéster",
+                "descricao": "Crea prendas que tengan forma con una comodidad y seguridad inigualables, redefiniendo el estándar para las prendas de compresión.",
+                "details": "El elástico Cinta fue desarrollado específicamente para prendas moldeadoras y de compresión, ofreciendo una compresión controlada que esculpe y realza la silueta sin sacrificar el bienestar del usuario. Su excelente recuperación elástica y alta resistencia al uso continuo aseguran que la prenda nunca pierda su forma ni capacidad de compresión, incluso tras muchos lavados. Es la elección definitiva para prendas que buscan un ajuste firme, un soporte localizado y un toque sofisticado de alto nivel, asegurando que el producto final sea valorado por su rendimiento, durabilidad y corte."
+            },
+            "fr": {
+                "categoria": "Vêtements shapewear",
+                "material": "Polyester",
+                "descricao": "Créez des pièces qui s’adaptent à un confort et une sécurité inégalés, redéfinissant la norme des vêtements de compression.",
+                "details": "L’élastique Cinta a été développé spécifiquement pour les vêtements shapewear et de compression, offrant une compression contrôlée qui sculpte et met en valeur la silhouette sans sacrifier le bien-être de l’utilisateur. Son excellente récupération élastique et sa forte résistance à un usage continu garantissent que le vêtement ne perd jamais sa forme ni sa capacité de compression, même après de nombreux lavages. C’est le choix définitif pour les vêtements recherchant un ajustement ferme, un soutien localisé et une touche sophistiquée de haute qualité, garantissant que le produit final est valorisé pour ses performances, sa durabilité et sa coupe."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "19lelok",
+        translationLastError: ""
     },
     {
         id: 4,
         nome: "Alça Atena",
         categoria: "Personalizados",
         imagem: "./img/Personalizados/alcaatena-stik.png",
-        descricao: "Dê vida à sua marca e a eleve a um novo patamar de exclusividade, requinte e sofisticação. Alça Atena é a solução de acabamento premium totalmente personalizada para atender e materializar o seu design e identidade visual. Por ser sob demanda, pode ser desenvolvida em uma ampla variedade de cores, padrões, texturas e larguras, adaptando-se perfeitamente a qualquer necessidade da sua coleção. Este produto não apenas oferece alta resistência e um toque extremamente refinado, mas também se torna um diferencial estético poderoso, capaz de capturar olhares e agregar valor inestimável à sua coleção de moda íntima e vestuário de luxo, fortalecendo o branding.",
+        descricao: "Dê vida à sua marca e a eleve a um novo patamar de exclusividade, requinte e sofisticação.",
+        details: "Alça Atena é a solução de acabamento premium totalmente personalizada para atender e materializar o seu design e identidade visual. Por ser sob demanda, pode ser desenvolvida em uma ampla variedade de cores, padrões, texturas e larguras, adaptando-se perfeitamente a qualquer necessidade da sua coleção. Este produto não apenas oferece alta resistência e um toque extremamente refinado, mas também se torna um diferencial estético poderoso, capaz de capturar olhares e agregar valor inestimável à sua coleção de moda íntima e vestuário de luxo, fortalecendo o branding.",
         material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Bring your brand to life and take it to a new level of exclusivity, refinement and sophistication.",
+                "details": "Atena Handle is the premium finishing solution fully customized to meet and materialize your design and visual identity. Because it is on demand, it can be developed in a wide variety of colors, patterns, textures and widths, adapting perfectly to any need of your collection. This product not only offers high resistance and an extremely refined touch, but also becomes a powerful aesthetic differential, capable of capturing glances and adding inestimable value to your collection of luxury underwear and apparel, strengthening branding."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Da vida a tu marca y llévala a un nuevo nivel de exclusividad, refinamiento y sofisticación.",
+                "details": "Atena Handle es la solución de acabado premium totalmente personalizada para adaptarse y materializar tu diseño e identidad visual. Al estar bajo demanda, puede desarrollarse en una amplia variedad de colores, patrones, texturas y anchuras, adaptándose perfectamente a cualquier necesidad de tu colección. Este producto no solo ofrece alta resistencia y un toque extremadamente refinado, sino que también se convierte en un diferencial estético potente, capaz de captar miradas y añadir un valor incalculable a tu colección de ropa interior y ropa de lujo, reforzando la marca."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Faites vivre votre marque et portez-la à un nouveau niveau d’exclusivité, de raffinement et de sophistication.",
+                "details": "Atena Handle est la solution de finition premium entièrement personnalisée pour correspondre et matérialiser votre design et votre identité visuelle. Parce qu’elle est à la demande, elle peut être développée dans une grande variété de couleurs, motifs, textures et largeurs, s’adaptant parfaitement à tous les besoins de votre collection. Ce produit offre non seulement une grande résistance et une touche extrêmement raffinée, mais devient aussi un puissant différentiel esthétique, capable de capter les regards et d’ajouter une valeur inestimable à votre collection de sous-vêtements et vêtements de luxe, renforçant ainsi votre image de marque."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "1nls0ty",
+        translationLastError: ""
     },
     {
         id: 5,
         nome: "Belly",
         categoria: "Premium",
         imagem: "./img/Premium/belly-stik.png",
-        descricao: "Sinta o luxo, a maciez e a excelência em cada detalhe de suas criações de alto padrão. O Belly é a materialização do elástico premium, destacando-se notavelmente por seu toque acetinado e uma resistência incomparável ao desgaste diário, atrito e à tensão. Essencial para peças de alta-costura, coleções exclusivas e linhas de luxo, ele entrega não apenas uma aparência sofisticada e visualmente rica que encanta o consumidor, mas também um desempenho elástico funcional, consistente e uma durabilidade notável, confirmando a alta qualidade e o valor agregado da sua produção.",
+        descricao: "Sinta o luxo, a maciez e a excelência em cada detalhe de suas criações de alto padrão.",
+        details: "O Belly é a materialização do elástico premium, destacando-se notavelmente por seu toque acetinado e uma resistência incomparável ao desgaste diário, atrito e à tensão. Essencial para peças de alta-costura, coleções exclusivas e linhas de luxo, ele entrega não apenas uma aparência sofisticada e visualmente rica que encanta o consumidor, mas também um desempenho elástico funcional, consistente e uma durabilidade notável, confirmando a alta qualidade e o valor agregado da sua produção.",
         material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Premium",
+                "material": "Elastic",
+                "descricao": "Feel the luxury, softness and excellence in every detail of your high-end creations.",
+                "details": "Belly is the embodiment of premium elastic, notably standing out for its satin feel and unrivalled resistance to daily wear, friction and tension. Essential for couture pieces, exclusive collections and luxury lines, it delivers not only a sophisticated and visually rich appearance that delights the consumer, but also functional, consistent elastic performance and remarkable durability, confirming the high quality and added value of its production."
+            },
+            "es": {
+                "categoria": "Premium",
+                "material": "Elástico",
+                "descricao": "Siente el lujo, la suavidad y la excelencia en cada detalle de tus creaciones de alta gama.",
+                "details": "Belly es la encarnación de la elástica premium, destacando especialmente por su sensación satinada y su resistencia inigualable al uso diario, la fricción y la tensión. Esencial para piezas de alta costura, colecciones exclusivas y líneas de lujo, ofrece no solo un aspecto sofisticado y visualmente rico que deleita al consumidor, sino también un rendimiento elástico funcional y constante y una durabilidad notable, confirmando la alta calidad y el valor añadido de su producción."
+            },
+            "fr": {
+                "categoria": "Premium",
+                "material": "Élastique",
+                "descricao": "Ressentez le luxe, la douceur et l’excellence dans chaque détail de vos créations haut de gamme.",
+                "details": "Belly incarne l’élastique premium, se démarquant notamment par sa sensation satinée et sa résistance inégalée au port quotidien, aux frictions et à la tension. Indispensable pour les pièces de haute couture, les collections exclusives et les lignes de luxe, il offre non seulement une apparence sophistiquée et visuellement riche qui rait le consommateur, mais aussi une performance élastique fonctionnelle et constante ainsi qu’une durabilité remarquable, confirmant la haute qualité et la valeur ajoutée de sa production."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "h471n0",
+        translationLastError: ""
     },
     {
         id: 6,
         nome: "Ana",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/ana-stik.png",
-        descricao: "Inspire delicadeza e garanta a longevidade e a beleza da sua lingerie por um ciclo de vida estendido. A renda Ana possui alta estabilidade dimensional e um acabamento técnico que facilita e otimiza o processo de costura em larga escala industrial. Ela garante que a elegância, o charme e o design vazado da sua peça permaneçam inalterados e vibrantes, mesmo após diversas lavagens e uso contínuo, sem deformar. É o produto ideal para quem busca combinar a beleza, a sensibilidade e o apelo estético da renda com a funcionalidade e a durabilidade exigidas pelo rigoroso mercado de moda íntima e vestuário fino.",
+        descricao: "Inspire delicadeza e garanta a longevidade e a beleza da sua lingerie por um ciclo de vida estendido.",
+        details: "A renda Ana possui alta estabilidade dimensional e um acabamento técnico que facilita e otimiza o processo de costura em larga escala industrial. Ela garante que a elegância, o charme e o design vazado da sua peça permaneçam inalterados e vibrantes, mesmo após diversas lavagens e uso contínuo, sem deformar. É o produto ideal para quem busca combinar a beleza, a sensibilidade e o apelo estético da renda com a funcionalidade e a durabilidade exigidas pelo rigoroso mercado de moda íntima e vestuário fino.",
         material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "Inspire delicacy and ensure the longevity and beauty of your lingerie for an extended life cycle.",
+                "details": "Ana lace has high dimensional stability and a technical finish that facilitates and optimizes the sewing process on a large industrial scale. It ensures that the elegance, charm and openwork design of your piece remain unchanged and vibrant, even after several washes and continuous use, without deforming. It is the ideal product for those looking to combine the beauty, sensitivity and aesthetic appeal of lace with the functionality and durability required by the rigorous underwear and fine apparel market."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "Inspira delicadeza y asegura la longevidad y belleza de tu lencería durante un ciclo de vida prolongado.",
+                "details": "El encaje Ana tiene una alta estabilidad dimensional y un acabado técnico que facilita y optimiza el proceso de costura a gran escala industrial. Garantiza que la elegancia, el encanto y el diseño calado de tu pieza permanezcan inalterados y vibrantes, incluso tras varios lavados y uso continuo, sin deformarse. Es el producto ideal para quienes buscan combinar la belleza, sensibilidad y atractivo estético del encaje con la funcionalidad y durabilidad requeridas por el riguroso mercado de ropa interior y ropa fina."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "Inspirez la délicatesse et assurez la longévité et la beauté de votre lingerie pendant un long cycle de vie.",
+                "details": "La dentelle Ana offre une grande stabilité dimensionnelle et une finition technique qui facilite et optimise le processus de couture à grande échelle industrielle. Elle garantit que l’élégance, le charme et le design en travail ouvert de votre pièce restent inchangés et éclatants, même après plusieurs lavages et une utilisation continue, sans se déformer. C’est le produit idéal pour ceux qui souhaitent combiner la beauté, la sensibilité et l’attrait esthétique de la dentelle avec la fonctionnalité et la durabilité requises par le marché rigoureux des sous-vêtements et des vêtements fins."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "1c9ug56",
+        translationLastError: ""
     },
     {
         id: 7,
         nome: "Magno",
         categoria: "Alça",
         imagem: "./img/Alças/magno-stik.png",
-        descricao: "Desenvolva peças que oferecem segurança, suporte inabalável e conforto de uso prolongado. Magno é uma alça robusta e extremamente confortável, especialmente formulada com alta tecnologia para suportar grandes tensões, peso e tração sem ceder, esticar ou perder sua forma original. Com bordas reforçadas, toque agradável e construção densa, é a escolha definitiva e de confiança para peças que exigem máxima sustentação, como sutiãs de tamanhos maiores, tops de alta performance ou vestuário técnico, sem abrir mão do conforto ideal para o usuário.",
+        descricao: "Desenvolva peças que oferecem segurança, suporte inabalável e conforto de uso prolongado.",
+        details: "Magno é uma alça robusta e extremamente confortável, especialmente formulada com alta tecnologia para suportar grandes tensões, peso e tração sem ceder, esticar ou perder sua forma original. Com bordas reforçadas, toque agradável e construção densa, é a escolha definitiva e de confiança para peças que exigem máxima sustentação, como sutiãs de tamanhos maiores, tops de alta performance ou vestuário técnico, sem abrir mão do conforto ideal para o usuário.",
         material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Handle",
+                "material": "Elastic",
+                "descricao": "Develop parts that offer safety, unwavering support, and long-term wearing comfort.",
+                "details": "Magno is a robust and extremely comfortable strap, specially formulated with high technology to withstand great tensions, weight and traction without giving way, stretching or losing its original shape. With reinforced edges, a pleasant touch and dense construction, it is the definitive and reliable choice for pieces that require maximum support, such as larger size bras, high-performance tops or technical clothing, without giving up optimal comfort for the user."
+            },
+            "es": {
+                "categoria": "Empuñadura",
+                "material": "Elástico",
+                "descricao": "Desarrolla piezas que ofrezcan seguridad, soporte inquebrantable y comodidad a largo plazo.",
+                "details": "Magno es una correa robusta y extremadamente cómoda, especialmente formulada con alta tecnología para soportar grandes tensiones, peso y tracción sin ceder, estirarse o perder su forma original. Con bordes reforzados, un tacto agradable y una construcción densa, es la opción definitiva y fiable para prendas que requieren el máximo soporte, como sujetadores de talla mayor, tops de alto rendimiento o ropa técnica, sin renunciar a una comodidad óptima para el usuario."
+            },
+            "fr": {
+                "categoria": "Poignée",
+                "material": "Élastique",
+                "descricao": "Développez des pièces qui offrent sécurité, un soutien inébranlable et un confort de port durable.",
+                "details": "Magno est une sangle robuste et extrêmement confortable, spécialement formulée avec une technologie avancée pour supporter de fortes tensions, poids et traction sans céder, étirer ou perdre sa forme d’origine. Avec ses bords renforcés, un toucher agréable et une construction dense, c’est le choix définitif et fiable pour les pièces nécessitant un soutien maximal, comme des soutiens-gorge de taille plus grande, des hauts haute performance ou des vêtements techniques, sans renoncer au confort optimal pour l’utilisateur."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "ioihvp",
+        translationLastError: ""
     },
     {
         id: 11,
         nome: "Ágda",
         categoria: "Viés",
         imagem: "img/agda-stik.png",
-        descricao: "Obtenha acabamentos profissionais, impecáveis e de longa duração com o viés Agda. Este produto é notavelmente flexível, extremamente resistente e ideal para ser aplicado em bordas e reforços de costuras, oferecendo um fechamento limpo e seguro. Sua maleabilidade superior facilita o trabalho em curvas, contornos complexos e detalhes arredondados, sendo um aliado crucial na produção em escala. Garante um resultado final elegante, duradouro e com aquele toque profissional que é crucial para elevar a percepção de qualidade do seu vestuário, assegurando a integridade e o visual da peça por mais tempo.",
+        descricao: "Obtenha acabamentos profissionais, impecáveis e de longa duração com o viés Agda.",
+        details: "Este produto é notavelmente flexível, extremamente resistente e ideal para ser aplicado em bordas e reforços de costuras, oferecendo um fechamento limpo e seguro. Sua maleabilidade superior facilita o trabalho em curvas, contornos complexos e detalhes arredondados, sendo um aliado crucial na produção em escala. Garante um resultado final elegante, duradouro e com aquele toque profissional que é crucial para elevar a percepção de qualidade do seu vestuário, assegurando a integridade e o visual da peça por mais tempo.",
         material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bias",
+                "material": "Elastic",
+                "descricao": "Get professional, flawless, long-lasting finishes with Agda bias.",
+                "details": "This product is remarkably flexible, extremely resistant and ideal for applying to edges and seam reinforcements, offering a clean and secure closure. Its superior malleability makes it easy to work with curves, complex contours and rounded details, being a crucial ally in scale production. It guarantees an elegant, long-lasting final result with that professional touch that is crucial to elevate the perception of quality of your garment, ensuring the integrity and look of the garment for longer."
+            },
+            "es": {
+                "categoria": "Sesgo",
+                "material": "Elástico",
+                "descricao": "Consigue acabados profesionales, impecables y duraderos con el sesgo de Agda.",
+                "details": "Este producto es notablemente flexible, extremadamente resistente y ideal para aplicarse en bordes y refuerzos de costura, ofreciendo un cierre limpio y seguro. Su superior maleabilidad facilita trabajar con curvas, contornos complejos y detalles redondeados, siendo un aliado crucial en la producción a escala. Garantiza un resultado final elegante y duradero con ese toque profesional crucial para elevar la percepción de calidad de tu prenda, asegurando la integridad y el aspecto durante más tiempo."
+            },
+            "fr": {
+                "categoria": "Biais",
+                "material": "Élastique",
+                "descricao": "Obtenez des finitions professionnelles, impeccables, durables avec Agda bias.",
+                "details": "Ce produit est remarquablement flexible, extrêmement résistant et idéal pour être appliqué sur les bords et les renforts de couture, offrant une fermeture propre et sécurisée. Sa malléabilité supérieure facilite le travail avec des courbes, des contours complexes et des détails arrondis, étant un allié crucial dans la production à l’échelle. Il garantit un résultat final élégant et durable avec cette touche professionnelle essentielle pour améliorer la perception de qualité de votre vêtement, garantissant l’intégrité et l’apparence du vêtement plus longtemps."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "x35obo",
+        translationLastError: ""
     },
     {
         id: 12,
         nome: "Atlas",
         categoria: "Viés Com Arco",
         imagem: "img/atlas-stik.png",
-        descricao: "Inove o design dos seus modeladores e peças íntimas com suporte técnico superior e discreto embutido. Atlas é o nosso elástico que já possui o arco integrado, sendo projetado especificamente para dar uma estrutura extra e localizada a corsets, sutiãs e modeladores. Ele consegue unir a firmeza necessária e essencial para a modelagem perfeita com o conforto para o uso diário, proporcionando liberdade. É um produto ideal para peças que exigem um suporte técnico localizado, garantindo que a forma original e o visual refinado da roupa sejam mantidos com excelência, valorizando a silhueta de maneira eficaz.",
+        descricao: "Inove o design dos seus modeladores e peças íntimas com suporte técnico superior e discreto embutido.",
+        details: "Atlas é o nosso elástico que já possui o arco integrado, sendo projetado especificamente para dar uma estrutura extra e localizada a corsets, sutiãs e modeladores. Ele consegue unir a firmeza necessária e essencial para a modelagem perfeita com o conforto para o uso diário, proporcionando liberdade. É um produto ideal para peças que exigem um suporte técnico localizado, garantindo que a forma original e o visual refinado da roupa sejam mantidos com excelência, valorizando a silhueta de maneira eficaz.",
         material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bias with arch",
+                "material": "Elastic",
+                "descricao": "Innovate the design of your shapewear and underwear with superior and discreet built-in technical support.",
+                "details": "Atlas is our elastic band that already has the integrated arch, being specifically designed to give an extra and localized structure to corsets, bras and shapewear. It manages to unite the necessary and essential firmness for perfect modeling with the comfort for daily use, providing freedom. It is an ideal product for pieces that require localized technical support, ensuring that the original shape and refined look of the clothing are maintained with excellence, enhancing the silhouette effectively."
+            },
+            "es": {
+                "categoria": "Sesgo con arco",
+                "material": "Elástico",
+                "descricao": "Innova el diseño de tu modeladora y ropa interior con soporte técnico integrado superior y discreto.",
+                "details": "Atlas es nuestra banda elástica que ya tiene el arco integrado, diseñada específicamente para dar una estructura extra y localizada a corsés, sujetadores y prendas moldeadoras. Consigue unir la firmeza necesaria y esencial para un modelado perfecto con la comodidad para el uso diario, proporcionando libertad. Es un producto ideal para piezas que requieren soporte técnico local, asegurando que la forma original y el aspecto refinado de la ropa se mantengan con excelencia, realzando la silueta de manera eficaz."
+            },
+            "fr": {
+                "categoria": "Biais avec l’arche",
+                "material": "Élastique",
+                "descricao": "Innovez dans le design de vos vêtements shapewear et sous-vêtements grâce à un support technique intégré supérieur et discret.",
+                "details": "Atlas est notre élastique qui possède déjà la voûte plantaire intégrée, conçue spécifiquement pour offrir une structure supplémentaire et localisée aux corsets, soutiens-gorge et vêtements shapewear. Elle parvient à unir la fermeté nécessaire et essentielle pour un mannequinat parfait avec le confort pour un usage quotidien, offrant ainsi de la liberté. C’est un produit idéal pour les pièces nécessitant un support technique localisé, garantissant que la forme originale et l’aspect raffiné des vêtements soient maintenus avec excellence, mettant en valeur la silhouette de manière efficace."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "qfs8fv",
+        translationLastError: ""
     },
     {
         id: 14,
         nome: "Chll",
         categoria: "Premium",
         imagem: "img/chll-stik.png",
-        descricao: "Crie coleções com um visual moderno, caimento impecável e um desempenho de elite que se destaca no mercado. O Chll é parte fundamental da nossa linha premium, destacando-se pela resistência superior à deformação, ao estiramento e por um caimento estruturado e elegante. É o material ideal para marcas que buscam peças com um estilo contemporâneo, alta durabilidade e excelente apresentação visual. Ele garante que a sofisticação e o design inovador permaneçam intactos por muito mais tempo, reforçando a qualidade e o alto padrão dos seus produtos premium, assegurando a fidelidade da forma.",
+        descricao: "Crie coleções com um visual moderno, caimento impecável e um desempenho de elite que se destaca no mercado.",
+        details: "O Chll é parte fundamental da nossa linha premium, destacando-se pela resistência superior à deformação, ao estiramento e por um caimento estruturado e elegante. É o material ideal para marcas que buscam peças com um estilo contemporâneo, alta durabilidade e excelente apresentação visual. Ele garante que a sofisticação e o design inovador permaneçam intactos por muito mais tempo, reforçando a qualidade e o alto padrão dos seus produtos premium, assegurando a fidelidade da forma.",
         material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Premium",
+                "material": "Elastic",
+                "descricao": "Create collections with a modern look, impeccable fit and elite performance that stands out in the market.",
+                "details": "Chll is a fundamental part of our premium line, standing out for its superior resistance to deformation, stretching and a structured and elegant fit. It is the ideal material for brands looking for pieces with a contemporary style, high durability and excellent visual presentation. It ensures that sophistication and innovative design remain intact for much longer, reinforcing the quality and high standard of its premium products, ensuring shape fidelity."
+            },
+            "es": {
+                "categoria": "Premium",
+                "material": "Elástico",
+                "descricao": "Crea colecciones con un aspecto moderno, un ajuste impecable y un rendimiento de élite que destaquen en el mercado.",
+                "details": "Chll es una parte fundamental de nuestra línea premium, destacando por su superior resistencia a la deformación, el estiramiento y un ajuste estructurado y elegante. Es el material ideal para marcas que buscan piezas con un estilo contemporáneo, alta durabilidad y excelente presentación visual. Garantiza que la sofisticación y el diseño innovador se mantengan durante mucho más tiempo, reforzando la calidad y el alto estándar de sus productos premium, asegurando la fidelidad de las formas."
+            },
+            "fr": {
+                "categoria": "Premium",
+                "material": "Élastique",
+                "descricao": "Créez des collections au look moderne, à la coupe impeccable et à la performance d’élite qui se démarquent sur le marché.",
+                "details": "Le Chll est un élément fondamental de notre gamme haut de gamme, se distinguant par sa résistance supérieure à la déformation, à l’étirement et à sa coupe structurée et élégante. C’est le matériau idéal pour les marques recherchant des pièces au style contemporain, à la grande durabilité et à la présentation visuelle excellente. Il garantit que la sophistication et le design innovant restent intacts bien plus longtemps, renforçant la qualité et le haut niveau de ses produits haut de gamme et garantissant la fidélité des formes."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "1impv17",
+        translationLastError: ""
     },
-
-    /* --- Itens adicionados automaticamente a partir de img - Copia (Revisados) --- */
-    // Alças
     {
         id: 16,
         nome: "Dayane",
         categoria: "Alças",
         imagem: "img - Copia/Alças/dayane-stik.png",
-        descricao: "Proporcione segurança e leveza essenciais para o uso diário e prolongado em peças de base. Dayane é a alça desenvolvida com elasticidade perfeitamente balanceada, pensada para o máximo conforto e um suporte seguro que acompanha cada movimento do corpo. É o material ideal para sutiãs, tops e vestuário que necessitam de um suporte confiável e discreto, garantindo o ajuste sem comprometer a leveza e a sensação de bem-estar ao longo do dia. Sua composição evita o excesso de pressão, valorizando a experiência do usuário.",
-        material: "Elástico"
+        descricao: "Proporcione segurança e leveza essenciais para o uso diário e prolongado em peças de base.",
+        details: "Dayane é a alça desenvolvida com elasticidade perfeitamente balanceada, pensada para o máximo conforto e um suporte seguro que acompanha cada movimento do corpo. É o material ideal para sutiãs, tops e vestuário que necessitam de um suporte confiável e discreto, garantindo o ajuste sem comprometer a leveza e a sensação de bem-estar ao longo do dia. Sua composição evita o excesso de pressão, valorizando a experiência do usuário.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Handles",
+                "material": "Elastic",
+                "descricao": "Provide essential safety and lightness for daily and extended use in base pieces.",
+                "details": "Dayane is the strap developed with perfectly balanced elasticity, designed for maximum comfort and a secure support that accompanies every movement of the body. It is the ideal material for bras, tops and clothing that need reliable and discreet support, ensuring the fit without compromising lightness and the feeling of well-being throughout the day. Its composition avoids excess pressure, enhancing the user experience."
+            },
+            "es": {
+                "categoria": "Asas",
+                "material": "Elástico",
+                "descricao": "Proporciona la seguridad y la ligereza esenciales para el uso diario y prolongado en las piezas base.",
+                "details": "Dayane es el tirante desarrollado con una elasticidad perfectamente equilibrada, diseñado para máxima comodidad y un soporte seguro que acompaña cada movimiento del cuerpo. Es el material ideal para sujetadores, tops y ropa que necesitan un soporte fiable y discreto, asegurando el ajuste sin comprometer la ligereza ni la sensación de bienestar durante todo el día. Su composición evita la presión excesiva, mejorando la experiencia del usuario."
+            },
+            "fr": {
+                "categoria": "Poignées",
+                "material": "Élastique",
+                "descricao": "Assurez la sécurité et la légèreté essentielles pour une utilisation quotidienne et prolongée dans les bases.",
+                "details": "Dayane est une sangle conçue avec une élasticité parfaitement équilibrée, conçue pour un confort maximal et un soutien sécurisé qui accompagne chaque mouvement du corps. C’est le matériau idéal pour les soutiens-gorge, hauts et vêtements nécessitant un soutien fiable et discret, garantissant l’ajustement sans compromettre la légèreté et le bien-être tout au long de la journée. Sa composition évite la pression excessive, améliorant ainsi l’expérience utilisateur."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.603Z",
+        translationSourceSignature: "1f6fyqx",
+        translationLastError: ""
     },
     {
         id: 17,
         nome: "Íris",
         categoria: "Alças",
         imagem: "img - Copia/Alças/Iris-stik.png",
-        descricao: "A durabilidade técnica que suas peças íntimas merecem, garantindo um ciclo de vida estendido e maior satisfação. Iris é a alça macia ao toque e altamente resistente ao desgaste, ao atrito e à fadiga do material, perfeita para lingeries de uso contínuo. Sua construção robusta permite uma fixação eficiente em reguladores, o que garante um ajuste preciso, duradouro e confortável, acompanhando a forma do corpo em todos os momentos com consistência e segurança, sem escorregar ou afrouxar.",
-        material: "Elástico"
+        descricao: "A durabilidade técnica que suas peças íntimas merecem, garantindo um ciclo de vida estendido e maior satisfação.",
+        details: "Iris é a alça macia ao toque e altamente resistente ao desgaste, ao atrito e à fadiga do material, perfeita para lingeries de uso contínuo. Sua construção robusta permite uma fixação eficiente em reguladores, o que garante um ajuste preciso, duradouro e confortável, acompanhando a forma do corpo em todos os momentos com consistência e segurança, sem escorregar ou afrouxar.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Handles",
+                "material": "Elastic",
+                "descricao": "The technical durability your underwear deserves, ensuring an extended life cycle and greater satisfaction.",
+                "details": "Iris is the soft-to-the-touch strap that is highly resistant to wear, friction and material fatigue, perfect for lingerie of continuous use. Its robust construction allows for efficient attachment to regulators, which ensures a precise, long-lasting and comfortable fit, following the shape of the body at all times with consistency and safety, without slipping or loosening."
+            },
+            "es": {
+                "categoria": "Asas",
+                "material": "Elástico",
+                "descricao": "La durabilidad técnica que tu ropa interior merece, asegurando un ciclo de vida prolongado y una mayor satisfacción.",
+                "details": "El iris es la correa suave al tacto, altamente resistente al desgaste, la fricción y la fatiga del material, perfecta para lencería de uso continuo. Su construcción robusta permite una fijación eficiente a los reguladores, lo que garantiza un ajuste preciso, duradero y cómodo, siguiendo la forma del cuerpo en todo momento con consistencia y seguridad, sin resbalar ni aflojarse."
+            },
+            "fr": {
+                "categoria": "Poignées",
+                "material": "Élastique",
+                "descricao": "La durabilité technique que votre sous-vêtement mérite, garantissant un cycle de vie prolongé et une plus grande satisfaction.",
+                "details": "Iris est une sangle douce au toucher, très résistante à l’usure, au frottement et à la fatigue des matériaux, parfaite pour la lingerie en usage continu. Sa construction robuste permet une fixation efficace sur des détendeurs, garantissant un ajustement précis, durable et confortable, suivant la forme du corps en permanence avec constance et sécurité, sans glisser ni se desserrer."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "ytm2xo",
+        translationLastError: ""
     },
     {
         id: 19,
         nome: "Mirela",
         categoria: "Alças",
         imagem: "img - Copia/Alças/mirela-stik.png",
-        descricao: "Adicione um toque de requinte, brilho sutil e suavidade em suas coleções que definem o luxo. Mirela é a alça com acabamento acetinado e toque excepcionalmente delicado, sendo a escolha ideal para lingeries e vestuário que se enquadram na categoria premium e de alta-costura. Ela une um visual incrivelmente refinado e elegante com um desempenho elástico funcional e superior, elevando o valor percebido das suas criações e solidificando sua posição no mercado de luxo pela qualidade estética e técnica.",
-        material: "Elástico"
+        descricao: "Adicione um toque de requinte, brilho sutil e suavidade em suas coleções que definem o luxo.",
+        details: "Mirela é a alça com acabamento acetinado e toque excepcionalmente delicado, sendo a escolha ideal para lingeries e vestuário que se enquadram na categoria premium e de alta-costura. Ela une um visual incrivelmente refinado e elegante com um desempenho elástico funcional e superior, elevando o valor percebido das suas criações e solidificando sua posição no mercado de luxo pela qualidade estética e técnica.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Handles",
+                "material": "Elastic",
+                "descricao": "Add a touch of refinement, subtle sparkle and softness to your luxury-defining collections.",
+                "details": "Mirela is the satin-finished strap with an exceptionally delicate touch, making it an ideal choice for lingerie and apparel that fall into the premium and haute couture category. It combines an incredibly refined and elegant look with a functional and superior elastic performance, elevating the perceived value of your creations and solidifying your position in the luxury market for aesthetic and technical quality."
+            },
+            "es": {
+                "categoria": "Asas",
+                "material": "Elástico",
+                "descricao": "Añade un toque de refinamiento, brillo sutil y suavidad a tus colecciones que definen el lujo.",
+                "details": "Mirela es el tirante acabado satinado con un toque excepcionalmente delicado, lo que lo convierte en una elección ideal para lencería y prendas que entran en la categoría premium y alta costura. Combina un aspecto increíblemente refinado y elegante con un rendimiento elástico funcional y superior, elevando el valor percibido de tus creaciones y consolidando tu posición en el mercado del lujo en calidad estética y técnica."
+            },
+            "fr": {
+                "categoria": "Poignées",
+                "material": "Élastique",
+                "descricao": "Ajoutez une touche de raffinement, de scintillements subtils et de douceur à vos collections qui définissent le luxe.",
+                "details": "Mirela est une bretelle satinée avec une touche exceptionnellement délicate, ce qui en fait un choix idéal pour la lingerie et les vêtements relevant de la catégorie haute couture et haute couture. Elle allie un look incroyablement raffiné et élégant à une performance élastique fonctionnelle et supérieure, rehaussant la valeur perçue de vos créations et consolidant votre position sur le marché du luxe en matière de qualité esthétique et technique."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "xmkb3w",
+        translationLastError: ""
     },
     {
         id: 20,
         nome: "Nádia",
         categoria: "Alças",
         imagem: "img - Copia/Alças/nadia-stik.png",
-        descricao: "Busque máxima versatilidade e confiança estrutural para diversos designs de vestuário. Nadia é a alça que se destaca por ser altamente durável e versátil, pronta para ser aplicada desde moda íntima de base e sutiãs, até acessórios de vestuário que exigem mais resistência e tração. Sua construção robusta garante a combinação perfeita entre resistência estrutural e flexibilidade ideal, adaptando-se a diferentes estilos e necessidades de costura com grande facilidade e consistência, oferecendo um excelente custo-benefício.",
-        material: "Elástico"
+        descricao: "Busque máxima versatilidade e confiança estrutural para diversos designs de vestuário.",
+        details: "Nadia é a alça que se destaca por ser altamente durável e versátil, pronta para ser aplicada desde moda íntima de base e sutiãs, até acessórios de vestuário que exigem mais resistência e tração. Sua construção robusta garante a combinação perfeita entre resistência estrutural e flexibilidade ideal, adaptando-se a diferentes estilos e necessidades de costura com grande facilidade e consistência, oferecendo um excelente custo-benefício.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Handles",
+                "material": "Elastic",
+                "descricao": "Strive for maximum versatility and structural reliability for diverse apparel designs.",
+                "details": "Nadia is the strap that stands out for being highly durable and versatile, ready to be applied from base underwear and bras, to clothing accessories that require more strength and traction. Its robust construction ensures the perfect combination of structural strength and optimal flexibility, adapting to different styles and sewing needs with great ease and consistency, offering excellent value for money."
+            },
+            "es": {
+                "categoria": "Asas",
+                "material": "Elástico",
+                "descricao": "Procura la máxima versatilidad y fiabilidad estructural para diseños de ropa diversos.",
+                "details": "Nadia es la tirante que destaca por ser muy duradera y versátil, lista para aplicarse desde ropa interior base y sujetadores, hasta accesorios de ropa que requieren más resistencia y tracción. Su construcción robusta garantiza la combinación perfecta de resistencia estructural y flexibilidad óptima, adaptándose a diferentes estilos y necesidades de costura con gran facilidad y consistencia, ofreciendo una excelente relación calidad-precio."
+            },
+            "fr": {
+                "categoria": "Poignées",
+                "material": "Élastique",
+                "descricao": "Visez une polyvalence maximale et une fiabilité structurelle pour la diversité des designs de vêtements.",
+                "details": "Nadia est la sangle qui se distingue par sa grande durabilité et polyvalence, prête à être appliquée depuis les sous-vêtements de base et soutiens-gorge jusqu’aux accessoires de vêtements nécessitant plus de résistance et d’adhérence. Sa construction robuste assure la combinaison parfaite de solidité structurelle et de flexibilité optimale, s’adaptant facilement et à la coin aux besoins de couture différents, offrant un excellent rapport qualité-prix."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "sv1wb7",
+        translationLastError: ""
     },
-
-    // Bases
     {
         id: 21,
         nome: "Carícia",
         categoria: "Bases",
         imagem: "img - Copia/Bases/caricia-stik.png",
-        descricao: "Confeccione bases e cós com conforto superior e maleabilidade que abraçam o corpo de forma suave. Carícia é a base macia ideal para cós e acabamentos internos, graças ao seu toque suave na pele e excelente capacidade de recuperação elástica. Ela é a garantia de conforto absoluto para peças que estão em contato direto com a pele, proporcionando uma experiência agradável e de bem-estar a cada uso, sem perder a capacidade de ajuste e de manter a forma do vestuário com discrição e leveza.",
-        material: "Elástico"
+        descricao: "Confeccione bases e cós com conforto superior e maleabilidade que abraçam o corpo de forma suave.",
+        details: "Carícia é a base macia ideal para cós e acabamentos internos, graças ao seu toque suave na pele e excelente capacidade de recuperação elástica. Ela é a garantia de conforto absoluto para peças que estão em contato direto com a pele, proporcionando uma experiência agradável e de bem-estar a cada uso, sem perder a capacidade de ajuste e de manter a forma do vestuário com discrição e leveza.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bases",
+                "material": "Elastic",
+                "descricao": "Make bases and waistbands with superior comfort and suppleness that hug the body gently.",
+                "details": "Caress is the ideal soft base for waistbands and internal finishes, thanks to its soft touch on the skin and excellent elastic recovery capacity. It is the guarantee of absolute comfort for garments that are in direct contact with the skin, providing a pleasant and well-being experience with each use, without losing the ability to adjust and maintain the shape of the garment with discretion and lightness."
+            },
+            "es": {
+                "categoria": "Bases",
+                "material": "Elástico",
+                "descricao": "Haz bases y cinturas con mayor comodidad y flexibilidad que se ajusten suavemente al cuerpo.",
+                "details": "Caress es la base blanda ideal para cinturas y acabados internos, gracias a su tacto suave sobre la piel y su excelente capacidad de recuperación elástica. Garantiza una comodidad absoluta para prendas que están en contacto directo con la piel, proporcionando una experiencia agradable y de bienestar en cada uso, sin perder la capacidad de ajustar y mantener la forma de la prenda con discreción y ligereza."
+            },
+            "fr": {
+                "categoria": "Bases",
+                "material": "Élastique",
+                "descricao": "Fabriquez des socles et des ceintures avec un confort et une souplesse supérieurs qui éprouvent doucement le corps.",
+                "details": "Caress est la base douce idéale pour les ceintures et les finitions internes, grâce à sa douceur sur la peau et son excellente capacité de récupération élastique. Elle garantit un confort absolu pour les vêtements en contact direct avec la peau, offrant une expérience agréable et bien-être à chaque utilisation, sans perdre la capacité d’ajuster et de maintenir la forme du vêtement avec discrétion et légèreté."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "1do19kq",
+        translationLastError: ""
     },
     {
         id: 22,
         nome: "Cintra",
         categoria: "Bases",
         imagem: "img - Copia/Bases/cintra-stik.png",
-        descricao: "Estrutura e suporte firme sem a sensação incômoda de rigidez, garantindo caimento. Cintra é a base com estabilidade dimensional superior e comprovada, o que a torna perfeita para estruturar cós, bustos e barras de forma eficaz. Oferece o suporte técnico necessário com uma flexibilidade ideal para o movimento, garantindo peças que são seguras, confortáveis e com um caimento que se mantém impecável ao longo do tempo de uso e ciclos de lavagens. Ideal para bases de sutiãs e tops que precisam de sustentação.",
-        material: "Elástico"
+        descricao: "Estrutura e suporte firme sem a sensação incômoda de rigidez, garantindo caimento.",
+        details: "Cintra é a base com estabilidade dimensional superior e comprovada, o que a torna perfeita para estruturar cós, bustos e barras de forma eficaz. Oferece o suporte técnico necessário com uma flexibilidade ideal para o movimento, garantindo peças que são seguras, confortáveis e com um caimento que se mantém impecável ao longo do tempo de uso e ciclos de lavagens. Ideal para bases de sutiãs e tops que precisam de sustentação.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bases",
+                "material": "Elastic",
+                "descricao": "Structure and firm support without the uncomfortable feeling of rigidity, ensuring fit.",
+                "details": "Cintra is the base with superior and proven dimensional stability, which makes it perfect for structuring waistbands, busts and hems effectively. It offers the necessary technical support with optimal flexibility for movement, ensuring pieces that are safe, comfortable and with a fit that remains impeccable over time of use and wash cycles. Ideal for bra bases and tops that need support."
+            },
+            "es": {
+                "categoria": "Bases",
+                "material": "Elástico",
+                "descricao": "Estructura y soporte firme sin la incómoda sensación de rigidez, asegurando el ajuste.",
+                "details": "Cintra es la base con una estabilidad dimensional superior y probada, lo que la hace perfecta para estructurar de forma eficaz cinturas, pechos y dobladillos. Ofrece el soporte técnico necesario con flexibilidad óptima para el movimiento, asegurando prendas seguras, cómodas y con un ajuste impecable a lo largo del tiempo de uso y los ciclos de lavado. Ideal para bases de sujetadores y tops que necesitan soporte."
+            },
+            "fr": {
+                "categoria": "Bases",
+                "material": "Élastique",
+                "descricao": "Structure et soutien ferme sans la sensation désagréable de rigidité, garantissant un ajustement.",
+                "details": "Cintra est la base dotée d’une stabilité dimensionnelle supérieure et éprouvée, ce qui la rend parfaite pour structurer efficacement les ceintures, la poitrine et les ourlets. Elle offre le soutien technique nécessaire avec une flexibilité optimale pour les mouvements, garantissant des pièces sûres, confortables et avec un ajustement irréprochable au fil du temps et des cycles de lavage. Idéal pour les bases de soutiens-gorge et les hauts nécessitant un soutien-gorge."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "12kifxw",
+        translationLastError: ""
     },
     {
         id: 23,
         nome: "Diana",
         categoria: "Bases",
         imagem: "img - Copia/Bases/diana-stik (1).png",
-        descricao: "Encontre o equilíbrio perfeito entre compressão leve e liberdade de movimento total para suas peças. Diana oferece um suporte balanceado e uma recuperação elástica excepcional, tornando-a a escolha ideal para peças que precisam de uma leve compressão e estabilidade duradoura. Sua composição técnica assegura que a forma e o conforto da roupa sejam mantidos com consistência, mesmo após ser usada e lavada repetidas vezes, garantindo um produto de alta qualidade e longevidade para o dia a dia.",
-        material: "Elástico"
+        descricao: "Encontre o equilíbrio perfeito entre compressão leve e liberdade de movimento total para suas peças.",
+        details: "Diana oferece um suporte balanceado e uma recuperação elástica excepcional, tornando-a a escolha ideal para peças que precisam de uma leve compressão e estabilidade duradoura. Sua composição técnica assegura que a forma e o conforto da roupa sejam mantidos com consistência, mesmo após ser usada e lavada repetidas vezes, garantindo um produto de alta qualidade e longevidade para o dia a dia.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bases",
+                "material": "Elastic",
+                "descricao": "Find the perfect balance between lightweight compression and total freedom of movement for your pieces.",
+                "details": "Diana offers balanced support and exceptional elastic recovery, making it an ideal choice for garments that need light compression and long-lasting stability. Its technical composition ensures that the shape and comfort of the garment are maintained consistently, even after being worn and washed repeatedly, ensuring a high-quality product and longevity for everyday life."
+            },
+            "es": {
+                "categoria": "Bases",
+                "material": "Elástico",
+                "descricao": "Encuentra el equilibrio perfecto entre compresión ligera y total libertad de movimiento para tus piezas.",
+                "details": "Diana ofrece un soporte equilibrado y una recuperación elástica excepcional, lo que la convierte en una opción ideal para prendas que requieren una compresión ligera y estabilidad duradera. Su composición técnica garantiza que la forma y la comodidad de la prenda se mantengan de forma constante, incluso después de ser usada y lavada repetidamente, asegurando un producto de alta calidad y longevidad en la vida diaria."
+            },
+            "fr": {
+                "categoria": "Bases",
+                "material": "Élastique",
+                "descricao": "Trouvez l’équilibre parfait entre compression légère et liberté totale de mouvement pour vos pièces.",
+                "details": "Diana offre un soutien équilibré et une récupération élastique exceptionnelle, ce qui en fait un choix idéal pour les vêtements nécessitant une compression légère et une stabilité durable. Sa composition technique garantit que la forme et le confort du vêtement sont maintenus de manière constante, même après port et lavage répétés, garantissant un produit de haute qualité et une longévité au quotidien."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "1ellr2i",
+        translationLastError: ""
     },
     {
         id: 24,
         nome: "Lady",
         categoria: "Bases",
         imagem: "img - Copia/Bases/lady-stik.png",
-        descricao: "Sofisticação e performance garantidas para suas coleções de alto padrão de luxo. Lady é a base com acabamento premium e um toque extremamente agradável, sedoso e macio, além de alta resistência ao estiramento e à fadiga do material. É desenvolvida especificamente para coleções de luxo, oferecendo conforto prolongado, durabilidade superior e elevando instantaneamente o nível de sofisticação e o valor percebido de cada peça produzida, do cós ao busto, com um visual refinado e elegante.",
-        material: "Elástico"
+        descricao: "Sofisticação e performance garantidas para suas coleções de alto padrão de luxo.",
+        details: "Lady é a base com acabamento premium e um toque extremamente agradável, sedoso e macio, além de alta resistência ao estiramento e à fadiga do material. É desenvolvida especificamente para coleções de luxo, oferecendo conforto prolongado, durabilidade superior e elevando instantaneamente o nível de sofisticação e o valor percebido de cada peça produzida, do cós ao busto, com um visual refinado e elegante.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bases",
+                "material": "Elastic",
+                "descricao": "Sophistication and performance guaranteed for your high-end luxury collections.",
+                "details": "Lady is the base with a premium finish and an extremely pleasant, silky and soft touch, as well as high resistance to stretch and material fatigue. It is developed specifically for luxury collections, offering extended comfort, superior durability and instantly raising the level of sophistication and perceived value of each piece produced, from the waistband to the bust, with a refined and elegant look."
+            },
+            "es": {
+                "categoria": "Bases",
+                "material": "Elástico",
+                "descricao": "Sofisticación y rendimiento garantizados para tus colecciones de lujo de alta gama.",
+                "details": "Lady es la base con un acabado premium y un tacto extremadamente agradable, sedoso y suave, además de alta resistencia al estiramiento y la fatiga del material. Está desarrollado específicamente para colecciones de lujo, ofreciendo comodidad prolongada, durabilidad superior y elevando instantáneamente el nivel de sofisticación y valor percibido de cada prenda producida, desde la cintura hasta el busto, con un aspecto refinado y elegante."
+            },
+            "fr": {
+                "categoria": "Bases",
+                "material": "Élastique",
+                "descricao": "Sophistication et performance garanties pour vos collections de luxe haut de gamme.",
+                "details": "La dame est la base avec une finition premium et un toucher extrêmement agréable, soyeux et doux, ainsi qu’une grande résistance à l’élasticité et à la fatigue des tissus. Elle est conçue spécifiquement pour les collections de luxe, offrant un confort prolongé, une durabilité supérieure et rehaussant instantanément le niveau de sophistication et la valeur perçue de chaque pièce produite, de la ceinture à la poitrine, avec un look raffiné et élégant."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "1s6fq4c",
+        translationLastError: ""
     },
     {
         id: 25,
         nome: "Leno",
         categoria: "Bases",
         imagem: "img - Copia/Bases/leno-stik.png",
-        descricao: "Obtenha a firmeza e a flexibilidade ideais e controladas para o seu design estruturado e exigente. Leno é a base robusta para peças que exigem firmeza superior e flexibilidade controlada, como vestuário esportivo de alta compressão e modeladores. É a solução perfeita para cós e barras que precisam manter a forma e a estrutura mesmo sob uso e tensão intensa, garantindo qualidade técnica, resistência e longevidade em cada aplicação industrial, com excelente retorno elástico.",
-        material: "Elástico"
+        descricao: "Obtenha a firmeza e a flexibilidade ideais e controladas para o seu design estruturado e exigente.",
+        details: "Leno é a base robusta para peças que exigem firmeza superior e flexibilidade controlada, como vestuário esportivo de alta compressão e modeladores. É a solução perfeita para cós e barras que precisam manter a forma e a estrutura mesmo sob uso e tensão intensa, garantindo qualidade técnica, resistência e longevidade em cada aplicação industrial, com excelente retorno elástico.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bases",
+                "material": "Elastic",
+                "descricao": "Get the optimal, controlled firmness and flexibility for your structured, demanding design.",
+                "details": "Leno is the robust base for garments that require superior firmness and controlled flexibility, such as high-compression sportswear and shapewear. It is the perfect solution for waistbands and bars that need to maintain shape and structure even under intense use and stress, ensuring technical quality, strength and longevity in every industrial application, with excellent elastic return."
+            },
+            "es": {
+                "categoria": "Bases",
+                "material": "Elástico",
+                "descricao": "Consigue la firmeza y flexibilidad óptimas y controladas para tu diseño estructurado y exigente.",
+                "details": "Leno es la base sólida para prendas que requieren una firmeza superior y una flexibilidad controlada, como la ropa deportiva de alta compresión y la modeladora. Es la solución perfecta para cinturas y barras que necesitan mantener la forma y la estructura incluso bajo uso intenso y estrés, asegurando calidad técnica, resistencia y longevidad en cualquier aplicación industrial, con un excelente retorno elástico."
+            },
+            "fr": {
+                "categoria": "Bases",
+                "material": "Élastique",
+                "descricao": "Obtenez la fermeté et la flexibilité optimales et contrôlées pour votre conception structurée et exigeante.",
+                "details": "Le Leno est la base solide pour les vêtements nécessitant une fermeté supérieure et une flexibilité contrôlée, tels que les vêtements de sport à haute compression et les vêtements shapewear. C’est la solution parfaite pour les ceintures et barres qui doivent maintenir forme et structure même sous une utilisation intense et des contraintes, garantissant la qualité technique, la solidité et la longévité dans chaque application industrielle, avec un excellent retour élastique."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "sxa3kt",
+        translationLastError: ""
     },
     {
         id: 26,
         nome: "Nayane",
         categoria: "Bases",
         imagem: "img - Copia/Bases/nayane-stik.png",
-        descricao: "Consistência de alta performance garantida para a sua produção em grande escala e alta demanda. Nayane é a base que garante um padrão de qualidade consistente e uniforme em todas as tiragens, com acabamento impecável e alta fidelidade ao design original. Sua composição técnica garante durabilidade e mantém a integridade estrutural da peça após diversas lavagens e ciclos de uso, sendo um material confiável que valoriza cada detalhe final da sua produção, otimizando o processo de costura.",
-        material: "Elástico"
+        descricao: "Consistência de alta performance garantida para a sua produção em grande escala e alta demanda.",
+        details: "Nayane é a base que garante um padrão de qualidade consistente e uniforme em todas as tiragens, com acabamento impecável e alta fidelidade ao design original. Sua composição técnica garante durabilidade e mantém a integridade estrutural da peça após diversas lavagens e ciclos de uso, sendo um material confiável que valoriza cada detalhe final da sua produção, otimizando o processo de costura.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bases",
+                "material": "Elastic",
+                "descricao": "Guaranteed high-performance consistency for your large-scale production and high demand.",
+                "details": "Nayane is the base that guarantees a consistent and uniform quality standard in all print runs, with impeccable finishing and high fidelity to the original design. Its technical composition guarantees durability and maintains the structural integrity of the piece after several washes and cycles of use, being a reliable material that values every final detail of its production, optimizing the sewing process."
+            },
+            "es": {
+                "categoria": "Bases",
+                "material": "Elástico",
+                "descricao": "Garantizado una alta eficiencia de alta calidad para tu producción a gran escala y alta demanda.",
+                "details": "Nayane es la base que garantiza un estándar de calidad consistente y uniforme en todas las tiradas, con acabados impecables y alta fidelidad al diseño original. Su composición técnica garantiza durabilidad y mantiene la integridad estructural de la pieza tras varios lavados y ciclos de uso, siendo un material fiable que valora cada detalle final de su producción y optimiza el proceso de costura."
+            },
+            "fr": {
+                "categoria": "Bases",
+                "material": "Élastique",
+                "descricao": "Garantie de la cohérence haute performance pour votre production à grande échelle et une forte demande.",
+                "details": "Nayane est la base qui garantit une qualité constante et uniforme dans tous les tirages, avec une finition impeccable et une haute fidélité au design original. Sa composition technique garantit la durabilité et maintient l’intégrité structurelle de la pièce après plusieurs lavages et cycles d’utilisation, étant un matériau fiable qui valorise chaque détail final de sa production, optimisant le processus de couture."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "1x6i57l",
+        translationLastError: ""
     },
-
-    // Elásticos Crus
     {
         id: 27,
         nome: "Beta",
         categoria: "Elásticos Crus",
         imagem: "img - Copia/Elásticos Crus/beta-stik (1).png",
-        descricao: "O ponto de partida essencial para a qualidade, robustez e alta performance na sua linha de produção. Beta é o elástico cru projetado para máxima durabilidade e estabilidade dimensional na sua forma mais pura e natural. É a matéria-prima ideal para ser utilizada em processos industriais que demandam material extremamente resistente, sem tingimento, e com um desempenho técnico superior garantido em todas as etapas da sua linha de produção, estando pronto para tingimento e acabamento final sem surpresas ou deformações.",
-        material: "Elástico"
+        descricao: "O ponto de partida essencial para a qualidade, robustez e alta performance na sua linha de produção.",
+        details: "Beta é o elástico cru projetado para máxima durabilidade e estabilidade dimensional na sua forma mais pura e natural. É a matéria-prima ideal para ser utilizada em processos industriais que demandam material extremamente resistente, sem tingimento, e com um desempenho técnico superior garantido em todas as etapas da sua linha de produção, estando pronto para tingimento e acabamento final sem surpresas ou deformações.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Raw Elastics",
+                "material": "Elastic",
+                "descricao": "The essential starting point for quality, robustness and high performance on your production line.",
+                "details": "Beta is the raw elastic designed for maximum durability and dimensional stability in its purest and most natural form. It is the ideal raw material to be used in industrial processes that demand extremely resistant material, without dyeing, and with a superior technical performance guaranteed in all stages of its production line, being ready for dyeing and final finishing without surprises or deformations."
+            },
+            "es": {
+                "categoria": "Elásticos en bruto",
+                "material": "Elástico",
+                "descricao": "El punto de partida esencial para la calidad, la robustez y el alto rendimiento en tu línea de producción.",
+                "details": "El beta es el elástico en bruto diseñado para la máxima durabilidad y estabilidad dimensional en su forma más pura y natural. Es la materia prima ideal para ser utilizada en procesos industriales que exigen material extremadamente resistente, sin teñir, y con un rendimiento técnico superior garantizado en todas las etapas de su línea de producción, listo para el teñido y el acabado final sin sorpresas ni deformaciones."
+            },
+            "fr": {
+                "categoria": "Élastiques bruts",
+                "material": "Élastique",
+                "descricao": "Le point de départ essentiel pour la qualité, la robustesse et la haute performance sur votre chaîne de production.",
+                "details": "Le bêta est l’élastique brut conçu pour une durabilité maximale et une stabilité dimensionnelle dans sa forme la plus pure et naturelle. C’est la matière première idéale pour être utilisée dans des procédés industriels nécessitant un matériau extrêmement résistant, sans teinture, et avec une performance technique supérieure garantie à toutes les étapes de sa chaîne de production, prêt pour la teinture et la finition finale sans surprises ni déformations."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "qa0b12",
+        translationLastError: ""
     },
     {
         id: 30,
         nome: "Flor",
         categoria: "Elásticos Crus",
         imagem: "img - Copia/Elásticos Crus/flor-stik (2).png",
-        descricao: "Flexibilidade essencial e versatilidade para inovar em seus designs de moda íntima e vestuário. Flor é o elástico cru versátil, que se destaca pela sua excelente capacidade de recuperação elástica e toque macio. É indicado para múltiplas aplicações onde a flexibilidade é o fator crucial, garantindo um desempenho de base sólido e adaptável antes de receber o tingimento ou acabamento final, mantendo a integridade da fibra e a elasticidade de forma consistente para diferentes tipos de peças.",
-        material: "Elástico"
+        descricao: "Flexibilidade essencial e versatilidade para inovar em seus designs de moda íntima e vestuário.",
+        details: "Flor é o elástico cru versátil, que se destaca pela sua excelente capacidade de recuperação elástica e toque macio. É indicado para múltiplas aplicações onde a flexibilidade é o fator crucial, garantindo um desempenho de base sólido e adaptável antes de receber o tingimento ou acabamento final, mantendo a integridade da fibra e a elasticidade de forma consistente para diferentes tipos de peças.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Raw Elastics",
+                "material": "Elastic",
+                "descricao": "Essential flexibility and versatility to innovate in your underwear and apparel designs.",
+                "details": "Flor is the versatile raw elastic, which stands out for its excellent elastic recovery capacity and soft touch. It is suitable for multiple applications where flexibility is the crucial factor, ensuring a solid and adaptable base performance before receiving the dye or final finish, maintaining fiber integrity and elasticity consistently for different types of garments."
+            },
+            "es": {
+                "categoria": "Elásticos en bruto",
+                "material": "Elástico",
+                "descricao": "Flexibilidad y versatilidad esenciales para innovar en el diseño de tu ropa interior y ropa.",
+                "details": "Flor es el elástico versátil en bruto, que destaca por su excelente capacidad de recuperación elástica y su tacto suave. Es adecuado para múltiples aplicaciones donde la flexibilidad es el factor crucial, asegurando un rendimiento base sólido y adaptable antes de recibir el tinte o el acabado final, manteniendo la integridad y elasticidad de la fibra de forma constante para diferentes tipos de prendas."
+            },
+            "fr": {
+                "categoria": "Élastiques bruts",
+                "material": "Élastique",
+                "descricao": "Flexibilité et polyvalence essentielles pour innover dans vos sous-vêtements et vos vêtements.",
+                "details": "Le flor est l’élastique brut polyvalent, qui se distingue par son excellente capacité de récupération élastique et sa douceur au toucher. Il convient à plusieurs applications où la flexibilité est le facteur crucial, garantissant une base solide et adaptable avant la teinture ou la finition finale, en maintenant l’intégrité et l’élasticité des fibres de façon constante pour différents types de vêtements."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "1st1huv",
+        translationLastError: ""
     },
     {
         id: 31,
         nome: "Fortim",
         categoria: "Elásticos Crus",
         imagem: "img - Copia/Elásticos Crus/fortim-stik.png",
-        descricao: "A base inabalável da sua resistência estrutural, confiabilidade e alta compressão. Fortim é o elástico cru de altíssima robustez e construção densa, desenvolvido para ser aplicado em peças que exigem máxima firmeza e resistência à tensão e ao estiramento. Ele é a garantia de durabilidade e fornece uma estrutura sólida e confiável para o vestuário que será submetido a um uso intenso e prolongado, como uniformes, equipamentos técnicos ou modeladores, mantendo a forma e a função.",
-        material: "Elástico"
+        descricao: "A base inabalável da sua resistência estrutural, confiabilidade e alta compressão.",
+        details: "Fortim é o elástico cru de altíssima robustez e construção densa, desenvolvido para ser aplicado em peças que exigem máxima firmeza e resistência à tensão e ao estiramento. Ele é a garantia de durabilidade e fornece uma estrutura sólida e confiável para o vestuário que será submetido a um uso intenso e prolongado, como uniformes, equipamentos técnicos ou modeladores, mantendo a forma e a função.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Raw Elastics",
+                "material": "Elastic",
+                "descricao": "The unshakable foundation of its structural strength, reliability and high compression.",
+                "details": "Fortim is the raw elastic of very high robustness and dense construction, developed to be applied to garments that require maximum firmness and resistance to tension and stretch. It is the guarantee of durability and provides a solid and reliable structure for clothing that will be subjected to intense and prolonged use, such as uniforms, technical equipment or shapewear, maintaining form and function."
+            },
+            "es": {
+                "categoria": "Elásticos en bruto",
+                "material": "Elástico",
+                "descricao": "La base inquebrantable de su resistencia estructural, fiabilidad y alta compresión.",
+                "details": "El fortim es el elástico en bruto de muy alta robustez y construcción densa, desarrollado para aplicarse a prendas que requieren máxima firmeza y resistencia a la tensión y el estiramiento. Garantiza durabilidad y proporciona una estructura sólida y fiable para prendas que serán sometidas a un uso intenso y prolongado, como uniformes, equipos técnicos o prendas moldeadoras, manteniendo la forma y la función."
+            },
+            "fr": {
+                "categoria": "Élastiques bruts",
+                "material": "Élastique",
+                "descricao": "La base inébranlable de sa solidité structurelle, de sa fiabilité et de sa forte compression.",
+                "details": "Le fortim est l’élastique brut d’une très grande robustesse et d’une construction dense, développé pour être appliqué aux vêtements nécessitant une fermeté et une résistance maximales à la tension et à l’élasticité. Il garantit la durabilité et offre une structure solide et fiable pour des vêtements soumis à un usage intense et prolongé, tels que les uniformes, équipements techniques ou les vêtements shapewear, maintenant la forme et la fonction."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "1ibmmb2",
+        translationLastError: ""
     },
     {
         id: 32,
         nome: "Iracema",
         categoria: "Elásticos Crus",
         imagem: "img - Copia/Elásticos Crus/iracema-stik.png",
-        descricao: "O preparo perfeito e técnico para receber a cor com fidelidade, vivacidade e consistência. Iracema é o elástico cru que entrega um desempenho elástico consistente e uniforme, sendo a base ideal para produtos que precisam de estabilidade e estão prontos para entrar em processos de coloração e tingimento. Ele mantém a qualidade e a elasticidade essenciais antes de receber o toque final e se transformar em um produto acabado de alta qualidade, sem alteração dimensional indesejada, otimizando o processo produtivo de cores.",
-        material: "Elástico"
+        descricao: "O preparo perfeito e técnico para receber a cor com fidelidade, vivacidade e consistência.",
+        details: "Iracema é o elástico cru que entrega um desempenho elástico consistente e uniforme, sendo a base ideal para produtos que precisam de estabilidade e estão prontos para entrar em processos de coloração e tingimento. Ele mantém a qualidade e a elasticidade essenciais antes de receber o toque final e se transformar em um produto acabado de alta qualidade, sem alteração dimensional indesejada, otimizando o processo produtivo de cores.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Raw Elastics",
+                "material": "Elastic",
+                "descricao": "The perfect and technical preparation to receive the color with fidelity, vividness and consistency.",
+                "details": "Iracema is the raw elastic that delivers consistent and uniform elastic performance, being the ideal base for products that need stability and are ready to enter coloring and dyeing processes. It maintains essential quality and elasticity before receiving the final touch and transforming into a high-quality finished product, without unwanted dimensional alteration, optimizing the color production process."
+            },
+            "es": {
+                "categoria": "Elásticos en bruto",
+                "material": "Elástico",
+                "descricao": "La preparación perfecta y técnica para recibir el color con fidelidad, viveza y consistencia.",
+                "details": "El iracema es el elástico en bruto que ofrece un rendimiento elástico consistente y uniforme, siendo la base ideal para productos que necesitan estabilidad y están listos para entrar en procesos de coloración y teñido. Mantiene la calidad y elasticidad esenciales antes de recibir el toque final y transformarse en un producto final de alta calidad, sin alteraciones dimensionales no deseadas, optimizando el proceso de producción del color."
+            },
+            "fr": {
+                "categoria": "Élastiques bruts",
+                "material": "Élastique",
+                "descricao": "La préparation parfaite et technique pour recevoir la couleur avec fidélité, vivacité et constance.",
+                "details": "L’iracema est l’élastique brut qui offre des performances élastiques constantes et uniformes, étant la base idéale pour les produits nécessitant de stabilité et prêts à entrer dans les processus de coloration et de teinture. Il maintient la qualité et l’élasticité essentielles avant de recevoir la touche finale et de se transformer en un produit fini de haute qualité, sans modifications dimensionnelles indésirables, optimisant ainsi le processus de production des couleurs."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "130cz4p",
+        translationLastError: ""
     },
     {
         id: 33,
         nome: "Jeri",
         categoria: "Elásticos Crus",
         imagem: "img - Copia/Elásticos Crus/jeri-stik.png",
-        descricao: "Ganhe agilidade e mantenha a qualidade na sua linha de produção industrial com excelência e facilidade. Jeri é o elástico cru que se destaca por ser de fácil manuseio e costura e por possuir excelente resistência ao rasgo e ao atrito. É ideal para confecções que valorizam a praticidade, a rapidez na montagem e a otimização de tempo, garantindo uma estrutura sólida e de qualidade em cada etapa do processo produtivo, entregando um produto final robusto e bem acabado.",
-        material: "Elástico"
+        descricao: "Ganhe agilidade e mantenha a qualidade na sua linha de produção industrial com excelência e facilidade.",
+        details: "Jeri é o elástico cru que se destaca por ser de fácil manuseio e costura e por possuir excelente resistência ao rasgo e ao atrito. É ideal para confecções que valorizam a praticidade, a rapidez na montagem e a otimização de tempo, garantindo uma estrutura sólida e de qualidade em cada etapa do processo produtivo, entregando um produto final robusto e bem acabado.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Raw Elastics",
+                "material": "Elastic",
+                "descricao": "Gain agility and maintain quality in your industrial production line with excellence and ease.",
+                "details": "Jeri is the raw elastic that stands out for being easy to handle and sew and for having excellent resistance to tearing and friction. It is ideal for clothing companies that value practicality, speed in assembly and time optimization, ensuring a solid and quality structure at each stage of the production process, delivering a robust and well-finished final product."
+            },
+            "es": {
+                "categoria": "Elásticos en bruto",
+                "material": "Elástico",
+                "descricao": "Gana agilidad y mantén la calidad en tu línea de producción industrial con excelencia y facilidad.",
+                "details": "Jeri es el elástico en bruto que destaca por ser fácil de manipular y coser, y por tener una excelente resistencia al desgarro y la fricción. Es ideal para empresas de confección que valoran la practicidad, la rapidez en el montaje y la optimización del tiempo, asegurando una estructura sólida y de calidad en cada etapa del proceso de producción, ofreciendo un producto final robusto y bien acabado."
+            },
+            "fr": {
+                "categoria": "Élastiques bruts",
+                "material": "Élastique",
+                "descricao": "Gagnez en agilité et maintenez la qualité dans votre chaîne de production industrielle avec excellence et aisance.",
+                "details": "Jeri est l’élastique brut qui se distingue par sa facilité de manipulation et de couture, et par son excellente résistance aux déchirures et aux frottements. Il est idéal pour les entreprises de vêtements qui valorisent la praticité, la rapidité d’assemblage et l’optimisation du temps, garantissant une structure solide et de qualité à chaque étape du processus de production, offrant un produit final robuste et bien fini."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "wv7vtt",
+        translationLastError: ""
     },
     {
         id: 34,
         nome: "Plla",
         categoria: "Elásticos Crus",
         imagem: "img - Copia/Elásticos Crus/plla-stik.png",
-        descricao: "Alto desempenho técnico para as maiores demandas e exigências do mercado de vestuário. Plla é o elástico cru técnico, perfeito para processos industriais exigentes, de grande volume de produção e que necessitam de máxima performance. Ele oferece a firmeza, a durabilidade e o desempenho superior necessários para o uso em larga escala, com uma garantia de qualidade que assegura a padronização e a consistência do seu produto final em todas as remessas, sendo ideal para peças estruturadas.",
-        material: "Elástico"
+        descricao: "Alto desempenho técnico para as maiores demandas e exigências do mercado de vestuário.",
+        details: "Plla é o elástico cru técnico, perfeito para processos industriais exigentes, de grande volume de produção e que necessitam de máxima performance. Ele oferece a firmeza, a durabilidade e o desempenho superior necessários para o uso em larga escala, com uma garantia de qualidade que assegura a padronização e a consistência do seu produto final em todas as remessas, sendo ideal para peças estruturadas.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Raw Elastics",
+                "material": "Elastic",
+                "descricao": "High technical performance for the highest demands and requirements of the clothing market.",
+                "details": "Plla is the technical raw elastic, perfect for demanding, high-volume industrial processes that require maximum performance. It offers the firmness, durability and superior performance required for large-scale use, with a quality assurance that ensures the standardization and consistency of your final product in all shipments, and is ideal for structured parts."
+            },
+            "es": {
+                "categoria": "Elásticos en bruto",
+                "material": "Elástico",
+                "descricao": "Alto rendimiento técnico para las mayores demandas y requisitos del mercado de la confección.",
+                "details": "Plla es el elástico técnico en bruto, perfecto para procesos industriales exigentes y de alto volumen que requieren el máximo rendimiento. Ofrece la firmeza, durabilidad y rendimiento superior necesarios para un uso a gran escala, con un control de calidad que garantiza la estandarización y consistencia de tu producto final en todos los envíos, y es ideal para piezas estructuradas."
+            },
+            "fr": {
+                "categoria": "Élastiques bruts",
+                "material": "Élastique",
+                "descricao": "Haute performance technique pour répondre aux exigences et exigences les plus élevées du marché de l’habillement.",
+                "details": "Le PLLA est l’élastique technique brut, parfait pour des processus industriels exigeants et à fort volume qui exigent des performances maximales. Il offre la fermeté, la durabilité et les performances supérieures requises pour une utilisation à grande échelle, avec une assurance qualité garantissant la standardisation et la cohérence de votre produit final dans tous les livraisons, et est idéal pour les pièces structurées."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "1535le0",
+        translationLastError: ""
     },
     {
         id: 35,
         nome: "Plus II",
         categoria: "Elásticos Crus",
         imagem: "img - Copia/Elásticos Crus/plusii-stik.png",
-        descricao: "A garantia técnica de que o ajuste será mantido, sempre com a máxima precisão dimensional. Plus II é o elástico cru que possui estabilidade dimensional excepcional, o que minimiza o risco de encolhimento ou alargamento indesejado após processos. É um material essencial para garantir que as medidas das peças sejam preservadas e não se alterem, mesmo após os processos de tingimento e acabamento, mantendo a qualidade e o encaixe perfeito da roupa, fundamental para o controle de qualidade.",
-        material: "Elástico"
+        descricao: "A garantia técnica de que o ajuste será mantido, sempre com a máxima precisão dimensional.",
+        details: "Plus II é o elástico cru que possui estabilidade dimensional excepcional, o que minimiza o risco de encolhimento ou alargamento indesejado após processos. É um material essencial para garantir que as medidas das peças sejam preservadas e não se alterem, mesmo após os processos de tingimento e acabamento, mantendo a qualidade e o encaixe perfeito da roupa, fundamental para o controle de qualidade.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Raw Elastics",
+                "material": "Elastic",
+                "descricao": "The technical guarantee that the fit will be maintained, always with maximum dimensional precision.",
+                "details": "Plus II is the raw elastic that has exceptional dimensional stability, which minimizes the risk of shrinkage or unwanted enlargement after processes. It is an essential material to ensure that the measurements of the pieces are preserved and do not change, even after the dyeing and finishing processes, maintaining the quality and perfect fit of the garment, which is essential for quality control."
+            },
+            "es": {
+                "categoria": "Elásticos en bruto",
+                "material": "Elástico",
+                "descricao": "La garantía técnica de que el ajuste se mantendrá, siempre con máxima precisión dimensional.",
+                "details": "El Plus II es el elástico en bruto que tiene una estabilidad dimensional excepcional, lo que minimiza el riesgo de encogimiento o agrandamiento no deseado tras los procesos. Es un material esencial para asegurar que las medidas de las piezas se conserven y no cambien, incluso después de los procesos de teñido y acabado, manteniendo la calidad y el ajuste perfecto de la prenda, lo cual es esencial para el control de calidad."
+            },
+            "fr": {
+                "categoria": "Élastiques bruts",
+                "material": "Élastique",
+                "descricao": "La garantie technique que l’ajustement sera maintenu, toujours avec une précision dimensionnelle maximale.",
+                "details": "Le plus II est l’élastique brut qui offre une stabilité dimensionnelle exceptionnelle, ce qui minimise le risque de rétrécissement ou d’agrandissement indésirable après les procédés. C’est un matériau essentiel pour garantir que les mesures des pièces sont conservées et ne changent pas, même après les processus de teinture et de finition, tout en maintenant la qualité et l’ajustement parfait du vêtement, ce qui est essentiel au contrôle qualité."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "85r8vv",
+        translationLastError: ""
     },
     {
-
         id: 36,
         nome: "Grécia",
         categoria: "Alças",
         imagem: "img - Copia/Alças/grecia-stik (1).png",
-        descricao: "Uma alça técnica que garante a precisão do ajuste final e a integridade dimensional da peça. Grecia é a solução técnica para manter a integridade dimensional de suas peças, especialmente em ambientes de alta tensão e uso contínuo. Sua formulação e construção garantem que as medidas da roupa sejam mantidas e estáveis mesmo após passarem por todos os processos de tingimento e acabamento, entregando um resultado final que veste perfeitamente, agrada o consumidor e mantém a durabilidade e o suporte essencial.",
-        material: "Elástico"
+        descricao: "Uma alça técnica que garante a precisão do ajuste final e a integridade dimensional da peça.",
+        details: "Grecia é a solução técnica para manter a integridade dimensional de suas peças, especialmente em ambientes de alta tensão e uso contínuo. Sua formulação e construção garantem que as medidas da roupa sejam mantidas e estáveis mesmo após passarem por todos os processos de tingimento e acabamento, entregando um resultado final que veste perfeitamente, agrada o consumidor e mantém a durabilidade e o suporte essencial.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Handles",
+                "material": "Elastic",
+                "descricao": "A technical handle that guarantees the accuracy of the final fit and the dimensional integrity of the part.",
+                "details": "Greece is the technical solution to maintain the dimensional integrity of your garments, especially in high-stress environments and continuous use. Its formulation and construction ensure that the measurements of the garment are maintained and stable even after going through all the dyeing and finishing processes, delivering a final result that fits perfectly, pleases the consumer and maintains durability and essential support."
+            },
+            "es": {
+                "categoria": "Asas",
+                "material": "Elástico",
+                "descricao": "Un mango técnico que garantice la precisión del ajuste final y la integridad dimensional de la pieza.",
+                "details": "Grecia es la solución técnica para mantener la integridad dimensional de tus prendas, especialmente en entornos de alto estrés y uso continuo. Su formulación y construcción aseguran que las medidas de la prenda se mantengan y sean estables incluso después de pasar por todos los procesos de teñido y acabado, ofreciendo un resultado final que encaja perfectamente, satisface al consumidor y mantiene la durabilidad y el soporte esencial."
+            },
+            "fr": {
+                "categoria": "Poignées",
+                "material": "Élastique",
+                "descricao": "Une poignée technique garantissant la précision de l’ajustement final et l’intégrité dimensionnelle de la pièce.",
+                "details": "La Grèce est la solution technique pour maintenir l’intégrité dimensionnelle de vos vêtements, en particulier dans des environnements à forte tension et une utilisation continue. Sa formulation et sa fabrication garantissent que les mesures du vêtement sont maintenues et stables même après tous les processus de teinture et de finition, offrant un résultat final parfaitement ajusté, satisfait le consommateur et conserve la durabilité ainsi que le soutien essentiel."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "k385u9",
+        translationLastError: ""
     },
-
-    // Modeladores
     {
         id: 37,
         nome: "Cintarela",
         categoria: "Modeladores",
         imagem: "img - Copia/Modeladores/cintarela2-stik (1).png",
-        descricao: "Desenvolva modeladores com definição de silhueta, conforto e durabilidade inigualáveis para o mercado premium. Cintarela é o elástico que proporciona um suporte firme e um ajuste preciso em peças que demandam compressão controlada e modelagem. Sua construção robusta e tecnológica garante que o vestuário mantenha a forma e a compressão necessária por um longo período de tempo, valorizando a silhueta, o design e garantindo a satisfação do usuário. Ideal para cós de alta sustentação e peças que precisam de alta recuperação elástica.",
-        material: "Elástico"
+        descricao: "Desenvolva modeladores com definição de silhueta, conforto e durabilidade inigualáveis para o mercado premium.",
+        details: "Cintarela é o elástico que proporciona um suporte firme e um ajuste preciso em peças que demandam compressão controlada e modelagem. Sua construção robusta e tecnológica garante que o vestuário mantenha a forma e a compressão necessária por um longo período de tempo, valorizando a silhueta, o design e garantindo a satisfação do usuário. Ideal para cós de alta sustentação e peças que precisam de alta recuperação elástica.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Shapewear",
+                "material": "Elastic",
+                "descricao": "Develop shapewear with silhouette definition, comfort and durability unmatched for the premium market.",
+                "details": "Cintarela is the elastic band that provides firm support and a precise fit in pieces that require controlled compression and shaping. Its robust and technological construction ensures that the garment maintains the shape and compression required for a long period of time, enhancing the silhouette, design and ensuring user satisfaction. Ideal for high support waistbands and pieces that need high elastic recovery."
+            },
+            "es": {
+                "categoria": "Prendas moldeadoras",
+                "material": "Elástico",
+                "descricao": "Desarrolla prendas moldeadoras con definición de silueta, comodidad y durabilidad inigualables para el mercado premium.",
+                "details": "Cintarela es la goma elástica que proporciona un soporte firme y un ajuste preciso en piezas que requieren compresión y modelado controlados. Su construcción robusta y tecnológica garantiza que la prenda mantenga la forma y compresión requeridas durante un largo periodo de tiempo, realzando la silueta, el diseño y asegurando la satisfacción del usuario. Ideal para cinturas de alto soporte y piezas que requieren alta recuperación elástica."
+            },
+            "fr": {
+                "categoria": "Vêtements shapewear",
+                "material": "Élastique",
+                "descricao": "Développez des vêtements shapewear avec une définition de silhouette, un confort et une durabilité inégalés pour le marché haut de gamme.",
+                "details": "La Cintarela est l’élastique qui offre un soutien solide et un ajustement précis dans les pièces nécessitant une compression et une forme contrôlées. Sa construction robuste et technologique garantit que le vêtement conserve la forme et la compression requises sur une longue période, améliorant ainsi la silhouette, le design et garantissant la satisfaction de l’utilisateur. Idéal pour les ceintures à fort soutien et les pièces nécessitant une grande récupération élastique."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "8ei5oa",
+        translationLastError: ""
     },
-
     {
         id: 39,
         nome: "Belly",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/bellypersonalisados-stik.png",
-        descricao: "Adicione um toque de luxo, sofisticação e personalidade à sua linha premium de vestuário. Esta é a versão customizada do elástico Belly, apresentando um acabamento diferenciado, toque acetinado e resistência superior ao desgaste e à tensão. O produto adiciona um toque exclusivo e visualmente rico às suas peças, mantendo o alto desempenho elástico e a qualidade que são esperados de um material premium, levando a sua marca para o destaque no acabamento.",
-        material: "Elástico"
+        descricao: "Adicione um toque de luxo, sofisticação e personalidade à sua linha premium de vestuário.",
+        details: "Esta é a versão customizada do elástico Belly, apresentando um acabamento diferenciado, toque acetinado e resistência superior ao desgaste e à tensão. O produto adiciona um toque exclusivo e visualmente rico às suas peças, mantendo o alto desempenho elástico e a qualidade que são esperados de um material premium, levando a sua marca para o destaque no acabamento.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Add a touch of luxury, sophistication and personality to your premium line of apparel.",
+                "details": "This is the customized version of the Belly elastic, featuring a distinctive finish, satin feel and superior resistance to wear and tension. The product adds an exclusive and visually rich touch to your pieces, while maintaining the high elastic performance and quality that are expected from a premium material, taking your brand to the forefront in the finish."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Añade un toque de lujo, sofisticación y personalidad a tu línea de ropa premium.",
+                "details": "Esta es la versión personalizada del elástico Belly, con un acabado distintivo, sensación satinada y una resistencia superior al desgaste y la tensión. El producto aporta un toque exclusivo y visualmente rico a tus piezas, manteniendo al tiempo el alto rendimiento elástico y la calidad que se espera de un material premium, llevando tu marca al primer plano en el acabado."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Ajoutez une touche de luxe, de sophistication et de personnalité à votre gamme de vêtements haut de gamme.",
+                "details": "Il s’agit de la version personnalisée de l’élastique Belly, avec une finition distinctive, une sensation satinée et une résistance supérieure à l’usure et à la tension. Le produit apporte une touche exclusive et visuellement riche à vos pièces, tout en conservant les hautes performances élastiques et la qualité attendues d’un matériau premium, mettant votre marque au premier plan dans la finition."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "okdqpe",
+        translationLastError: ""
     },
     {
         id: 40,
         nome: "Fênix",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/fenix-stik.png",
-        descricao: "A sua identidade em destaque com performance técnica e confiável em cada detalhe de costura. Fenix é o elástico que possui um design exclusivo e desempenho comprovado, desenvolvido sob medida para as necessidades e padrões de design da sua marca. Ele garante que a integridade da estampa ou padrão personalizado se mantenha impecável, reforçando a comunicação visual da sua coleção e assegurando a durabilidade do design mesmo após o uso e lavagem frequentes, com alta fidelidade de cor.",
-        material: "Elástico"
+        descricao: "A sua identidade em destaque com performance técnica e confiável em cada detalhe de costura.",
+        details: "Fenix é o elástico que possui um design exclusivo e desempenho comprovado, desenvolvido sob medida para as necessidades e padrões de design da sua marca. Ele garante que a integridade da estampa ou padrão personalizado se mantenha impecável, reforçando a comunicação visual da sua coleção e assegurando a durabilidade do design mesmo após o uso e lavagem frequentes, com alta fidelidade de cor.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Your identity stands out with technical and reliable performance in every sewing detail.",
+                "details": "Fenix is the elastic band that has a unique design and proven performance, tailored to your brand's needs and design standards. It ensures that the integrity of the print or custom pattern remains impeccable, reinforcing the visual communication of your collection and ensuring the durability of the design even after frequent use and washing, with high color fidelity."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Tu identidad destaca por su rendimiento técnico y fiable en cada detalle de costura.",
+                "details": "Fenix es la goma elástica con un diseño único y un rendimiento probado, adaptado a las necesidades y estándares de diseño de tu marca. Garantiza que la integridad del estampado o patrón personalizado se mantenga impecable, reforzando la comunicación visual de tu colección y asegurando la durabilidad del diseño incluso tras un uso y lavado frecuentes, con alta fidelidad de color."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Votre identité se démarque par une performance technique et fiable dans chaque détail de couture.",
+                "details": "Fenix est l’élastique qui possède un design unique et des performances éprouvées, adaptée aux besoins et standards de votre marque. Elle garantit que l’intégrité de l’imprimé ou du motif personnalisé reste impeccable, renforçant la communication visuelle de votre collection et garantissant la durabilité du design même après une utilisation et un lavage fréquents, avec une grande fidélité des couleurs."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "m8wug7",
+        translationLastError: ""
     },
     {
         id: 41,
         nome: "Fox",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/fox-stik.png",
-        descricao: "Maximize o apelo visual customizado para todas as suas peças e garanta um impacto visual forte e memorável. Fox é o elástico personalizado e versátil, que oferece uma excelente área de impressão para a sua marca, logotipos ou padrões decorativos. Ele combina a funcionalidade e o desempenho técnico do elástico com um forte apelo visual customizado e marcante, elevando o design da sua linha de vestuário e garantindo a identidade da sua coleção em cada detalhe do cós.",
-        material: "Elástico"
+        descricao: "Maximize o apelo visual customizado para todas as suas peças e garanta um impacto visual forte e memorável.",
+        details: "Fox é o elástico personalizado e versátil, que oferece uma excelente área de impressão para a sua marca, logotipos ou padrões decorativos. Ele combina a funcionalidade e o desempenho técnico do elástico com um forte apelo visual customizado e marcante, elevando o design da sua linha de vestuário e garantindo a identidade da sua coleção em cada detalhe do cós.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Maximize the custom visual appeal for all your pieces and ensure a strong and memorable visual impact.",
+                "details": "Fox is the personalized and versatile elastic band, which offers an excellent printing area for your brand, logos or decorative patterns. It combines the functionality and technical performance of the elastic with a strong customized and striking visual appeal, elevating the design of your clothing line and ensuring the identity of your collection in every detail of the waistband."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Maximiza el atractivo visual personalizado de todas tus piezas y asegura un impacto visual fuerte e inolvidable.",
+                "details": "Fox es la goma elástica personalizada y versátil, que ofrece una excelente zona de impresión para tu marca, logotipos o patrones decorativos. Combina la funcionalidad y el rendimiento técnico de la goma con un atractivo visual personalizado y llamativo, elevando el diseño de tu línea de ropa y asegurando la identidad de tu colección en cada detalle de la cintura."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Maximisez l’attrait visuel personnalisé de toutes vos pièces et assurez-vous d’un impact visuel fort et mémorable.",
+                "details": "Fox est un élastique personnalisé et polyvalent, qui offre un excellent espace d’impression pour votre marque, vos logos ou vos motifs décoratifs. Il allie la fonctionnalité et la performance technique de l’élastique à un attrait visuel personnalisé et frappant, sublimant le design de votre ligne de vêtements et garantissant l’identité de votre collection dans chaque détail de la ceinture."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.604Z",
+        translationSourceSignature: "11dgq2x",
+        translationLastError: ""
     },
     {
         id: 42,
         nome: "Gym",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/gym-stik.png",
-        descricao: "Conquiste o mercado esportivo e fitness com estilo, alta performance e funcionalidade garantida. Gym é o elástico personalizado ideal para aplicações fitness e esportivas de alto rendimento. Ele combina alta elasticidade e uma notável resistência ao suor, umidade, cloro e ciclos de lavagens frequentes, garantindo que a personalização da sua marca permaneça intacta, independentemente da intensidade do exercício e da rotina do atleta, oferecendo durabilidade extrema.",
-        material: "Elástico"
+        descricao: "Conquiste o mercado esportivo e fitness com estilo, alta performance e funcionalidade garantida.",
+        details: "Gym é o elástico personalizado ideal para aplicações fitness e esportivas de alto rendimento. Ele combina alta elasticidade e uma notável resistência ao suor, umidade, cloro e ciclos de lavagens frequentes, garantindo que a personalização da sua marca permaneça intacta, independentemente da intensidade do exercício e da rotina do atleta, oferecendo durabilidade extrema.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Conquer the sports and fitness market with style, high performance and guaranteed functionality.",
+                "details": "Gym is the ideal custom elastic band for high-performance fitness and sports applications. It combines high elasticity and a remarkable resistance to sweat, moisture, chlorine and frequent wash cycles, ensuring that your brand customization remains intact regardless of the intensity of the exercise and the athlete's routine, offering extreme durability."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Conquista el mercado del deporte y el fitness con estilo, alto rendimiento y funcionalidad garantizada.",
+                "details": "El gimnasio es la banda elástica personalizada ideal para aplicaciones de fitness y deportes de alto rendimiento. Combina alta elasticidad y una resistencia notable al sudor, la humedad, el cloro y ciclos frecuentes de lavado, asegurando que la personalización de tu marca se mantenga intacta independientemente de la intensidad del ejercicio y la rutina del atleta, ofreciendo una durabilidad extrema."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Conquérez le marché du sport et du fitness avec style, haute performance et fonctionnalité garantie.",
+                "details": "La salle de sport est l’élastique sur mesure idéale pour les applications sportives et de fitness haute performance. Elle allie une grande élasticité et une résistance remarquable à la transpiration, à l’humidité, au chlore et aux cycles de lavage fréquents, garantissant que la personnalisation de votre marque reste intacte, quelle que soit l’intensité de l’exercice et la routine de l’athlète, offrant une durabilité extrême."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "6j8fj4",
+        translationLastError: ""
     },
     {
         id: 43,
         nome: "Jana",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/jana-stik.png",
-        descricao: "Conforto e estilo pensados sob medida para o seu público mais exigente em moda íntima. Jana é o elástico que harmoniza um toque agradável e extremamente suave com um design que pode ser totalmente customizado e exclusivo. É perfeito para linhas de moda íntima que buscam detalhes personalizados e o máximo de bem-estar para o uso prolongado, oferecendo um ajuste suave, discreto e duradouro, com a marca em evidência.",
-        material: "Elástico"
+        descricao: "Conforto e estilo pensados sob medida para o seu público mais exigente em moda íntima.",
+        details: "Jana é o elástico que harmoniza um toque agradável e extremamente suave com um design que pode ser totalmente customizado e exclusivo. É perfeito para linhas de moda íntima que buscam detalhes personalizados e o máximo de bem-estar para o uso prolongado, oferecendo um ajuste suave, discreto e duradouro, com a marca em evidência.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Comfort and style tailored to your most demanding audience in underwear.",
+                "details": "Jana is the elastic that harmonizes a pleasant and extremely soft touch with a design that can be fully customized and exclusive. It is perfect for underwear lines that seek personalized details and maximum well-being for prolonged use, offering a soft, discreet and long-lasting fit, with the brand in evidence."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Comodidad y estilo adaptados a tu público más exigente en ropa interior.",
+                "details": "Jana es la goma que armoniza un toque agradable y extremadamente suave con un diseño que puede personalizarse completamente y ser exclusivo. Es perfecta para líneas de ropa interior que buscan detalles personalizados y el máximo bienestar para un uso prolongado, ofreciendo un ajuste suave, discreto y duradero, con la marca en la marca."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Confort et style adaptés à votre public le plus exigeant en sous-vêtements.",
+                "details": "Jana est l’élastique qui harmonise un toucher agréable et extrêmement doux avec un design entièrement personnalisé et exclusif. Il est parfait pour les gammes de sous-vêtements qui recherchent des détails personnalisés et un bien-être maximal pour un usage prolongé, offrant une coupe douce, discrète et durable, avec la marque en présentie."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "e3yfwb",
+        translationLastError: ""
     },
     {
         id: 44,
         nome: "Kiss",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/kiss-stik.png",
-        descricao: "A delicadeza do toque que dura e resiste ao tempo e ao desgaste do uso diário. Kiss é o elástico personalizado com toque suave e resistência ideal para o uso diário em peças delicadas. Permite a criação de designs delicados e esteticamente agradáveis, sem abrir mão da durabilidade e da resistência necessárias para peças de uso contínuo, tornando-o funcional e visualmente atraente para o consumidor final.",
-        material: "Elástico"
+        descricao: "A delicadeza do toque que dura e resiste ao tempo e ao desgaste do uso diário.",
+        details: "Kiss é o elástico personalizado com toque suave e resistência ideal para o uso diário em peças delicadas. Permite a criação de designs delicados e esteticamente agradáveis, sem abrir mão da durabilidade e da resistência necessárias para peças de uso contínuo, tornando-o funcional e visualmente atraente para o consumidor final.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "The delicacy of the touch that lasts and resists the time and wear and tear of daily use.",
+                "details": "Kiss is the custom elastic with a soft touch and resistance ideal for daily use in delicate pieces. It allows the creation of delicate and aesthetically pleasing designs, without giving up the durability and resistance necessary for pieces of continuous use, making it functional and visually appealing to the end consumer."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "La delicadeza del tacto que perdura y resiste el tiempo y el desgaste del uso diario.",
+                "details": "Kiss es el elástico personalizado con un tacto suave y resistencia, ideal para el uso diario en piezas delicadas. Permite crear diseños delicados y estéticamente agradables, sin renunciar a la durabilidad y resistencia necesarias para piezas de uso continuo, haciéndolo funcional y visualmente atractivo para el consumidor final."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "La délicatesse du contact qui dure et résiste au temps et à l’usure de l’usage quotidien.",
+                "details": "Kiss est un élastique sur mesure avec une douceur et une résistance, idéal pour un usage quotidien dans des pièces délicates. Il permet de créer des motifs délicats et esthétiquement agréables, sans renoncer à la durabilité et à la résistance nécessaires pour des pièces à usage continu, le rendant fonctionnel et visuellement attrayant pour le consommateur final."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1yeyyl6",
+        translationLastError: ""
     },
     {
         id: 45,
         nome: "Léxia",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/lexia-stik.png",
-        descricao: "Design moderno com um caimento e ajuste perfeitos e duradouros, elevando a peça. Lexia é o elástico de visual contemporâneo e ótimo caimento, que oferece total possibilidade de customização com a sua marca e padrão. É a escolha ideal para coleções que priorizam um ajuste perfeito, durável e um forte apelo de design na cintura ou em acabamentos, garantindo que a peça vista de forma impecável e estruturada no corpo.",
-        material: "Elástico"
+        descricao: "Design moderno com um caimento e ajuste perfeitos e duradouros, elevando a peça.",
+        details: "Lexia é o elástico de visual contemporâneo e ótimo caimento, que oferece total possibilidade de customização com a sua marca e padrão. É a escolha ideal para coleções que priorizam um ajuste perfeito, durável e um forte apelo de design na cintura ou em acabamentos, garantindo que a peça vista de forma impecável e estruturada no corpo.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Modern design with a perfect and durable fit and fit, elevating the piece.",
+                "details": "Lexia is the elastic with a contemporary look and great fit, which offers full customization with your brand and pattern. It is the ideal choice for collections that prioritize a perfect, durable fit and a strong design appeal at the waist or finishes, ensuring that the piece is worn impeccably and structured on the body."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Diseño moderno con un ajuste perfecto y duradero, que eleva la pieza.",
+                "details": "Lexia es el elástico con un aspecto contemporáneo y un ajuste excelente, que ofrece personalización total según tu marca y tu patrón. Es la elección ideal para colecciones que priorizan un ajuste perfecto y duradero y un fuerte atractivo de diseño en la cintura o los acabados, asegurando que la prenda se lleve impecable y estructurada en el cuerpo."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Design moderne avec un ajustement parfait et durable, qui sublime la pièce.",
+                "details": "Lexia est l’élastique au look contemporain et à la coupe parfaite, qui offre une personnalisation totale selon votre marque et votre patron. C’est le choix idéal pour les collections qui privilégient un ajustement parfait et durable ainsi qu’un fort attrait de design à la taille ou aux finitions, garantissant que la pièce soit portée de manière impeccable et structurée sur le corps."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "11r98ti",
+        translationLastError: ""
     },
     {
         id: 46,
         nome: "Lion",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/lion-stik.png",
-        descricao: "Força, resistência e exclusividade em suas peças mais estruturadas e de alta compressão. Lion é o elástico personalizado indicado para vestuário mais robusto, pesado ou que exige maior sustentação e compressão. Ele combina a firmeza estrutural inquestionável do material com a visibilidade e a exclusividade da sua personalização, sendo ideal para cós de alta pressão, roupas de trabalho e vestuário esportivo de impacto, garantindo suporte máximo.",
-        material: "Elástico"
+        descricao: "Força, resistência e exclusividade em suas peças mais estruturadas e de alta compressão.",
+        details: "Lion é o elástico personalizado indicado para vestuário mais robusto, pesado ou que exige maior sustentação e compressão. Ele combina a firmeza estrutural inquestionável do material com a visibilidade e a exclusividade da sua personalização, sendo ideal para cós de alta pressão, roupas de trabalho e vestuário esportivo de impacto, garantindo suporte máximo.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Strength, resistance and exclusivity in its most structured and high compression pieces.",
+                "details": "Lion is the custom elastic indicated for more robust, heavy clothing or that requires greater support and compression. It combines the unquestionable structural firmness of the material with the visibility and exclusivity of its customization, being ideal for high-pressure waistbands, workwear and impact sportswear, ensuring maximum support."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Fuerza, resistencia y exclusividad en sus piezas más estructuradas y de alta compresión.",
+                "details": "Lion es el elástico personalizado indicado para prendas más robustas y pesadas o que requieren mayor soporte y compresión. Combina la indiscutible firmeza estructural del material con la visibilidad y exclusividad de su personalización, siendo ideal para cinturas de alta presión, ropa de trabajo y ropa deportiva de impacto, asegurando el máximo soporte."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Force, résistance et exclusivité dans ses pièces les plus structurées et à haute compression.",
+                "details": "Lion est l’élastique sur mesure destiné aux vêtements plus robustes et lourds ou nécessitant un meilleur soutien et une compression. Il combine la fermeté structurelle incontestable du matériau avec la visibilité et l’exclusivité de sa personnalisation, étant idéal pour les ceintures à haute pression, les vêtements de travail et les vêtements de sport à impact, garantissant un soutien maximal."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "qm7tyx",
+        translationLastError: ""
     },
     {
         id: 47,
         nome: "Liptus",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/liptus-stik.png",
-        descricao: "Padrão consistente, confiabilidade técnica e estética garantida em larga escala industrial. Liptus é o elástico personalizado que oferece um acabamento confiável, estável e com alta fidelidade de cor e padrão em todas as tiragens. Sua consistência técnica o torna o material perfeito para tiragens industriais que exigem uma padronização rigorosa e sem falhas, garantindo a uniformidade e a qualidade do seu produto em grandes volumes de produção.",
-        material: "Elástico"
+        descricao: "Padrão consistente, confiabilidade técnica e estética garantida em larga escala industrial.",
+        details: "Liptus é o elástico personalizado que oferece um acabamento confiável, estável e com alta fidelidade de cor e padrão em todas as tiragens. Sua consistência técnica o torna o material perfeito para tiragens industriais que exigem uma padronização rigorosa e sem falhas, garantindo a uniformidade e a qualidade do seu produto em grandes volumes de produção.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Consistent standard, technical reliability and aesthetics guaranteed on a large industrial scale.",
+                "details": "Liptus is the custom elastic that offers a reliable, stable finish with high color fidelity and pattern in all runs. Its technical consistency makes it the perfect material for industrial runs that require rigorous and flawless standardization, ensuring the uniformity and quality of your product in large production volumes."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Estándar consistente, fiabilidad técnica y estética garantizados a gran escala industrial.",
+                "details": "Liptus es el elástico personalizado que ofrece un acabado fiable y estable con alta fidelidad de color y patrón en todas las tiradas. Su consistencia técnica lo convierte en el material perfecto para tiradas industriales que requieren una estandarización rigurosa e impecable, asegurando la uniformidad y calidad de tu producto en grandes volúmenes de producción."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Une standardisation constante, une fiabilité technique et une esthétique garanties à grande échelle industrielle.",
+                "details": "Liptus est l’élastique sur mesure qui offre une finition fiable et stable, avec une haute fidélité des couleurs et des motifs dans toutes les séries. Sa cohérence technique en fait le matériau parfait pour les séries industrielles nécessitant une standardisation rigoureuse et sans défaut, garantissant l’uniformité et la qualité de votre produit en grande quantité."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "pot2d",
+        translationLastError: ""
     },
     {
         id: 48,
         nome: "Lisboa",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/lisboa-stik.png",
-        descricao: "Elegância, estética refinada e alta resistência para o seu segmento de luxo e alta-costura. Lisboa é um elástico de estética refinada e alta resistência ao estiramento e ao desgaste, com amplas opções de customização e personalização de cor. É perfeito para agregar valor, exclusividade e um acabamento de alto padrão em peças de luxo, onde a qualidade técnica e o detalhe visual são inegociáveis, proporcionando um toque sedoso.",
-        material: "Elástico"
+        descricao: "Elegância, estética refinada e alta resistência para o seu segmento de luxo e alta-costura.",
+        details: "Lisboa é um elástico de estética refinada e alta resistência ao estiramento e ao desgaste, com amplas opções de customização e personalização de cor. É perfeito para agregar valor, exclusividade e um acabamento de alto padrão em peças de luxo, onde a qualidade técnica e o detalhe visual são inegociáveis, proporcionando um toque sedoso.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Elegance, refined aesthetics and high resistance for its luxury and haute couture segment.",
+                "details": "Lisboa is an elastic band with refined aesthetics and high resistance to stretch and wear, with wide options for customization and color customization. It is perfect for adding value, exclusivity and a high-end finish to luxury pieces, where technical quality and visual detail are non-negotiable, providing a silky touch."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Elegancia, estética refinada y alta resistencia para su segmento de lujo y alta costura.",
+                "details": "Lisboa es una goma elástica con una estética refinada y alta resistencia al estiramiento y al desgaste, con amplias opciones de personalización y color. Es perfecta para añadir valor, exclusividad y un acabado de alta gama a piezas de lujo, donde la calidad técnica y el detalle visual son innegociables, proporcionando un toque sedoso."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Élégance, esthétique raffinée et haute résistance pour son segment luxe et haute couture.",
+                "details": "Lisboa est un élastique à l’esthétique raffinée et à une grande résistance à l’étirement et à l’usure, avec de larges options de personnalisation et de personnalisation des couleurs. Il est parfait pour apporter de la valeur, de l’exclusivité et une finition haut de gamme aux pièces de luxe, où la qualité technique et le détail visuel sont non négociables, offrant une touche soyeuse."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "cquxzd",
+        translationLastError: ""
     },
     {
         id: 50,
         nome: "Master",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/masterpersonalisado-stik.png",
-        descricao: "A durabilidade e a resistência Master com a forte e marcante identidade da sua marca. Esta é a versão customizada do elástico Master, com personalização de alta durabilidade e integridade visual. Ele combina a resistência estrutural inquestionável e o suporte técnico do material com a forte e marcante identidade visual da sua marca, sendo ideal para peças que serão submetidas a uso intenso e lavagens frequentes, garantindo longevidade.",
-        material: "Elástico"
+        descricao: "A durabilidade e a resistência Master com a forte e marcante identidade da sua marca.",
+        details: "Esta é a versão customizada do elástico Master, com personalização de alta durabilidade e integridade visual. Ele combina a resistência estrutural inquestionável e o suporte técnico do material com a forte e marcante identidade visual da sua marca, sendo ideal para peças que serão submetidas a uso intenso e lavagens frequentes, garantindo longevidade.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "The durability and resistance Master with the strong and striking identity of its brand.",
+                "details": "This is the customized version of the Master elastic, with high durability customization and visual integrity. It combines the unquestionable structural strength and technical support of the material with the strong and striking visual identity of its brand, being ideal for pieces that will be subjected to intense use and frequent washing, ensuring longevity."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "El Maestro de la durabilidad y la resistencia con la identidad fuerte y llamativa de su marca.",
+                "details": "Esta es la versión personalizada del elástico Master, con alta durabilidad e integridad visual. Combina la indiscutible resistencia estructural y el soporte técnico del material con la identidad visual fuerte y llamativa de su marca, siendo ideal para piezas que serán sometidas a un uso intenso y lavados frecuentes, garantizando su durabilidad."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Le Maître de la durabilité et de la résistance avec l’identité forte et frappante de sa marque.",
+                "details": "Il s’agit de la version personnalisée de l’élastique Master, avec une grande durabilité et une grande intégrité visuelle. Il combine la solidité structurelle incontestable et le soutien technique du matériau à l’identité visuelle forte et frappante de sa marque, étant idéal pour les pièces soumises à un usage intense et à des lavages fréquents, assurant ainsi leur longévité."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1e1a4ql",
+        translationLastError: ""
     },
     {
         id: 51,
         nome: "Plus II",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/pluspesonalisados-stik.png",
-        descricao: "Firmeza, conforto no ajuste e a sua assinatura em destaque no acabamento final. Este elástico equilibra sustentação e elasticidade de forma ideal, agora em uma versão totalmente customizada e fiel ao seu design. É a solução perfeita para quem busca um ajuste confortável, durável e deseja manter a marca em evidência no cós, barra ou alça, unindo qualidade técnica e estabilidade dimensional à comunicação visual com o consumidor.",
-        material: "Elástico"
+        descricao: "Firmeza, conforto no ajuste e a sua assinatura em destaque no acabamento final.",
+        details: "Este elástico equilibra sustentação e elasticidade de forma ideal, agora em uma versão totalmente customizada e fiel ao seu design. É a solução perfeita para quem busca um ajuste confortável, durável e deseja manter a marca em evidência no cós, barra ou alça, unindo qualidade técnica e estabilidade dimensional à comunicação visual com o consumidor.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Firmness, comfort in the fit and your signature highlighted in the final finish.",
+                "details": "This elastic balances support and elasticity in an ideal way, now in a fully customized version and faithful to its design. It is the perfect solution for those looking for a comfortable, durable fit and want to keep the brand in evidence on the waistband, hem or strap, combining technical quality and dimensional stability with visual communication with the consumer."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Firmeza, comodidad en el ajuste y tu firma resaltada en el acabado final.",
+                "details": "Este elástico equilibra el soporte y la elasticidad de forma ideal, ahora en una versión totalmente personalizada y fiel a su diseño. Es la solución perfecta para quienes buscan un ajuste cómodo y duradero y quieren mantener la marca visible en la cintura, el bajo o la correa, combinando calidad técnica y estabilidad dimensional con comunicación visual con el consumidor."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Fermeté, confort dans la coupe et votre signature mise en valeur dans la finition finale.",
+                "details": "Cet élastique équilibre soutien et élasticité de manière idéale, désormais en version entièrement personnalisée et fidèle à son design. C’est la solution idéale pour ceux qui recherchent une coupe confortable et durable et souhaitent garder la marque bien visible sur la ceinture, l’ourlet ou la sangle, alliant qualité technique et stabilité dimensionnelle avec une communication visuelle avec le consommateur."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "10qj9q1",
+        translationLastError: ""
     },
     {
         id: 52,
         nome: "Puma",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/puma-foto.png",
-        descricao: "Força, visual robusto e um estilo marcante que se destacam no vestuário esportivo e casual. Puma é o elástico com visual robusto e uma construção resistente, que permite uma customização de alto impacto e grande visibilidade da marca. É perfeito para a moda esportiva e peças que exigem um forte apelo visual, sem comprometer a durabilidade, a elasticidade e a performance do material em situações de tensão e movimento intenso, garantindo suporte e design.",
-        material: "Elástico"
+        descricao: "Força, visual robusto e um estilo marcante que se destacam no vestuário esportivo e casual.",
+        details: "Puma é o elástico com visual robusto e uma construção resistente, que permite uma customização de alto impacto e grande visibilidade da marca. É perfeito para a moda esportiva e peças que exigem um forte apelo visual, sem comprometer a durabilidade, a elasticidade e a performance do material em situações de tensão e movimento intenso, garantindo suporte e design.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Strength, rugged looks, and a striking style that stand out in sportswear and casual wear.",
+                "details": "Puma is the elastic band with a robust look and a resistant construction, which allows for high-impact customization and great brand visibility. It is perfect for sportswear and pieces that require a strong visual appeal, without compromising the durability, elasticity and performance of the material in situations of tension and intense movement, ensuring support and design."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Fuerza, aspecto robusto y un estilo llamativo que destacan tanto en ropa deportiva como casual.",
+                "details": "Puma es la goma elástica con un aspecto robusto y una construcción resistente, que permite una personalización de alto impacto y una gran visibilidad de marca. Es perfecta para ropa deportiva y prendas que requieren un atractivo visual fuerte, sin comprometer la durabilidad, elasticidad y rendimiento del material en situaciones de tensión y movimientos intensos, asegurando soporte y diseño."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Force, looks robustes et un style frappant qui ressortent dans les vêtements de sport et décontractés.",
+                "details": "Puma est un élastique à l’allure robuste et à la construction résistante, qui permet une personnalisation à fort impact et une grande visibilité de marque. Il est parfait pour les vêtements de sport et les pièces nécessitant un fort attrait visuel, sans compromettre la durabilité, l’élasticité et la performance du matériau dans des situations de tension et de mouvements intenses, garantissant ainsi un soutien et un design."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "iteg8j",
+        translationLastError: ""
     },
     {
         id: 53,
         nome: "Senna",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/senna-stik.png",
-        descricao: "Durabilidade técnica e a visibilidade da marca que resistem ao tempo, atrito e uso intenso. Senna é o elástico personalizado com excelente resistência ao desgaste, ao atrito e à fadiga do material. É ideal para aplicações em que a durabilidade do material e a visibilidade da marca são cruciais e precisam ser mantidas em condições de uso intenso e lavagens frequentes, como cós de calças e peças esportivas de alta frequência de uso, mantendo o acabamento impecável.",
-        material: "Elástico"
+        descricao: "Durabilidade técnica e a visibilidade da marca que resistem ao tempo, atrito e uso intenso.",
+        details: "Senna é o elástico personalizado com excelente resistência ao desgaste, ao atrito e à fadiga do material. É ideal para aplicações em que a durabilidade do material e a visibilidade da marca são cruciais e precisam ser mantidas em condições de uso intenso e lavagens frequentes, como cós de calças e peças esportivas de alta frequência de uso, mantendo o acabamento impecável.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Technical durability and brand visibility that stand up to time, friction and heavy use.",
+                "details": "Senna is the custom elastic band with excellent resistance to material wear, friction and fatigue. It is ideal for applications where material durability and brand visibility are crucial and need to be maintained in conditions of heavy use and frequent washing, such as pant waistbands and high-frequency sports garments, while maintaining the impeccable finish."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Durabilidad técnica y visibilidad de marca que resisten el tiempo, la fricción y el uso intenso.",
+                "details": "Senna es la banda elástica personalizada con excelente resistencia al desgaste del material, la fricción y la fatiga. Es ideal para aplicaciones donde la durabilidad del material y la visibilidad de la marca son cruciales y deben mantenerse en condiciones de uso intensivo y lavados frecuentes, como cinturas de pantalones y prendas deportivas de alta frecuencia, manteniendo el acabado impecable."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Durabilité technique et visibilité de marque qui résistent au temps, aux frictions et à une utilisation intensive.",
+                "details": "Le Senna est un élastique sur mesure offrant une excellente résistance à l’usure des matériaux, à la friction et à la fatigue. Il est idéal pour les applications où la durabilité du matériau et la visibilité de la marque sont cruciales et doivent être maintenues dans des conditions d’utilisation intensive et de lavages fréquents, comme les ceintures de pantalons et les vêtements de sport à haute fréquence, tout en maintenant une finition impeccable."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1vopded",
+        translationLastError: ""
     },
     {
         id: 54,
         nome: "Vênus",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/venus-stik.png",
-        descricao: "O toque de luxo e a suavidade em um acabamento premium e totalmente customizado. Venus é o elástico personalizado com toque suave, sedoso e acabamento superior, ideal para contato direto com a pele em peças íntimas. Ele adiciona um detalhe de luxo e conforto imediato às peças, valorizando instantaneamente a identidade e o cuidado da sua marca com o produto e a experiência do consumidor, com excelente recuperação elástica e caimento.",
-        material: "Elástico"
+        descricao: "O toque de luxo e a suavidade em um acabamento premium e totalmente customizado.",
+        details: "Venus é o elástico personalizado com toque suave, sedoso e acabamento superior, ideal para contato direto com a pele em peças íntimas. Ele adiciona um detalhe de luxo e conforto imediato às peças, valorizando instantaneamente a identidade e o cuidado da sua marca com o produto e a experiência do consumidor, com excelente recuperação elástica e caimento.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "The touch of luxury and softness in a premium and fully customized finish.",
+                "details": "Venus is the custom elastic with a soft, silky touch and superior finish, ideal for direct skin contact in intimate pieces. It adds a detail of luxury and immediate comfort to the pieces, instantly enhancing your brand's identity and care for the product and the consumer experience, with excellent elastic recovery and fit."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "El toque de lujo y suavidad en un acabado premium y totalmente personalizado.",
+                "details": "Venus es la goma elástica personalizada con un toque suave, sedoso y un acabado superior, ideal para el contacto directo de la piel en piezas íntimas. Añade un detalle de lujo y comodidad inmediata a las piezas, realzando instantáneamente la identidad de tu marca y el cuidado del producto y la experiencia del consumidor, con excelente recuperación y ajuste elástico."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "La touche de luxe et de douceur dans une finition premium et entièrement personnalisée.",
+                "details": "Venus est un élastique sur mesure avec une toucher douce et soyeuse et une finition supérieure, idéal pour un contact direct de la peau dans des pièces intimes. Il ajoute un détail de luxe et un confort immédiat aux pièces, sublimant instantanément l’identité de votre marque et le soin de votre produit ainsi que de l’expérience consommateur, avec une excellente récupération élastique et ajustement."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "184h509",
+        translationLastError: ""
     },
     {
         id: 55,
         nome: "Virtus",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/virtus-stik.png",
-        descricao: "Confiabilidade técnica, padrão consistente e estética premium para todas as suas criações. Virtus é o elástico personalizado que oferece consistência de alto nível e um visual sofisticado e marcante, com alta fidelidade de cor. Sua construção garante um encaixe perfeito e duradouro, sendo um material de alta qualidade e ótimo caimento para peças de vestuário que exigem acabamento diferenciado e a visibilidade da marca em cós ou alças.",
-        material: "Elástico"
+        descricao: "Confiabilidade técnica, padrão consistente e estética premium para todas as suas criações.",
+        details: "Virtus é o elástico personalizado que oferece consistência de alto nível e um visual sofisticado e marcante, com alta fidelidade de cor. Sua construção garante um encaixe perfeito e duradouro, sendo um material de alta qualidade e ótimo caimento para peças de vestuário que exigem acabamento diferenciado e a visibilidade da marca em cós ou alças.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Technical reliability, consistent standard and premium aesthetics for all your creations.",
+                "details": "Virtus is the custom elastic band that offers high-level consistency and a sophisticated and striking look, with high color fidelity. Its construction guarantees a perfect and long-lasting fit, being a high-quality material and great fit for garments that require a differentiated finish and brand visibility in waistbands or straps."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Fiabilidad técnica, estética estándar y premium consistente para todas tus creaciones.",
+                "details": "Virtus es la goma elástica personalizada que ofrece una consistencia de alto nivel y un aspecto sofisticado y llamativo, con alta fidelidad de color. Su construcción garantiza un ajuste perfecto y duradero, siendo un material de alta calidad y un ajuste excelente para prendas que requieren un acabado diferenciado y visibilidad de marca en cinturas o tirantes."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Fiabilité technique, standardisation cohérente et esthétique premium pour toutes vos créations.",
+                "details": "Virtus est un élastique sur mesure qui offre une cohérence de haut niveau et un look sophistiqué et frappant, avec une grande fidélité des couleurs. Sa construction garantit un ajustement parfait et durable, étant un matériau de haute qualité et un excellent ajustement pour des vêtements nécessitant une finition différenciée et une visibilité de marque dans les ceintures ou les bretelles."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "h526lb",
+        translationLastError: ""
     },
     {
         id: 56,
         nome: "X Nillo",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/xnillo-stik.png",
-        descricao: "O elástico versátil, personalizado e de alta qualidade para qualquer desafio de design e costura. X Nillo é um produto com alto nível de acabamento e grande versatilidade em sua aplicação em diversos tipos de vestuário. Adapta-se com excelência a diferentes tipos de peças e métodos de costura, assegurando um resultado de alta qualidade, resistência e a visibilidade da sua marca no acabamento, desde moda íntima a roupas esportivas e de base, com durabilidade garantida.",
-        material: "Elástico"
+        descricao: "O elástico versátil, personalizado e de alta qualidade para qualquer desafio de design e costura.",
+        details: "X Nillo é um produto com alto nível de acabamento e grande versatilidade em sua aplicação em diversos tipos de vestuário. Adapta-se com excelência a diferentes tipos de peças e métodos de costura, assegurando um resultado de alta qualidade, resistência e a visibilidade da sua marca no acabamento, desde moda íntima a roupas esportivas e de base, com durabilidade garantida.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "The versatile, custom, high-quality elastic band for any design and sewing challenge.",
+                "details": "X Nillo is a product with a high level of finish and great versatility in its application in various types of clothing. It adapts with excellence to different types of garments and sewing methods, ensuring a result of high quality, resistance and the visibility of your brand in the finish, from underwear to sportswear and basewear, with guaranteed durability."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "La goma elástica versátil, personalizada y de alta calidad para cualquier reto de diseño y costura.",
+                "details": "X Nillo es un producto con un alto nivel de acabado y gran versatilidad en su aplicación en diversos tipos de ropa. Se adapta con excelencia a diferentes tipos de prendas y métodos de costura, asegurando un resultado de alta calidad, resistencia y la visibilidad de tu marca en el acabado, desde ropa interior hasta ropa deportiva y base, con durabilidad garantizada."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "L’élastique polyvalent, sur mesure et de haute qualité pour tout défi de design et de couture.",
+                "details": "X Nillo est un produit à la finition élevée et à la grande polyvalence dans son application sur divers types de vêtements. Il s’adapte avec excellence à différents types de vêtements et de méthodes de couture, garantissant un résultat de haute qualité, de résistance et la visibilité de votre marque dans la finition, des sous-vêtements aux vêtements de sport et basewears, avec une durabilité garantie."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1xrfa6g",
+        translationLastError: ""
     },
-
-    // Premium
     {
         id: 58,
         nome: "Camila",
         categoria: "Premium",
         imagem: "img - Copia/Premium/camila-stik.png",
-        descricao: "Elegância superior e resistência inabalável que definem o padrão premium para suas coleções. Camila é o elástico que combina estilo, toque sedoso e uma durabilidade superior, ideal para peças de luxo. Sua textura e brilho são ideais para peças que buscam um diferencial estético marcante no acabamento e a garantia de uma longa vida útil do vestuário, confirmando o alto valor percebido da sua coleção pela excelência do material e sua capacidade de manter o design original.",
-        material: "Elástico"
+        descricao: "Elegância superior e resistência inabalável que definem o padrão premium para suas coleções.",
+        details: "Camila é o elástico que combina estilo, toque sedoso e uma durabilidade superior, ideal para peças de luxo. Sua textura e brilho são ideais para peças que buscam um diferencial estético marcante no acabamento e a garantia de uma longa vida útil do vestuário, confirmando o alto valor percebido da sua coleção pela excelência do material e sua capacidade de manter o design original.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Premium",
+                "material": "Elastic",
+                "descricao": "Superior elegance and unwavering strength that set the premium standard for its collections.",
+                "details": "Camila is the elastic band that combines style, silky touch and superior durability, ideal for luxury pieces. Its texture and shine are ideal for pieces that seek a striking aesthetic differential in the finish and the guarantee of a long useful life of the garment, confirming the high perceived value of its collection for the excellence of the material and its ability to maintain the original design."
+            },
+            "es": {
+                "categoria": "Premium",
+                "material": "Elástico",
+                "descricao": "Elegancia superior y fuerza inquebrantable que marcaron el estándar premium para sus colecciones.",
+                "details": "Camila es la goma elástica que combina estilo, toque sedoso y durabilidad superior, ideal para piezas de lujo. Su textura y brillo son ideales para piezas que buscan una llamativa diferencia estética en el acabado y la garantía de una larga vida útil de la prenda, confirmando el alto valor percibido de su colección por la excelencia del material y su capacidad para mantener el diseño original."
+            },
+            "fr": {
+                "categoria": "Premium",
+                "material": "Élastique",
+                "descricao": "Une élégance supérieure et une force inébranlable qui ont établi la norme haut de gamme pour ses collections.",
+                "details": "Camila est l’élastique qui allie style, touche soyeuse et durabilité supérieure, idéale pour les pièces de luxe. Sa texture et son éclat sont idéales pour les pièces recherchant une différence esthétique frappante dans la finition et la garantie d’une longue durée de vie utile du vêtement, confirmant la grande valeur perçue de sa collection pour l’excellence du matériau et sa capacité à conserver le design original."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1a33s6k",
+        translationLastError: ""
     },
     {
         id: 59,
         nome: "Listras",
         categoria: "Premium",
         imagem: "img - Copia/Premium/listras-stik.png",
-        descricao: "Um detalhe sofisticado, moderno e durável que perdura no tempo com notável elegância. Listras é o elástico premium que apresenta um visual listrado diferenciado e resistente ao desgaste e à deformação. Adiciona um toque de design moderno, sofisticado e discreto, mantendo a qualidade técnica e o desempenho elástico superior esperado da linha premium em cós e acabamentos, com um excelente retorno elástico e estabilidade dimensional, garantindo a forma da peça.",
-        material: "Elástico"
+        descricao: "Um detalhe sofisticado, moderno e durável que perdura no tempo com notável elegância.",
+        details: "Listras é o elástico premium que apresenta um visual listrado diferenciado e resistente ao desgaste e à deformação. Adiciona um toque de design moderno, sofisticado e discreto, mantendo a qualidade técnica e o desempenho elástico superior esperado da linha premium em cós e acabamentos, com um excelente retorno elástico e estabilidade dimensional, garantindo a forma da peça.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Premium",
+                "material": "Elastic",
+                "descricao": "A sophisticated, modern and durable detail that lasts over time with remarkable elegance.",
+                "details": "Stripes is the premium elastic band that presents a distinctive striped look that is resistant to wear and tear and deformation. It adds a touch of modern, sophisticated and discreet design, while maintaining the technical quality and superior elastic performance expected from the premium line in waistbands and finishes, with an excellent elastic return and dimensional stability, ensuring the shape of the piece."
+            },
+            "es": {
+                "categoria": "Premium",
+                "material": "Elástico",
+                "descricao": "Un detalle sofisticado, moderno y duradero que perdura con el tiempo con una elegancia notable.",
+                "details": "Stripes es la banda elástica premium que presenta un aspecto distintivo de rayas resistente al desgaste y deformaciones. Añade un toque de diseño moderno, sofisticado y discreto, manteniendo la calidad técnica y el rendimiento elástico superior esperados de la línea premium en cinturas y acabados, con un excelente retorno elástico y estabilidad dimensional, asegurando la forma de la pieza."
+            },
+            "fr": {
+                "categoria": "Premium",
+                "material": "Élastique",
+                "descricao": "Un détail sophistiqué, moderne et durable qui perdure dans le temps avec une élégance remarquable.",
+                "details": "Stripes est la bande élastique premium qui présente un aspect rayé distinctif, résistant à l’usure et à la déformation. Elle ajoute une touche de design moderne, sophistiqué et discret, tout en conservant la qualité technique et les performances élastiques supérieures attendues de la gamme premium pour les ceintures et les finitions, avec un excellent retour élastique et une stabilité dimensionnelle, assurant la forme de la pièce."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "697s7f",
+        translationLastError: ""
     },
-    // Rendas
     {
         id: 61,
         nome: "Ana Bicolor",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/anabivolor-stik.png",
-        descricao: "Contraste visual marcante, sofisticação e elegância em cada centímetro da peça. Ana Bicolor é a renda que apresenta uma padronagem em duas cores, oferecendo um contraste estético elegante, um visual profundo e um caimento excelente. É a escolha perfeita para peças que desejam um toque de cor sofisticado e um design inconfundível, unindo a delicadeza da renda à resistência técnica necessária para a produção e o uso contínuo, mantendo a integridade do desenho.",
-        material: "Elástico"
+        descricao: "Contraste visual marcante, sofisticação e elegância em cada centímetro da peça.",
+        details: "Ana Bicolor é a renda que apresenta uma padronagem em duas cores, oferecendo um contraste estético elegante, um visual profundo e um caimento excelente. É a escolha perfeita para peças que desejam um toque de cor sofisticado e um design inconfundível, unindo a delicadeza da renda à resistência técnica necessária para a produção e o uso contínuo, mantendo a integridade do desenho.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "Striking visual contrast, sophistication and elegance in every inch of the piece.",
+                "details": "Ana Bicolor is lace that features a two-color pattern, offering an elegant aesthetic contrast, a deep look and an excellent fit. It is the perfect choice for pieces that want a sophisticated touch of color and an unmistakable design, combining the delicacy of lace with the technical resistance necessary for production and continuous use, while maintaining the integrity of the design."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "Contraste visual impactante, sofisticación y elegancia en cada centímetro de la pieza.",
+                "details": "Ana Bicolor es un encaje que presenta un patrón bicolor, ofreciendo un contraste estético elegante, un aspecto profundo y un ajuste excelente. Es la elección perfecta para piezas que buscan un toque sofisticado de color y un diseño inconfundible, combinando la delicadeza del encaje con la resistencia técnica necesaria para la producción y el uso continuo, manteniendo la integridad del diseño."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "Un contraste visuel frappant, une sophistication et une élégance dans chaque centimètre de la pièce.",
+                "details": "Ana Bicolor est une dentelle qui présente un motif bicolore, offrant un contraste esthétique élégant, un look profond et une coupe parfaite. C’est le choix idéal pour les pièces qui recherchent une touche de couleur sophistiquée et un design inimitable, alliant la délicatesse de la dentelle à la résistance technique nécessaire à la production et à l’utilisation continue, tout en conservant l’intégrité du design."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "any7hk",
+        translationLastError: ""
     },
     {
         id: 62,
         nome: "Capi",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/capi-stik.png",
-        descricao: "A versatilidade do material para compor peças elegantes e detalhes decorativos ricos e duradouros. Capi é a renda cuja estrutura técnica garante durabilidade e mantém a delicadeza do desenho original intacta, mesmo após o uso contínuo e diversas lavagens industriais. É um material confiável e de alta performance para criar composições sofisticadas, valorizando o design da lingerie e oferecendo um toque suave, com excelente maleabilidade na aplicação.",
-        material: "Elástico"
+        descricao: "A versatilidade do material para compor peças elegantes e detalhes decorativos ricos e duradouros.",
+        details: "Capi é a renda cuja estrutura técnica garante durabilidade e mantém a delicadeza do desenho original intacta, mesmo após o uso contínuo e diversas lavagens industriais. É um material confiável e de alta performance para criar composições sofisticadas, valorizando o design da lingerie e oferecendo um toque suave, com excelente maleabilidade na aplicação.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "The versatility of the material to compose elegant pieces and rich, long-lasting decorative details.",
+                "details": "Capi is the lace whose technical structure guarantees durability and keeps the delicacy of the original design intact, even after continuous use and several industrial washes. It is a reliable and high-performance material to create sophisticated compositions, enhancing the design of the lingerie and offering a soft touch, with excellent malleability in application."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "La versatilidad del material para componer piezas elegantes y detalles decorativos ricos y duraderos.",
+                "details": "El capi es el encaje cuya estructura técnica garantiza durabilidad y mantiene intacta la delicadeza del diseño original, incluso tras un uso continuo y varios lavados industriales. Es un material fiable y de alto rendimiento para crear composiciones sofisticadas, realzando el diseño de la lencería y ofreciendo un toque suave, con excelente maleabilidad en su aplicación."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "La polyvalence du matériau pour composer des pièces élégantes et des détails décoratifs riches et durables.",
+                "details": "Le capi est la dentelle dont la structure technique garantit la durabilité et conserve la délicatesse du design original, même après une utilisation continue et plusieurs lavages industriels. C’est un matériau fiable et performant pour créer des compositions sophistiquées, mettant en valeur le design de la lingerie et offrant une touche douce, avec une excellente malléabilité dans l’application."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1r8xlgl",
+        translationLastError: ""
     },
     {
         id: 63,
         nome: "Eva",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/eva-stik.png",
-        descricao: "O máximo de conforto e suavidade extrema para áreas sensíveis e delicadas da pele. Eva é a renda de toque macio, com acabamento suave e maleável, sendo ideal para aplicações em áreas da pele que demandam maior delicadeza e bem-estar. Proporciona um conforto extremo ao vestir e um visual delicado ao produto final, garantindo a satisfação do usuário em peças de uso diário e com a leveza e beleza estética da renda.",
-        material: "Elástico"
+        descricao: "O máximo de conforto e suavidade extrema para áreas sensíveis e delicadas da pele.",
+        details: "Eva é a renda de toque macio, com acabamento suave e maleável, sendo ideal para aplicações em áreas da pele que demandam maior delicadeza e bem-estar. Proporciona um conforto extremo ao vestir e um visual delicado ao produto final, garantindo a satisfação do usuário em peças de uso diário e com a leveza e beleza estética da renda.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "Maximum comfort and extreme softness for sensitive and delicate areas of the skin.",
+                "details": "Eva is the lace with a soft touch, with a smooth and malleable finish, being ideal for applications in areas of the skin that demand greater delicacy and well-being. It provides extreme comfort when wearing and a delicate look to the final product, ensuring user satisfaction in everyday items and with the lightness and aesthetic beauty of lace."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "Máxima comodidad y suavidad extrema para zonas sensibles y delicadas de la piel.",
+                "details": "Eva es el encaje con un toque suave, con un acabado liso y maleable, ideal para aplicaciones en zonas de la piel que requieren mayor delicadeza y bienestar. Proporciona un confort extremo al llevarlo y un aspecto delicado al producto final, asegurando la satisfacción del usuario con objetos cotidianos y con la ligereza y belleza estética del encaje."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "Confort maximal et extrême douceur pour les zones sensibles et délicates de la peau.",
+                "details": "Eva est la dentelle au toucher doux, avec une finition lisse et malléable, idéale pour les applications dans les zones de la peau qui exigent plus de délicatesse et de bien-être. Elle offre un confort extrême lors du port et un aspect délicat au produit final, garantissant la satisfaction de l’utilisateur dans les articles du quotidien ainsi que la légèreté et la beauté esthétique de la dentelle."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1fyb67y",
+        translationLastError: ""
     },
     {
         id: 64,
         nome: "Ina",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/ina-stik.png",
-        descricao: "Leveza, discrição e acabamento perfeito para a criação de detalhes finos e delicados. Ina é a renda que combina um visual leve e delicado com alta maleabilidade e adaptabilidade a contornos. É a escolha perfeita para aplicações em peças femininas que buscam leveza, um caimento suave e um acabamento discreto, porém elegante e sofisticado, sem comprometer a resistência e durabilidade do material no uso frequente.",
-        material: "Elástico"
+        descricao: "Leveza, discrição e acabamento perfeito para a criação de detalhes finos e delicados.",
+        details: "Ina é a renda que combina um visual leve e delicado com alta maleabilidade e adaptabilidade a contornos. É a escolha perfeita para aplicações em peças femininas que buscam leveza, um caimento suave e um acabamento discreto, porém elegante e sofisticado, sem comprometer a resistência e durabilidade do material no uso frequente.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "Lightness, discretion and perfect finish for the creation of fine and delicate details.",
+                "details": "Ina is lace that combines a light and delicate look with high malleability and adaptability to contours. It is the perfect choice for applications in women's pieces that seek lightness, a soft fit and a discreet, yet elegant and sophisticated finish, without compromising the strength and durability of the material in frequent use."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "Ligereza, discreción y un acabado perfecto para crear detalles finos y delicados.",
+                "details": "El encaje es un encaje que combina un aspecto ligero y delicado con alta maleabilidad y adaptabilidad a los contornos. Es la elección perfecta para aplicaciones en piezas femeninas que buscan ligereza, un ajuste suave y un acabado discreto, pero elegante y sofisticado, sin comprometer la resistencia y durabilidad del material en uso frecuente."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "Légèreté, discrétion et finition parfaite pour créer des détails fins et délicats.",
+                "details": "L’ina est une dentelle qui allie un look léger et délicat à une grande malléabilité et adaptabilité aux contours. C’est le choix parfait pour les pièces féminines recherchant la légèreté, une coupe douce et une finition discrète, élégante et sophistiquée, sans compromettre la solidité et la durabilité du matériau utilisé fréquemment."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "g1rbyi",
+        translationLastError: ""
     },
     {
         id: 65,
         nome: "Lara",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/lara-stik.png",
-        descricao: "Beleza estética, resistência e ajuste confortável sem apertar ou causar incômodo. Lara é a renda que combina leveza e resistência, ideal para ser utilizada em acabamentos de cós e pernas de calcinhas e sutiãs. Oferece um bom nível de ajuste e conforto, mantendo a beleza do padrão e garantindo que a peça fique no lugar sem causar incômodo ou compressão excessiva, valorizando a experiência do consumidor com o caimento suave e seguro.",
-        material: "Elástico"
+        descricao: "Beleza estética, resistência e ajuste confortável sem apertar ou causar incômodo.",
+        details: "Lara é a renda que combina leveza e resistência, ideal para ser utilizada em acabamentos de cós e pernas de calcinhas e sutiãs. Oferece um bom nível de ajuste e conforto, mantendo a beleza do padrão e garantindo que a peça fique no lugar sem causar incômodo ou compressão excessiva, valorizando a experiência do consumidor com o caimento suave e seguro.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "Aesthetic beauty, resistance and comfortable fit without tightening or causing discomfort.",
+                "details": "Lara is the lace that combines lightness and resistance, ideal to be used in waistband and leg finishes of panties and bras. It offers a good level of fit and comfort, maintaining the beauty of the pattern and ensuring that the piece stays in place without causing discomfort or excessive compression, enhancing the consumer experience with the smooth and secure fit."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "Belleza estética, resistencia y ajuste cómodo sin apretarlos ni causar incomodidad.",
+                "details": "Lara es el encaje que combina ligereza y resistencia, ideal para usarse en acabados de cintura y piernas de braguitas y sujetadores. Ofrece un buen ajuste y comodidad, manteniendo la belleza del patrón y asegurando que la pieza se mantenga en su lugar sin causar molestias ni compresión excesiva, mejorando la experiencia del consumidor con un ajuste suave y seguro."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "Beauté esthétique, résistance et ajustement confortable sans serrer ni causer d’inconfort.",
+                "details": "La dentelle est la dentelle qui allie légèreté et résistance, idéale pour les finitions de la ceinture et des jambes de culottes et soutiens-gorge. Elle offre un bon niveau d’ajustement et de confort, conservant la beauté du patron et garantissant que la pièce reste en place sans inconfort ni compression excessive, améliorant l’expérience du consommateur grâce à un ajustement fluide et sécurisé."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1wy9ua9",
+        translationLastError: ""
     },
     {
         id: 66,
         nome: "Luna",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/luna-stik.png",
-        descricao: "O material chave para composições elegantes, sofisticadas e luxuosas no segmento de moda íntima. Luna é a renda que possui uma aparência sofisticada, um design de alto padrão e toque suave, perfeita para coleções que exigem excelência. Sua construção técnica a torna uma excelente escolha para agregar um valor percebido alto aos seus produtos, garantindo beleza duradoura, caimento impecável e excelente recuperação elástica, ideal para peças de destaque.",
-        material: "Elástico"
+        descricao: "O material chave para composições elegantes, sofisticadas e luxuosas no segmento de moda íntima.",
+        details: "Luna é a renda que possui uma aparência sofisticada, um design de alto padrão e toque suave, perfeita para coleções que exigem excelência. Sua construção técnica a torna uma excelente escolha para agregar um valor percebido alto aos seus produtos, garantindo beleza duradoura, caimento impecável e excelente recuperação elástica, ideal para peças de destaque.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "The key material for elegant, sophisticated and luxurious compositions in the underwear segment.",
+                "details": "Luna is lace that has a sophisticated appearance, a high-end design and a soft touch, perfect for collections that demand excellence. Its technical construction makes it an excellent choice to add a high perceived value to your products, ensuring long-lasting beauty, impeccable fit and excellent elastic recovery, ideal for highlight pieces."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "El material clave para composiciones elegantes, sofisticadas y lujosas en el segmento de la ropa interior.",
+                "details": "Luna es un encaje con un aspecto sofisticado, un diseño de alta gama y un toque suave, perfecto para colecciones que exigen excelencia. Su construcción técnica la convierte en una excelente opción para añadir un alto valor percibido a tus productos, asegurando belleza duradera, ajuste impecable y excelente recuperación elástica, ideal para prendas destacadas."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "Le matériau clé pour des compositions élégantes, sophistiquées et luxueuses dans le segment des sous-vêtements.",
+                "details": "Luna est une dentelle à l’apparence sophistiquée, au design haut de gamme et au toucher doux, parfaite pour les collections qui exigent l’excellence. Sa construction technique en fait un excellent choix pour ajouter une grande valeur perçue à vos produits, garantissant une beauté durable, un ajustement impeccable et une excellente récupération élastique, idéale pour les pièces en relief."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "14e01ek",
+        translationLastError: ""
     },
     {
         id: 67,
         nome: "Mirra",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/mirra-stik.png",
-        descricao: "Acabamento primoroso para peças finas e delicadas com durabilidade e resistência garantidas. Mirra é a renda ideal para detalhes delicados e bordas de peças íntimas, unindo leveza e firmeza na medida certa. A sua delicadeza visual é complementada pela resistência necessária para o uso contínuo e lavagens, tornando-a funcional, bela e uma escolha confiável para a produção industrial que busca excelência em acabamentos rendados.",
-        material: "Elástico"
+        descricao: "Acabamento primoroso para peças finas e delicadas com durabilidade e resistência garantidas.",
+        details: "Mirra é a renda ideal para detalhes delicados e bordas de peças íntimas, unindo leveza e firmeza na medida certa. A sua delicadeza visual é complementada pela resistência necessária para o uso contínuo e lavagens, tornando-a funcional, bela e uma escolha confiável para a produção industrial que busca excelência em acabamentos rendados.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "Exquisite finish for fine and delicate pieces with guaranteed durability and resistance.",
+                "details": "Mirra is the ideal lace for delicate details and edges of intimate pieces, combining lightness and firmness in the right measure. Its visual delicacy is complemented by the resistance necessary for continuous use and washing, making it functional, beautiful and a reliable choice for industrial production that seeks excellence in lacy finishes."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "Acabado exquisito para piezas finas y delicadas con durabilidad y resistencia garantizadas.",
+                "details": "Mirra es el encaje ideal para detalles delicados y bordes de piezas íntimas, combinando ligereza y firmeza en la medida adecuada. Su delicadeza visual se complementa con la resistencia necesaria para un uso y lavado continuos, lo que la convierte en funcional, hermosa y una opción fiable para la producción industrial que busca la excelencia en acabados de encaje."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "Finition exquise pour des pièces fines et délicates, avec une durabilité et une résistance garanties.",
+                "details": "Mirra est la dentelle idéale pour les détails délicats et les bords des pièces intimes, alliant légèreté et fermeté dans la bonne mesure. Sa délicatesse visuelle est complétée par la résistance nécessaire à une utilisation et un lavage continus, ce qui en fait un usage fonctionnel, beau et un choix fiable pour la production industrielle recherchant l’excellence dans les finitions dentelles."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1vyc15v",
+        translationLastError: ""
     },
     {
         id: 68,
         nome: "Sofia",
         categoria: "Rendas",
         imagem: "img - Copia/Rendas/sofia-stik.png",
-        descricao: "Estética e funcionalidade técnica em perfeita harmonia para um resultado superior e duradouro. Sofia é a renda que equilibra a beleza do design com o desempenho técnico. Oferece um excelente nível de elasticidade e estabilidade dimensional, sendo ideal para aplicações em que o conforto, a durabilidade do material e a manutenção da forma são essenciais para a qualidade final da peça, especialmente em sutiãs e modeladores leves, garantindo caimento e ajuste.",
-        material: "Elástico"
+        descricao: "Estética e funcionalidade técnica em perfeita harmonia para um resultado superior e duradouro.",
+        details: "Sofia é a renda que equilibra a beleza do design com o desempenho técnico. Oferece um excelente nível de elasticidade e estabilidade dimensional, sendo ideal para aplicações em que o conforto, a durabilidade do material e a manutenção da forma são essenciais para a qualidade final da peça, especialmente em sutiãs e modeladores leves, garantindo caimento e ajuste.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Rents",
+                "material": "Elastic",
+                "descricao": "Aesthetics and technical functionality in perfect harmony for a superior and long-lasting result.",
+                "details": "Sofia is the lace that balances the beauty of design with technical performance. It offers an excellent level of elasticity and dimensional stability, being ideal for applications where comfort, material durability and shape maintenance are essential for the final quality of the piece, especially in light bras and shapewear, ensuring fit and fit."
+            },
+            "es": {
+                "categoria": "Alquileres",
+                "material": "Elástico",
+                "descricao": "Estética y funcionalidad técnica en perfecta armonía para un resultado superior y duradero.",
+                "details": "Sofia es el encaje que equilibra la belleza del diseño con el rendimiento técnico. Ofrece un excelente nivel de elasticidad y estabilidad dimensional, siendo ideal para aplicaciones donde la comodidad, la durabilidad del material y el mantenimiento de la forma son esenciales para la calidad final de la pieza, especialmente en sujetadores ligeros y shapewears, asegurando el ajuste y el ajuste."
+            },
+            "fr": {
+                "categoria": "Loyers",
+                "material": "Élastique",
+                "descricao": "Esthétique et fonctionnalité technique en parfaite harmonie pour un résultat supérieur et durable.",
+                "details": "Sofia est la dentelle qui équilibre la beauté du design et la performance technique. Elle offre un excellent niveau d’élasticité et de stabilité dimensionnelle, idéale pour les applications où le confort, la durabilité du matériau et le maintien de la forme sont essentiels à la qualité finale de la pièce, notamment en soutiens-gorge légers et en shapewear, garantissant ainsi l’ajustement et l’ajustement."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "1k0hjx5",
+        translationLastError: ""
     },
-
-    // Viés
     {
         id: 70,
         nome: "Atlas",
         categoria: "Viés",
         imagem: "img - Copia/Viés/atlas-stik (1).png",
-        descricao: "Estrutura firme, estabilidade dimensional e bom caimento sem adicionar volume indesejado à peça. Atlas é o viés com estrutura sólida e bom caimento, ideal para o reforço de costuras e contornos em tecidos leves e médios. Proporciona estabilidade técnica ao acabamento, garantindo que seja robusto, elegante e não comprometa a leveza do tecido ou o caimento final do vestuário, sendo de fácil aplicação industrial em grandes volumes e mantendo a uniformidade.",
-        material: "Elástico"
+        descricao: "Estrutura firme, estabilidade dimensional e bom caimento sem adicionar volume indesejado à peça.",
+        details: "Atlas é o viés com estrutura sólida e bom caimento, ideal para o reforço de costuras e contornos em tecidos leves e médios. Proporciona estabilidade técnica ao acabamento, garantindo que seja robusto, elegante e não comprometa a leveza do tecido ou o caimento final do vestuário, sendo de fácil aplicação industrial em grandes volumes e mantendo a uniformidade.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bias",
+                "material": "Elastic",
+                "descricao": "Firm structure, dimensional stability and good fit without adding unwanted bulk to the piece.",
+                "details": "Atlas is the bias with a solid structure and good fit, ideal for reinforcing seams and contours in light and medium fabrics. It provides technical stability to the finish, ensuring that it is robust, elegant and does not compromise the lightness of the fabric or the final fit of the garment, being easy to apply industrially in large volumes and maintaining uniformity."
+            },
+            "es": {
+                "categoria": "Sesgo",
+                "material": "Elástico",
+                "descricao": "Estructura firme, estabilidad dimensional y buen ajuste sin añadir volumen innecesario a la pieza.",
+                "details": "Atlas es el bies con estructura sólida y buen ajuste, ideal para reforzar costuras y contornos en tejidos ligeros y medios. Proporciona estabilidad técnica al acabado, asegurando que sea robusto, elegante y no comprometa la ligereza del tejido ni el ajuste final de la prenda, siendo fácil de aplicar industrialmente en grandes volúmenes y manteniendo la uniformidad."
+            },
+            "fr": {
+                "categoria": "Biais",
+                "material": "Élastique",
+                "descricao": "Structure ferme, stabilité dimensionnelle et bon ajustement sans ajouter de volume indésirable à la pièce.",
+                "details": "L’Atlas est un biais avec une structure solide et un bon ajustement, idéal pour renforcer les coutures et les contours dans des tissus légers et moyens. Il apporte une stabilité technique à la finition, garantissant une robustesse, une élégance et ne compromet pas la légèreté du tissu ni la coupe finale du vêtement, étant facile à appliquer industriellement en grand volume et maintenant l’uniformité."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "y6ioav",
+        translationLastError: ""
     },
     {
         id: 71,
         nome: "Eros",
         categoria: "Viés Com Arco",
         imagem: "img - Copia/Viés/eros-stik (1).png",
-        descricao: "Refinamento estético e resistência invisível para um acabamento suave e superior nas peças. Eros é o viés de toque refinado, com acabamento discreto e notável resistência a atrito e desgaste. É excelente para aplicações que exigem durabilidade e uma transição suave, praticamente imperceptível, entre os tecidos, sendo ideal para peças íntimas e de alta-costura que valorizam o conforto e a estética discreta, com alta maleabilidade para encaixes.",
-        material: "Elástico"
+        descricao: "Refinamento estético e resistência invisível para um acabamento suave e superior nas peças.",
+        details: "Eros é o viés de toque refinado, com acabamento discreto e notável resistência a atrito e desgaste. É excelente para aplicações que exigem durabilidade e uma transição suave, praticamente imperceptível, entre os tecidos, sendo ideal para peças íntimas e de alta-costura que valorizam o conforto e a estética discreta, com alta maleabilidade para encaixes.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bias with arch",
+                "material": "Elastic",
+                "descricao": "Aesthetic refinement and invisible resistance for a smooth and superior finish on the pieces.",
+                "details": "Eros is the refined touch bias, with a discreet finish and remarkable resistance to friction and wear. It is excellent for applications that require durability and a smooth, practically imperceptible transition between fabrics, being ideal for underwear and haute couture pieces that value comfort and discreet aesthetics, with high malleability for fittings."
+            },
+            "es": {
+                "categoria": "Sesgo con arco",
+                "material": "Elástico",
+                "descricao": "Refinamiento estético y resistencia invisible para un acabado liso y superior en las piezas.",
+                "details": "Eros es el sesgo de tacto refinado, con un acabado discreto y una resistencia notable a la fricción y al desgaste. Es excelente para aplicaciones que requieren durabilidad y una transición suave y prácticamente imperceptible entre tejidos, siendo ideal para ropa interior y prendas de alta costura que valoran la comodidad y una estética discreta, con alta maleabilidad para las pruebas."
+            },
+            "fr": {
+                "categoria": "Biais avec l’arche",
+                "material": "Élastique",
+                "descricao": "Raffinement esthétique et résistance invisible pour une finition lisse et supérieure sur les pièces.",
+                "details": "L’Eros est le biais tactile raffiné, avec une finition discrète et une résistance remarquable à la friction et à l’usure. Il est excellent pour les applications nécessitant durabilité et une transition fluide et presque imperceptible entre les tissus, étant idéal pour les sous-vêtements et les pièces haute couture qui valorisent le confort et l’esthétique discrète, avec une grande malléabilité pour les essayages."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "y97szq",
+        translationLastError: ""
     },
     {
         id: 72,
         nome: "Nud",
         categoria: "Viés Com Arco",
         imagem: "img - Copia/Viés/nudvies-stik.png",
-        descricao: "Conforto extremo e discrição visual para peças que exigem máximo bem-estar e leveza. Nud é o viés com toque suave e alta maleabilidade e adaptabilidade ao corpo em movimento. É ideal para ser usado em acabamentos de peças íntimas, moda praia e vestuário esportivo, onde o conforto na pele e a discrição visual no design são a prioridade absoluta da sua coleção e a resistência ao cloro e umidade é essencial, garantindo um resultado limpo.",
-        material: "Elástico"
+        descricao: "Conforto extremo e discrição visual para peças que exigem máximo bem-estar e leveza.",
+        details: "Nud é o viés com toque suave e alta maleabilidade e adaptabilidade ao corpo em movimento. É ideal para ser usado em acabamentos de peças íntimas, moda praia e vestuário esportivo, onde o conforto na pele e a discrição visual no design são a prioridade absoluta da sua coleção e a resistência ao cloro e umidade é essencial, garantindo um resultado limpo.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bias with arch",
+                "material": "Elastic",
+                "descricao": "Extreme comfort and visual discretion for garments that require maximum well-being and lightness.",
+                "details": "Nud is the bias with a soft touch and high malleability and adaptability to the body in motion. It is ideal to be used in finishes of underwear, beachwear and sportswear, where comfort on the skin and visual discretion in design are the absolute priority of your collection and resistance to chlorine and moisture is essential, ensuring a clean result."
+            },
+            "es": {
+                "categoria": "Sesgo con arco",
+                "material": "Elástico",
+                "descricao": "Comodidad extrema y discreción visual para prendas que requieren el máximo bienestar y ligereza.",
+                "details": "Nud es el sesgo con un tacto suave y alta maleabilidad y adaptabilidad al cuerpo en movimiento. Es ideal para usarse en acabados de ropa interior, ropa de playa y ropa deportiva, donde la comodidad en la piel y la discreción visual en el diseño son la prioridad absoluta de tu colección y la resistencia al cloro y la humedad es esencial, asegurando un resultado limpio."
+            },
+            "fr": {
+                "categoria": "Biais avec l’arche",
+                "material": "Élastique",
+                "descricao": "Un confort extrême et une discrétion visuelle pour des vêtements nécessitant un bien-être et une légèreté maximales.",
+                "details": "Le nud est le biais avec un toucher doux et une grande malléabilité et adaptabilité au corps en mouvement. Il est idéal pour être utilisé dans les finitions de sous-vêtements, vêtements de plage et sportswear, où le confort sur la peau et la discrétion visuelle dans le design sont la priorité absolue de votre collection, et où la résistance au chlore et à l’humidité est essentielle, garantissant un résultat propre."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "abi7m0",
+        translationLastError: ""
     },
     {
         id: 73,
         nome: "Senna",
         categoria: "Viés",
         imagem: "img - Copia/Viés/sennavies-stik.png",
-        descricao: "A elegância de um reforço que dura, oferece segurança à costura e valoriza o acabamento. Senna é o viés especialmente indicado para o reforço de costuras e bordas, unindo um visual elegante com alta funcionalidade. Sua construção robusta garante que o acabamento resista ao uso contínuo, à tensão e à lavagem sem perder a forma ou a integridade, oferecendo um resultado duradouro e profissional para peças que demandam maior sustentação nas bordas.",
-        material: "Elástico"
+        descricao: "A elegância de um reforço que dura, oferece segurança à costura e valoriza o acabamento.",
+        details: "Senna é o viés especialmente indicado para o reforço de costuras e bordas, unindo um visual elegante com alta funcionalidade. Sua construção robusta garante que o acabamento resista ao uso contínuo, à tensão e à lavagem sem perder a forma ou a integridade, oferecendo um resultado duradouro e profissional para peças que demandam maior sustentação nas bordas.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bias",
+                "material": "Elastic",
+                "descricao": "The elegance of a reinforcement that lasts, offers security to the seam and enhances the finish.",
+                "details": "Senna is the bias especially suitable for reinforcing seams and edges, combining an elegant look with high functionality. Its robust construction ensures that the finish withstands continuous use, tension and washing without losing shape or integrity, offering a long-lasting and professional result for pieces that require greater support at the edges."
+            },
+            "es": {
+                "categoria": "Sesgo",
+                "material": "Elástico",
+                "descricao": "La elegancia de un refuerzo que perdura ofrece seguridad a la costura y realza el acabado.",
+                "details": "El sesgo de Senna es especialmente adecuado para reforzar costuras y bordes, combinando un aspecto elegante con alta funcionalidad. Su construcción robusta garantiza que el acabado resista el uso, tensión y lavado continuos sin perder forma o integridad, ofreciendo un resultado duradero y profesional para piezas que requieren mayor soporte en los bordes."
+            },
+            "fr": {
+                "categoria": "Biais",
+                "material": "Élastique",
+                "descricao": "L’élégance d’un renfort durable offre de la sécurité à la couture et met en valeur la finition.",
+                "details": "Le Senna est le biais particulièrement adapté pour renforcer les coutures et les bords, alliant un look élégant à une grande fonctionnalité. Sa construction robuste garantit que la finition résiste à une utilisation, une tension et un lavage continus sans perdre forme ni intégrité, offrant un résultat durable et professionnel pour les pièces nécessitant un meilleur soutien sur les bords."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "313pi",
+        translationLastError: ""
     },
     {
         id: 74,
         nome: "Sud",
         categoria: "Viés Com Arco",
         imagem: "img - Copia/Viés/sud-stik.png",
-        descricao: "Acabamento profissional impecável e adaptável em curvas e contornos complexos do design. Sud é o viés flexível e confiável, perfeito para ser aplicado em áreas com curvas, contornos e encaixes difíceis. Garante um acabamento limpo, profissional e se adapta perfeitamente ao formato da peça, mantendo a forma do design e oferecendo um excelente resultado estético e funcional em larga escala, otimizando o processo de confecção em detalhes arredondados.",
-        material: "Elástico"
+        descricao: "Acabamento profissional impecável e adaptável em curvas e contornos complexos do design.",
+        details: "Sud é o viés flexível e confiável, perfeito para ser aplicado em áreas com curvas, contornos e encaixes difíceis. Garante um acabamento limpo, profissional e se adapta perfeitamente ao formato da peça, mantendo a forma do design e oferecendo um excelente resultado estético e funcional em larga escala, otimizando o processo de confecção em detalhes arredondados.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bias with arch",
+                "material": "Elastic",
+                "descricao": "Impeccable professional finish that adapts to complex curves and contours of the design.",
+                "details": "Sud is the flexible and reliable bias, perfect to be applied in areas with difficult curves, contours and fittings. It guarantees a clean, professional finish and adapts perfectly to the shape of the piece, maintaining the shape of the design and offering an excellent aesthetic and functional result on a large scale, optimizing the manufacturing process in rounded details."
+            },
+            "es": {
+                "categoria": "Sesgo con arco",
+                "material": "Elástico",
+                "descricao": "Acabado profesional impecable que se adapta a curvas y contornos complejos del diseño.",
+                "details": "El sesgo es flexible y fiable, perfecto para aplicarse en zonas con curvas, contornos y accesorios difíciles. Garantiza un acabado limpio y profesional y se adapta perfectamente a la forma de la pieza, manteniendo la forma del diseño y ofreciendo un excelente resultado estético y funcional a gran escala, optimizando el proceso de fabricación con detalles redondeados."
+            },
+            "fr": {
+                "categoria": "Biais avec l’arche",
+                "material": "Élastique",
+                "descricao": "Finition professionnelle impeccable qui s’adapte aux courbes et contours complexes du design.",
+                "details": "Le Sud est le biais flexible et fiable, parfait pour être appliqué dans les zones aux courbes, contours et ajustements difficiles. Il garantit une finition propre et professionnelle et s’adapte parfaitement à la forme de la pièce, conservant la forme du design et offrant un excellent résultat esthétique et fonctionnel à grande échelle, optimisant le processus de fabrication avec des détails arrondis."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.605Z",
+        translationSourceSignature: "6raya0",
+        translationLastError: ""
     },
     {
         id: 75,
         nome: "X Nillo",
         categoria: "Viés",
         imagem: "img - Copia/Viés/xnillovies-stik.png",
-        descricao: "Viés versátil com acabamento profissional e resistência para qualquer desafio de design e costura. X Nillo é um produto com alto nível de acabamento e grande versatilidade em sua aplicação em diversos tipos de vestuário. Adapta-se com excelência a diferentes tipos de peças e métodos de costura, assegurando um resultado de alta qualidade, resistência e durabilidade garantida, desde moda íntima a roupas esportivas e de base, sendo um material confiável para bordas e bainhas.",
-        material: "Elástico"
+        descricao: "Viés versátil com acabamento profissional e resistência para qualquer desafio de design e costura.",
+        details: "X Nillo é um produto com alto nível de acabamento e grande versatilidade em sua aplicação em diversos tipos de vestuário. Adapta-se com excelência a diferentes tipos de peças e métodos de costura, assegurando um resultado de alta qualidade, resistência e durabilidade garantida, desde moda íntima a roupas esportivas e de base, sendo um material confiável para bordas e bainhas.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Bias",
+                "material": "Elastic",
+                "descricao": "Versatile bias with professional finish and resistance for any design and sewing challenge.",
+                "details": "X Nillo is a product with a high level of finish and great versatility in its application in different types of clothing. It adapts with excellence to different types of garments and sewing methods, ensuring a result of high quality, resistance and guaranteed durability, from underwear to sportswear and basewear, being a reliable material for borders and hems."
+            },
+            "es": {
+                "categoria": "Sesgo",
+                "material": "Elástico",
+                "descricao": "Sesgo versátil con acabado profesional y resistencia para cualquier reto de diseño y costura.",
+                "details": "X Nillo es un producto con un alto nivel de acabado y gran versatilidad en su aplicación en diferentes tipos de ropa. Se adapta con excelencia a distintos tipos de prendas y métodos de costura, asegurando un resultado de alta calidad, resistencia y durabilidad garantizada, desde ropa interior hasta ropa deportiva y base, siendo un material fiable para bordes y bajos."
+            },
+            "fr": {
+                "categoria": "Biais",
+                "material": "Élastique",
+                "descricao": "Biais polyvalent avec finition professionnelle et résistance pour tout défi de design et de couture.",
+                "details": "X Nillo est un produit à la finition élevée et à une grande polyvalence dans son application sur différents types de vêtements. Il s’adapte avec excellence à différents types de vêtements et de méthodes de couture, garantissant un résultat de haute qualité, résistance et durabilité garantie, des sous-vêtements aux vêtements de sport et basewears, étant un matériau fiable pour les bordures et les ourlets."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.606Z",
+        translationSourceSignature: "18aur1l",
+        translationLastError: ""
     },
-    // Novos produtos adicionados - Personalizados (IDs 76 a 79)
     {
         id: 76,
         nome: "Cleide",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/cleide-stik.png",
-        descricao: "O equilíbrio perfeito entre suporte estrutural e conforto em uma peça totalmente personalizada para sua marca. Cleide é um elástico customizado com elasticidade cuidadosamente balanceada e uniforme, projetada para oferecer segurança inabalável e bem-estar durante o uso prolongado. É ideal para uso em sutiãs e vestuário que exigem um suporte confiável e um ajuste que se mantenha estável, com a forte e marcante identidade visual da sua marca em evidência no acabamento, garantindo qualidade técnica, estilo e longevidade do design.",
-        material: "Elástico"
+        descricao: "O equilíbrio perfeito entre suporte estrutural e conforto em uma peça totalmente personalizada para sua marca.",
+        details: "Cleide é um elástico customizado com elasticidade cuidadosamente balanceada e uniforme, projetada para oferecer segurança inabalável e bem-estar durante o uso prolongado. É ideal para uso em sutiãs e vestuário que exigem um suporte confiável e um ajuste que se mantenha estável, com a forte e marcante identidade visual da sua marca em evidência no acabamento, garantindo qualidade técnica, estilo e longevidade do design.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "The perfect balance of structural support and comfort in a piece that's fully customized for your brand.",
+                "details": "Cleide is a custom elastic band with carefully balanced and uniform elasticity, designed to offer unwavering safety and well-being during prolonged use. It is ideal for use in bras and apparel that require reliable support and a fit that remains stable, with the strong and striking visual identity of your brand in evidence in the finish, ensuring technical quality, style and longevity of the design."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "El equilibrio perfecto entre soporte estructural y comodidad en una pieza totalmente personalizada para tu marca.",
+                "details": "Cleide es una goma elástica personalizada con una elasticidad cuidadosamente equilibrada y uniforme, diseñada para ofrecer seguridad y bienestar inquebrantables durante un uso prolongado. Es ideal para su uso en sujetadores y prendas que requieren un soporte fiable y un ajuste estable, con la identidad visual fuerte y llamativa de tu marca reflejada en el acabado, garantizando la calidad técnica, el estilo y la longevidad del diseño."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Le parfait équilibre entre soutien structurel et confort dans une pièce entièrement personnalisée pour votre marque.",
+                "details": "Cleide est un élastique sur mesure avec une élasticité soigneusement équilibrée et uniforme, conçu pour offrir une sécurité et un bien-être inébranlables lors d’un usage prolongé. Il est idéal pour les soutiens-gorge et vêtements nécessitant un soutien fiable et un ajustement stable, avec l’identité visuelle forte et frappante de votre marque visible dans la finition, garantissant la qualité technique, le style et la longévité du design."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.606Z",
+        translationSourceSignature: "ddz5v1",
+        translationLastError: ""
     },
     {
         id: 77,
         nome: "Dila",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/dila-stik.png",
-        descricao: "Personalização macia, toque suave e alta resistência para o desgaste do dia a dia. Dila é o elástico personalizado, macio e extremamente resistente ao desgaste, ao atrito e à fadiga do material, perfeito para peças íntimas de uso contínuo. Apresenta excelente fixação em reguladores, o que garante um ajuste preciso, duradouro e confortável, acompanhando o movimento do corpo sem ceder. É a escolha técnica para quem busca unir conforto suave, alta performance e a exclusividade da sua marca na alça de sustentação.",
-        material: "Elástico"
+        descricao: "Personalização macia, toque suave e alta resistência para o desgaste do dia a dia.",
+        details: "Dila é o elástico personalizado, macio e extremamente resistente ao desgaste, ao atrito e à fadiga do material, perfeito para peças íntimas de uso contínuo. Apresenta excelente fixação em reguladores, o que garante um ajuste preciso, duradouro e confortável, acompanhando o movimento do corpo sem ceder. É a escolha técnica para quem busca unir conforto suave, alta performance e a exclusividade da sua marca na alça de sustentação.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Soft customization, soft touch and high resistance for daily wear.",
+                "details": "Dila is the custom elastic, soft and extremely resistant to wear, friction and fatigue of the material, perfect for underwear of continuous use. It has excellent fixation in regulators, which guarantees a precise, long-lasting and comfortable fit, following the movement of the body without giving in. It is the technical choice for those looking to combine soft comfort, high performance and the exclusivity of their brand in the support strap."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Personalización suave, tacto suave y alta resistencia para el uso diario.",
+                "details": "Dila es el elástico personalizado, suave y extremadamente resistente al desgaste, la fricción y la fatiga del material, perfecto para ropa interior de uso continuo. Tiene una excelente fijación en reguladores, lo que garantiza un ajuste preciso, duradero y cómodo, siguiendo el movimiento del cuerpo sin ceder. Es la opción técnica para quienes buscan combinar confort suave, alto rendimiento y la exclusividad de su marca en la correa de soporte."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Personnalisation douce, toucher doux et haute résistance au quotidien.",
+                "details": "Dila est un élastique sur mesure, doux et extrêmement résistant à l’usure, à la friction et à la fatigue du matériau, parfait pour des sous-vêtements à usage continu. Il possède une excellente fixation dans les régulateurs, garantissant un ajustement précis, durable et confortable, suivant le mouvement du corps sans céder. C’est le choix technique pour ceux qui souhaitent combiner confort doux, haute performance et exclusivité de leur marque dans la sangle de soutien."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.606Z",
+        translationSourceSignature: "1g875i0",
+        translationLastError: ""
     },
     {
         id: 78,
         nome: "Listras",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/listraspersoanlisada-stik.png",
-        descricao: "Seu design listrado exclusivo com a nossa inquestionável qualidade técnica, durabilidade e sofisticação. Este é o elástico totalmente personalizado com um visual listrado diferenciado, moderno e com alta durabilidade de padrão e cor. Ele adiciona um toque de design sofisticado e único aos cós e acabamentos, mantendo o desempenho elástico superior, a resistência e a qualidade esperada da linha premium, garantindo que a peça se destaque pela estética, longevidade do material e excelente retorno elástico.",
-        material: "Elástico"
+        descricao: "Seu design listrado exclusivo com a nossa inquestionável qualidade técnica, durabilidade e sofisticação.",
+        details: "Este é o elástico totalmente personalizado com um visual listrado diferenciado, moderno e com alta durabilidade de padrão e cor. Ele adiciona um toque de design sofisticado e único aos cós e acabamentos, mantendo o desempenho elástico superior, a resistência e a qualidade esperada da linha premium, garantindo que a peça se destaque pela estética, longevidade do material e excelente retorno elástico.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Its exclusive striped design with our unquestionable technical quality, durability and sophistication.",
+                "details": "This is the fully customized elastic band with a differentiated, modern striped look and with high pattern and color durability. It adds a touch of sophisticated and unique design to the waistbands and finishes, maintaining the superior elastic performance, resistance and quality expected from the premium line, ensuring that the piece stands out for its aesthetics, longevity of the material and excellent elastic return."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Su diseño exclusivo a rayas con nuestra indiscutible calidad técnica, durabilidad y sofisticación.",
+                "details": "Esta es la banda elástica totalmente personalizada con un aspecto diferenciado y moderno a rayas y alta durabilidad en patrones y colores. Añade un toque de diseño sofisticado y único a las cinturas y acabados, manteniendo el rendimiento elástico superior, la resistencia y la calidad esperados de la línea premium, asegurando que la pieza destaque por su estética, longevidad del material y excelente retorno elástico."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Son design rayé exclusif avec notre qualité technique, durabilité et sophistication incontestables.",
+                "details": "Il s’agit d’un élastique entièrement personnalisé, avec un look rayé moderne et différencié, et une grande durabilité en motifs et couleurs. Il ajoute une touche de design sophistiqué et unique aux ceintures et finitions, conservant la performance élastique supérieure, la résistance et la qualité attendues de la gamme premium, garantissant que la pièce se démarque par son esthétique, sa longévité du matériau et son excellent retour élastique."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.606Z",
+        translationSourceSignature: "1jovq9q",
+        translationLastError: ""
     },
     {
         id: 79,
         nome: "Cintarela",
         categoria: "Personalizados",
         imagem: "img - Copia/Personalizados/cintarelapremium-stik.png",
-        descricao: "Modelagem precisa, alta compressão e a identidade da sua marca em destaque e total exclusividade. A versão personalizada do Cintarela garante suporte firme, conforto e um ajuste preciso em modeladores e vestuário de compressão. Sua construção robusta e de alta tecnologia mantém a compressão necessária e a forma da peça por um longo período de tempo, com um toque exclusivo da sua personalização, valorizando a silhueta, o design com excelência e a durabilidade estrutural da roupa.",
-        material: "Elástico"
-    },
+        descricao: "Modelagem precisa, alta compressão e a identidade da sua marca em destaque e total exclusividade.",
+        details: "A versão personalizada do Cintarela garante suporte firme, conforto e um ajuste preciso em modeladores e vestuário de compressão. Sua construção robusta e de alta tecnologia mantém a compressão necessária e a forma da peça por um longo período de tempo, com um toque exclusivo da sua personalização, valorizando a silhueta, o design com excelência e a durabilidade estrutural da roupa.",
+        material: "Elástico",
+        i18n: {
+            "en": {
+                "categoria": "Personalized",
+                "material": "Elastic",
+                "descricao": "Precise modeling, high compression and your brand identity in the spotlight and total exclusivity.",
+                "details": "The customized version of the Cintarela guarantees firm support, comfort and a precise fit in shapewear and compression garments. Its robust and high-tech construction maintains the necessary compression and the shape of the garment for a long period of time, with an exclusive touch of its customization, enhancing the silhouette, the design with excellence and the structural durability of the garment."
+            },
+            "es": {
+                "categoria": "Personalizado",
+                "material": "Elástico",
+                "descricao": "Modelado preciso, alta compresión y tu identidad de marca en el centro de atención y total exclusividad.",
+                "details": "La versión personalizada de la Cintarela garantiza un soporte firme, comodidad y un ajuste preciso en prendas modeladas y de compresión. Su construcción robusta y de alta tecnología mantiene la compresión y la forma necesarias durante mucho tiempo, con un toque exclusivo de personalización, realzando la silueta, el diseño con excelencia y la durabilidad estructural de la prenda."
+            },
+            "fr": {
+                "categoria": "Personnalisé",
+                "material": "Élastique",
+                "descricao": "Mannequinat précis, forte compression, votre identité de marque sous les projecteurs et exclusivité totale.",
+                "details": "La version personnalisée de la Cintarela garantit un soutien ferme, du confort et un ajustement précis dans les vêtements shapewear et compression. Sa construction robuste et high-tech maintient la compression nécessaire et la forme du vêtement sur une longue période, avec une touche exclusive de personnalisation, mettant en valeur la silhouette, le design avec excellence et la durabilité structurelle du vêtement."
+            }
+        },
+        translationStatus: "published",
+        translationUpdatedAt: "2026-09-10T18:33:57.606Z",
+        translationSourceSignature: "124gkbv",
+        translationLastError: ""
+    }
 ];
 const produtosPadrao = produtos.map(produto => ({ ...produto }));
 
