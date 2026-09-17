@@ -3510,10 +3510,47 @@ const siteContentStore = (() => {
         { image: 'img/optimized/imagens-novas/banners-02.jpg', mobileImage: 'img/optimized/imagens-novas/banners-02-mobile.jpg', alt: 'Banner institucional STIK 02' },
         { image: 'img/optimized/imagens-novas/banners-03.jpg', mobileImage: 'img/optimized/imagens-novas/banners-03-mobile.jpg', alt: 'Banner institucional STIK 03' }
     ];
+    const localizedHeroBannerImageGroups = HERO_BANNER_IMAGES.map((item, index) => {
+        const bannerNumber = String(index + 1).padStart(2, '0');
+        return {
+            pt: { ...item },
+            en: { image: `img/optimized/imagens-novas/banners-${bannerNumber}-en.jpg`, mobileImage: `img/optimized/imagens-novas/banners-${bannerNumber}-en-mobile.jpg`, alt: `STIK institutional banner ${bannerNumber}` },
+            es: { image: `img/optimized/imagens-novas/banners-${bannerNumber}-es.jpg`, mobileImage: `img/optimized/imagens-novas/banners-${bannerNumber}-es-mobile.jpg`, alt: `Banner institucional STIK ${bannerNumber}` },
+            fr: { image: `img/optimized/imagens-novas/banners-${bannerNumber}-fr.jpg`, mobileImage: `img/optimized/imagens-novas/banners-${bannerNumber}-fr-mobile.jpg`, alt: `Banniere institutionnelle STIK ${bannerNumber}` }
+        };
+    });
+    const localizedHeroBannerImagesByPath = localizedHeroBannerImageGroups.reduce((map, group) => {
+        Object.values(group).forEach(item => {
+            if (item.image) map[item.image] = group;
+            if (item.mobileImage) map[item.mobileImage] = group;
+        });
+        return map;
+    }, {});
     const HERO_BANNER_IMAGE_ALIASES = {
         'img/Imagens novas/banners-01.jpg': 'img/optimized/imagens-novas/banners-01.jpg',
+        'img/Imagens novas/banners-01-ingles.jpg': 'img/optimized/imagens-novas/banners-01-en.jpg',
+        'img/Imagens novas/banners-01-espanhol.jpg': 'img/optimized/imagens-novas/banners-01-es.jpg',
+        'img/Imagens novas/banners-01-frances.jpg': 'img/optimized/imagens-novas/banners-01-fr.jpg',
+        'img/Imagens novas/banners-01-mobile.png': 'img/optimized/imagens-novas/banners-01-mobile.jpg',
+        'img/Imagens novas/banners-01-mobile-ingles.png': 'img/optimized/imagens-novas/banners-01-en-mobile.jpg',
+        'img/Imagens novas/banners-01-mobile-espanhol.png': 'img/optimized/imagens-novas/banners-01-es-mobile.jpg',
+        'img/Imagens novas/banners-01-mobile-frances.png': 'img/optimized/imagens-novas/banners-01-fr-mobile.jpg',
         'img/Imagens novas/banners-02.jpg': 'img/optimized/imagens-novas/banners-02.jpg',
+        'img/Imagens novas/banners-02-ingles.png': 'img/optimized/imagens-novas/banners-02-en.jpg',
+        'img/Imagens novas/banners-02-espanhol.png': 'img/optimized/imagens-novas/banners-02-es.jpg',
+        'img/Imagens novas/banners-02-frances.png': 'img/optimized/imagens-novas/banners-02-fr.jpg',
+        'img/Imagens novas/banners-02-mobile.png': 'img/optimized/imagens-novas/banners-02-mobile.jpg',
+        'img/Imagens novas/banners-02-mobile-ingles.png': 'img/optimized/imagens-novas/banners-02-en-mobile.jpg',
+        'img/Imagens novas/banners-02-mobile-espanhol.png': 'img/optimized/imagens-novas/banners-02-es-mobile.jpg',
+        'img/Imagens novas/banners-02-mobile-frances.png': 'img/optimized/imagens-novas/banners-02-fr-mobile.jpg',
         'img/Imagens novas/banners-03.jpg': 'img/optimized/imagens-novas/banners-03.jpg',
+        'img/Imagens novas/banners-03-ingles.png': 'img/optimized/imagens-novas/banners-03-en.jpg',
+        'img/Imagens novas/banners-03-espanhol.png': 'img/optimized/imagens-novas/banners-03-es.jpg',
+        'img/Imagens novas/banners-03-frances.png': 'img/optimized/imagens-novas/banners-03-fr.jpg',
+        'img/Imagens novas/banners-03-mobile.png': 'img/optimized/imagens-novas/banners-03-mobile.jpg',
+        'img/Imagens novas/banners-03-mobile-ingles.png': 'img/optimized/imagens-novas/banners-03-en-mobile.jpg',
+        'img/Imagens novas/banners-03-mobile-espanhol.png': 'img/optimized/imagens-novas/banners-03-es-mobile.jpg',
+        'img/Imagens novas/banners-03-mobile-frances.png': 'img/optimized/imagens-novas/banners-03-fr-mobile.jpg',
         'img/optimized/hero-banner-01.jpg': 'img/optimized/imagens-novas/banners-01.jpg',
         'img/optimized/hero-banner-02.jpg': 'img/optimized/imagens-novas/banners-02.jpg',
         'img/optimized/hero-banner-03.jpg': 'img/optimized/imagens-novas/banners-03.jpg'
@@ -3553,8 +3590,17 @@ const siteContentStore = (() => {
     };
     const optimizedMobileImagesByDesktop = {
         'img/optimized/imagens-novas/banners-01.jpg': 'img/optimized/imagens-novas/banners-01-mobile.jpg',
+        'img/optimized/imagens-novas/banners-01-en.jpg': 'img/optimized/imagens-novas/banners-01-en-mobile.jpg',
+        'img/optimized/imagens-novas/banners-01-es.jpg': 'img/optimized/imagens-novas/banners-01-es-mobile.jpg',
+        'img/optimized/imagens-novas/banners-01-fr.jpg': 'img/optimized/imagens-novas/banners-01-fr-mobile.jpg',
         'img/optimized/imagens-novas/banners-02.jpg': 'img/optimized/imagens-novas/banners-02-mobile.jpg',
+        'img/optimized/imagens-novas/banners-02-en.jpg': 'img/optimized/imagens-novas/banners-02-en-mobile.jpg',
+        'img/optimized/imagens-novas/banners-02-es.jpg': 'img/optimized/imagens-novas/banners-02-es-mobile.jpg',
+        'img/optimized/imagens-novas/banners-02-fr.jpg': 'img/optimized/imagens-novas/banners-02-fr-mobile.jpg',
         'img/optimized/imagens-novas/banners-03.jpg': 'img/optimized/imagens-novas/banners-03-mobile.jpg',
+        'img/optimized/imagens-novas/banners-03-en.jpg': 'img/optimized/imagens-novas/banners-03-en-mobile.jpg',
+        'img/optimized/imagens-novas/banners-03-es.jpg': 'img/optimized/imagens-novas/banners-03-es-mobile.jpg',
+        'img/optimized/imagens-novas/banners-03-fr.jpg': 'img/optimized/imagens-novas/banners-03-fr-mobile.jpg',
         'img/optimized/imagens-novas/moda-intima.jpg': 'img/optimized/imagens-novas/moda-intima-mobile.jpg',
         'img/optimized/imagens-novas/universo-masculino.jpg': 'img/optimized/imagens-novas/universo-masculino-mobile.jpg',
         'img/optimized/imagens-novas/moda-esportiva.jpg': 'img/optimized/imagens-novas/moda-esportiva-mobile.jpg',
@@ -3665,11 +3711,12 @@ const siteContentStore = (() => {
 
     function normalizeImageItem(item = {}, fallback = {}) {
         const rawImage = item.image || item.src || fallback.image || '';
-        const image = optimizedImageAliases[rawImage] || rawImage;
+        const image = HERO_BANNER_IMAGE_ALIASES[rawImage] || optimizedImageAliases[rawImage] || rawImage;
         const rawMobileImage = item.mobileImage || item.mobileSrc || fallback.mobileImage || optimizedMobileImagesByDesktop[image] || '';
+        const mobileImage = HERO_BANNER_IMAGE_ALIASES[rawMobileImage] || optimizedImageAliases[rawMobileImage] || rawMobileImage;
         return {
             image: cleanAsset(image, fallback.image || ''),
-            mobileImage: cleanAsset(rawMobileImage, ''),
+            mobileImage: cleanAsset(mobileImage, ''),
             alt: cleanText(item.alt || fallback.alt || 'Imagem Stik', 120)
         };
     }
@@ -3677,11 +3724,25 @@ const siteContentStore = (() => {
     function normalizeHeroBannerImageItem(item = {}, fallback = {}) {
         const rawImage = item.image || item.src || fallback.image || '';
         const image = HERO_BANNER_IMAGE_ALIASES[rawImage] || optimizedImageAliases[rawImage] || rawImage;
+        const rawMobileImage = item.mobileImage || item.mobileSrc || fallback.mobileImage || optimizedMobileImagesByDesktop[image] || '';
+        const mobileImage = HERO_BANNER_IMAGE_ALIASES[rawMobileImage] || optimizedImageAliases[rawMobileImage] || rawMobileImage;
         return normalizeImageItem({
             ...item,
             image,
-            mobileImage: item.mobileImage || item.mobileSrc || fallback.mobileImage || optimizedMobileImagesByDesktop[image] || ''
+            mobileImage
         }, fallback);
+    }
+
+    function localizeHeroBannerImageItem(item = {}) {
+        const group = localizedHeroBannerImagesByPath[item.image] || localizedHeroBannerImagesByPath[item.mobileImage];
+        if (!group) return item;
+        const localized = group[normalizeStikLanguage(stikCurrentLanguage)] || group[STIK_DEFAULT_LANGUAGE];
+        return {
+            ...item,
+            image: localized.image,
+            mobileImage: localized.mobileImage,
+            alt: localized.alt || item.alt
+        };
     }
 
     function normalizeCatalogCarouselImageItem(item = {}, fallback = {}, index = 0) {
@@ -3773,6 +3834,7 @@ const siteContentStore = (() => {
                 : HERO_BANNER_IMAGES;
         const slideshowImages = slideshowSource
             .map((item, index) => normalizeHeroBannerImageItem(item, HERO_BANNER_IMAGES[index] || HERO_BANNER_IMAGES[0]))
+            .map(localizeHeroBannerImageItem)
             .filter(item => item.image)
             .slice(0, 12);
         const hasHeroConfig = Boolean(home.hero && Object.keys(hero).length);
