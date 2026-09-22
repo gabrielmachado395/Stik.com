@@ -244,7 +244,7 @@ app.use((req, res, next) => {
     return res.status(404).send('Not found');
   }
 
-  if (normalizedPath === '/dados_capturados' || normalizedPath === '/dados_capturados.html') {
+  if (normalizedPath === '/dados_capturados' || normalizedPath === '/dados_capturados.html' || normalizedPath === '/dados-capturados') {
     if (!hasDebugAccess(req)) {
       return res.status(403).send('Painel de insights de visitantes disponivel apenas em ambiente local ou com token de debug.');
     }
@@ -289,6 +289,59 @@ app.use('/api/translate', createRateLimiter({
   max: 20,
   message: 'Muitas solicitacoes de traducao. Tente novamente em instantes.'
 }));
+
+const FRIENDLY_PAGE_ALIASES = new Map([
+  ['/relatorio-igualdade', 'relatorio_igualdade.html'],
+  ['/fale-conosco', 'fale_conosco.html'],
+  ['/politica-de-privacidade', 'politica_de_privacidade.html'],
+  ['/termos-de-uso', 'termos_de_uso.html'],
+  ['/dados-capturados', 'dados_capturados.html']
+]);
+
+const LEGACY_PAGE_REDIRECTS = new Map([
+  ['/relatorio_igualdade.html', '/relatorio-igualdade'],
+  ['/fale_conosco.html', '/fale-conosco'],
+  ['/politica_de_privacidade.html', '/politica-de-privacidade'],
+  ['/termos_de_uso.html', '/termos-de-uso'],
+  ['/dados_capturados.html', '/dados-capturados']
+]);
+
+const COMPONENT_HTML_PATHS = new Set(['/header.html', '/footer.html', '/sidebar.html', '/catalogo.html']);
+
+app.use((req, res, next) => {
+  if (!['GET', 'HEAD'].includes(req.method)) return next();
+
+  const requestUrl = new URL(req.originalUrl, `http://${req.headers.host || 'localhost'}`);
+  const pathname = requestUrl.pathname;
+
+  if (pathname === '/index.html') {
+    return res.redirect(301, `/${requestUrl.search}${requestUrl.hash}`);
+  }
+
+  const legacyRedirect = LEGACY_PAGE_REDIRECTS.get(pathname);
+  if (legacyRedirect) {
+    return res.redirect(301, `${legacyRedirect}${requestUrl.search}${requestUrl.hash}`);
+  }
+
+  if (/\.html$/i.test(pathname) && !COMPONENT_HTML_PATHS.has(pathname)) {
+    return res.redirect(301, `${pathname.replace(/\.html$/i, '')}${requestUrl.search}${requestUrl.hash}`);
+  }
+
+  const aliasFile = FRIENDLY_PAGE_ALIASES.get(pathname.replace(/\/+$/, ''));
+  if (aliasFile) {
+    return res.sendFile(path.join(__dirname, aliasFile));
+  }
+
+  if (!path.extname(pathname)) {
+    const rootDir = path.resolve(__dirname);
+    const htmlPath = path.resolve(rootDir, `${pathname.replace(/^\/+/, '')}.html`);
+    if (htmlPath.startsWith(`${rootDir}${path.sep}`) && fs.existsSync(htmlPath)) {
+      return res.sendFile(htmlPath);
+    }
+  }
+
+  return next();
+});
 
 app.use(express.static(path.join(__dirname), { dotfiles: 'deny' }));
 
@@ -1586,7 +1639,7 @@ app.post('/api/send-catalog', async (req, res) => {
     }
 
     try {
-    const catalogUrl = escapeHtml(normalizePublicUrl(process.env.CATALOG_URL || '/catalogo.html', '/catalogo.html'));
+    const catalogUrl = escapeHtml(normalizePublicUrl(process.env.CATALOG_URL || '/catalogo', '/catalogo'));
     const html = `<p>Olá,</p><p>Obrigado pelo interesse. Clique no link abaixo para baixar nosso catálogo.</p><p><a href="${catalogUrl}">Baixar Catálogo</a></p><p>Atenciosamente,<br/>Stik</p>`;
 
     const result = await sendEmail({

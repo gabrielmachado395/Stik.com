@@ -1,0 +1,41 @@
+RewriteEngine On
+
+# Remove trailing slash from extensionless page URLs.
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+# Canonical page URLs.
+RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+RewriteRule ^index\.html$ / [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+relatorio_igualdade\.html[\s?] [NC]
+RewriteRule ^relatorio_igualdade\.html$ /relatorio-igualdade [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+fale_conosco\.html[\s?] [NC]
+RewriteRule ^fale_conosco\.html$ /fale-conosco [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+politica_de_privacidade\.html[\s?] [NC]
+RewriteRule ^politica_de_privacidade\.html$ /politica-de-privacidade [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+termos_de_uso\.html[\s?] [NC]
+RewriteRule ^termos_de_uso\.html$ /termos-de-uso [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+dados_capturados\.html[\s?] [NC]
+RewriteRule ^dados_capturados\.html$ /dados-capturados [R=301,L]
+
+# Remove .html from every other page URL.
+RewriteCond %{REQUEST_URI} !^/(header|footer|sidebar|catalogo)\.html$ [NC]
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
+RewriteRule ^(.+)\.html$ /$1 [R=301,L,NE]
+
+# Friendly aliases for pages whose filenames still use underscores.
+RewriteRule ^relatorio-igualdade$ relatorio_igualdade.html [L]
+RewriteRule ^fale-conosco$ fale_conosco.html [L]
+RewriteRule ^politica-de-privacidade$ politica_de_privacidade.html [L]
+RewriteRule ^termos-de-uso$ termos_de_uso.html [L]
+RewriteRule ^dados-capturados$ dados_capturados.html [L]
+
+# Serve extensionless URLs from the matching .html file.
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)$ $1.html [L]

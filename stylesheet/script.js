@@ -660,7 +660,7 @@ function getDefaultStikConsent() {
 }
 
 function isStikAnalyticsPage() {
-    return /\/dados_capturados(\.html)?$/.test(window.location.pathname.replace(/\/+$/, ''));
+    return /\/(?:dados_capturados|dados-capturados)(\.html)?$/.test(window.location.pathname.replace(/\/+$/, ''));
 }
 
 function isStikAdminPage() {
@@ -681,7 +681,7 @@ function isStikLocalPreviewHost() {
 
 function removeStikAdminLinksOnPublicHost(root = document) {
     if (isStikLocalPreviewHost()) return;
-    root.querySelectorAll?.('a[href="admin.html"], .footer-admin-link').forEach(link => link.remove());
+    root.querySelectorAll?.('a[href="admin.html"], a[href="/admin"], .footer-admin-link').forEach(link => link.remove());
 }
 
 function guardStikInternalPreviewPage() {
@@ -986,7 +986,7 @@ function initStikDataBanner(options = {}) {
     banner.innerHTML = `
         <div class="data-consent-copy">
             <strong>${getStikMessage('cookies.title', 'Uso de cookies')}</strong>
-            <p>${getStikMessage('cookies.bodyHtml', 'Usamos cookies e tecnologias semelhantes para melhorar sua experiência. Mais informações podem ser encontradas em nossa <a href="politica_de_privacidade.html">Política de Privacidade</a>.')}</p>
+            <p>${getStikMessage('cookies.bodyHtml', 'Usamos cookies e tecnologias semelhantes para melhorar sua experiência. Mais informações podem ser encontradas em nossa <a href="/politica-de-privacidade">Política de Privacidade</a>.')}</p>
         </div>
         <div class="data-consent-actions">
             <button type="button" class="data-consent-primary" data-consent-action="accept">${getStikMessage('cookies.accept', 'Prosseguir')}</button>
@@ -4642,7 +4642,7 @@ function highlightCurrentSidebarLink() {
         activeRoute = 'blog';
     } else if (/\/institucional(\.html)?$/.test(pathname)) {
         activeRoute = 'institucional';
-    } else if (/\/fale_conosco(\.html)?$/.test(pathname)) {
+    } else if (/\/(?:fale_conosco|fale-conosco)(\.html)?$/.test(pathname)) {
         activeRoute = 'contato';
     } else if (
         (pathname === '' || pathname === '/' || pathname.endsWith('index.html')) &&
@@ -4859,7 +4859,7 @@ function getLocalizedProduct(product) {
 function criarProdutoCard(produto) {
     const produtoCard = document.createElement('a'); 
     produtoCard.classList.add('produto-card');
-    produtoCard.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
+    produtoCard.href = `/produto?id=${encodeURIComponent(produto.id)}`;
     const categoryName = getLocalizedCategoryName(produto.categoria);
     produtoCard.innerHTML = `
         ${optimizedImageMarkup(produto.imagem, categoryName)}
@@ -4872,7 +4872,7 @@ function criarCategoriaCard(categoria, imagemRepresentativa) {
     const card = document.createElement('a');
     const displayCategory = getLocalizedCategoryName(categoria);
     card.classList.add('produto-card');
-    card.href = `categoria.html?categoria=${encodeURIComponent(categoria)}`;
+    card.href = `/categoria?categoria=${encodeURIComponent(categoria)}`;
     card.innerHTML = `
         ${optimizedImageMarkup(imagemRepresentativa, displayCategory)}
         <h3>${escapeHtml(displayCategory)}</h3>
@@ -4950,7 +4950,7 @@ function renderAdminSelectedCategoryProducts() {
                     <div class="admin-item-meta">${renderAdminStatusBadge(statusMeta)}</div>
                 </div>
                 <div class="admin-list-actions">
-                    <a class="admin-icon-btn" href="produto.html?id=${escapeAttribute(encodeURIComponent(product.id))}" target="_blank" rel="noopener" aria-label="Abrir produto">
+                    <a class="admin-icon-btn" href="/produto?id=${escapeAttribute(encodeURIComponent(product.id))}" target="_blank" rel="noopener" aria-label="Abrir produto">
                         <i class="fas fa-external-link-alt"></i>
                     </a>
                     <button type="button" class="admin-icon-btn" data-admin-edit-product-from-category="${escapeAttribute(product.id)}" aria-label="Editar produto">
@@ -5040,7 +5040,7 @@ function renderDynamicSidebarCategories() {
             const displayCategory = getLocalizedCategoryName(category, productStore.listProducts());
             return `
             <li>
-                <a href="categoria.html?categoria=${encodeURIComponent(category)}" class="sidebar-link" data-sidebar-category="${escapeAttribute(category)}">
+                <a href="/categoria?categoria=${encodeURIComponent(category)}" class="sidebar-link" data-sidebar-category="${escapeAttribute(category)}">
                     ${escapeHtml(displayCategory)}
                 </a>
             </li>
@@ -5110,7 +5110,7 @@ function inicializarPesquisa() {
                 produtosFiltrados.forEach(produto => {
                     const displayProduct = getLocalizedProduct(produto);
                     const item = document.createElement('a');
-                    item.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
+                    item.href = `/produto?id=${encodeURIComponent(produto.id)}`;
                     item.classList.add('search-result-item');
                     item.innerHTML = `
                         ${optimizedImageMarkup(produto.imagem, displayProduct.displayNome)}
@@ -5941,7 +5941,7 @@ function initMicroInteractions() {
 
 // Função que direciona para a tela de criação de artigos do blog.
 function createNewArticle() {
-    window.location.href = 'create-article.html';
+    window.location.href = '/create-article';
 }
 
 const BLOG_SCREEN_ARTICLES = [
@@ -5959,10 +5959,10 @@ const BLOG_SCREEN_ARTICLES = [
         blocos: [
             { tipo: 'lead', html: 'Do sofá para as ruas, explore a tendência loungewear e confira algumas dicas valiosas para acertar nas suas coleções!' },
             { tipo: 'paragrafo', html: 'Por muito tempo, a tendência loungewear ficou restrita ao conforto íntimo da vida doméstica. No entanto, esse cenário mudou nos últimos anos.' },
-            { tipo: 'paragrafo', html: 'Com um foco renovado no conforto, no bem-estar e na versatilidade, o <a href="blog.html">loungewear</a> evoluiu para abraçar a moda casual, tornando-se um pilar fundamental no guarda-roupa moderno.' },
+            { tipo: 'paragrafo', html: 'Com um foco renovado no conforto, no bem-estar e na versatilidade, o <a href="/blog">loungewear</a> evoluiu para abraçar a moda casual, tornando-se um pilar fundamental no guarda-roupa moderno.' },
             { tipo: 'titulo', nivel: 2, texto: 'A ascensão da tendência loungewear' },
             { tipo: 'imagem', src: 'img - Copia/thumb-blog-09-1024x683.jpg', alt: 'Referência de moda confortável', legenda: 'Ref: Envato' },
-            { tipo: 'paragrafo', html: 'A crescente adoção do <a href="blog.html">trabalho remoto</a> e a valorização do bem-estar têm redefinido o que as pessoas buscam em suas vestimentas diárias.' },
+            { tipo: 'paragrafo', html: 'A crescente adoção do <a href="/blog">trabalho remoto</a> e a valorização do bem-estar têm redefinido o que as pessoas buscam em suas vestimentas diárias.' },
             { tipo: 'titulo', nivel: 2, texto: 'Tendências atuais em loungewear' },
             { tipo: 'imagem', src: 'img - Copia/thumb-blog-19.jpg', alt: 'Paleta de tons suaves para moda íntima', legenda: 'Ref: Envato' },
             { tipo: 'titulo', nivel: 3, texto: 'Estilos híbridos e adaptação ao home office' },
@@ -5970,7 +5970,7 @@ const BLOG_SCREEN_ARTICLES = [
             { tipo: 'titulo', nivel: 3, texto: 'Tecidos sustentáveis e confortáveis' },
             { tipo: 'paragrafo', html: 'Materiais sustentáveis estão cada vez mais em voga. Além de oferecer conforto, reforçam práticas de moda consciente e valorizam a percepção da coleção.' },
             { tipo: 'titulo', nivel: 3, texto: 'Detalhes e acabamentos' },
-            { tipo: 'paragrafo', html: 'Acabamentos de alta qualidade, botões decorativos e <a href="produto.html?id=1">elásticos</a> estilizados melhoram a aparência das peças e elevam a experiência geral de uso.' },
+            { tipo: 'paragrafo', html: 'Acabamentos de alta qualidade, botões decorativos e <a href="/produto?id=1">elásticos</a> estilizados melhoram a aparência das peças e elevam a experiência geral de uso.' },
             { tipo: 'titulo', nivel: 2, texto: 'A importância do conforto' },
             { tipo: 'imagem', src: 'img - Copia/thumb-blog-20-01-1024x480.jpg', alt: 'Peça confortável com acabamento macio', legenda: 'Ref: Envato' },
             { tipo: 'paragrafo', html: 'A escolha do elástico é decisiva para garantir conforto e estética. Elásticos bem escolhidos ajudam no caimento e mantêm a forma da peça após uso e lavagens frequentes.' },
@@ -6286,7 +6286,7 @@ function renderBlogCard(article, options = {}) {
     const tags = renderBlogTags(getBlogTags(article));
 
     return `
-        <a class="${escapeAttribute(className)}" href="artigo.html?id=${encodeURIComponent(article.id)}">
+        <a class="${escapeAttribute(className)}" href="/artigo?id=${encodeURIComponent(article.id)}">
             ${optimizedImageMarkup(article.imagem, article.titulo, { loading })}
             <div class="blog-card-content">
                 <div class="blog-card-tags">${tags}</div>
@@ -6492,13 +6492,13 @@ async function displayArticles() {
         if (blogBreadcrumb) {
             blogBreadcrumb.innerHTML = isSearchMode
                 ? `
-                    <a href="index.html">Home</a>
-                    <a href="blog.html">Blog</a>
+                    <a href="/">Home</a>
+                    <a href="/blog">Blog</a>
                     <span>Busca</span>
                     <strong>${escapeHtml(searchTerm)}</strong>
                 `
                 : `
-                    <a href="index.html">Home</a>
+                    <a href="/">Home</a>
                     <span>Blog</span>
                 `;
         }
@@ -6706,7 +6706,7 @@ async function carregarArtigo() {
         if (articleContentEl) {
             articleContentEl.innerHTML = `
                 <p>Este artigo não está mais disponível ou foi removido.</p>
-                <p><a href="blog.html">Voltar para o blog</a></p>
+                <p><a href="/blog">Voltar para o blog</a></p>
             `;
         }
         return;
@@ -7345,7 +7345,7 @@ async function setupArticleForm() {
             if (action === 'preview') {
                 const saved = await saveArticle(currentStatus);
                 if (saved && saved.id) {
-                    window.open(`artigo.html?id=${encodeURIComponent(saved.id)}`, '_blank', 'noopener');
+                    window.open(`/artigo?id=${encodeURIComponent(saved.id)}`, '_blank', 'noopener');
                 }
                 return;
             }
@@ -8018,7 +8018,7 @@ function carregarDetalhesDoProduto() {
         const breadcrumbCategory = document.querySelector('.product-breadcrumb-category');
         if (breadcrumbCategory) {
             breadcrumbCategory.textContent = categoriaFormatada;
-            breadcrumbCategory.href = `categoria.html?categoria=${encodeURIComponent(categoriaOriginal)}`;
+            breadcrumbCategory.href = `/categoria?categoria=${encodeURIComponent(categoriaOriginal)}`;
         }
 
         const breadcrumbCurrent = document.querySelector('.product-breadcrumb-current');
@@ -8058,7 +8058,7 @@ function carregarDetalhesDoProduto() {
                 const relatedProduct = getLocalizedProduct(p);
                 const card = document.createElement('a');
                 card.classList.add('produto-card');
-                card.href = `produto.html?id=${encodeURIComponent(p.id)}`;
+                card.href = `/produto?id=${encodeURIComponent(p.id)}`;
                 card.innerHTML = `${optimizedImageMarkup(p.imagem, relatedProduct.displayNome)}<h3>${escapeHtml(relatedProduct.displayNome)}</h3>`;
                 grid.appendChild(card);
             });
@@ -8601,10 +8601,10 @@ async function inicializarPagina() {
     const isAdminPage = /\/admin(\.html)?$/.test(pathname);
     document.body.classList.toggle('admin-active', isAdminPage);
     const isFaqPage = /\/faq(\.html)?$/.test(pathname);
-    const isPoliticaPage = /\/politica_de_privacidade(\.html)?$/.test(pathname);
-    const isTermosPage = /\/termos_de_uso(\.html)?$/.test(pathname);
-    const isFaleConoscoPage = /\/fale_conosco(\.html)?$/.test(pathname);
-    const isDadosCapturadosPage = /\/dados_capturados(\.html)?$/.test(pathname);
+    const isPoliticaPage = /\/(?:politica_de_privacidade|politica-de-privacidade)(\.html)?$/.test(pathname);
+    const isTermosPage = /\/(?:termos_de_uso|termos-de-uso)(\.html)?$/.test(pathname);
+    const isFaleConoscoPage = /\/(?:fale_conosco|fale-conosco)(\.html)?$/.test(pathname);
+    const isDadosCapturadosPage = /\/(?:dados_capturados|dados-capturados)(\.html)?$/.test(pathname);
     if (guardStikInternalPreviewPage()) return;
 
     // Função utilitária que injeta o template da página caso ainda não esteja presente
@@ -8861,9 +8861,9 @@ async function initRecaptcha() {
         }
       } catch (err) { /* ignore */ }
     } else {
-      // não existe na página atual -> redireciona para index.html#catalogo
+      // não existe na página atual -> redireciona para /#catalogo
       // ajuste o caminho se seu index estiver em outra rota
-      window.location.href = 'index.html#catalogo';
+      window.location.href = '/#catalogo';
     }
   }, false);
 })();
@@ -9167,7 +9167,7 @@ function renderCategoriaPage() {
         itens.slice(0, visibleItemsCount).forEach(produto => {
             const displayProduct = getLocalizedProduct(produto);
             const card = document.createElement('a');
-            card.href = `produto.html?id=${encodeURIComponent(produto.id)}`;
+            card.href = `/produto?id=${encodeURIComponent(produto.id)}`;
             card.classList.add('produto-card');
 
             card.innerHTML = `
@@ -10241,7 +10241,7 @@ function renderAdminSiteContent() {
             <section class="admin-card admin-site-content-card">
                 <div class="admin-list-head">
                     <h2>Home - Hero inicial</h2>
-                    <a class="blog-editor-btn blog-editor-btn-outline" href="index.html" target="_blank" rel="noopener">
+                    <a class="blog-editor-btn blog-editor-btn-outline" href="/" target="_blank" rel="noopener">
                         <i class="fas fa-external-link-alt"></i>
                         Ver Home
                     </a>
@@ -10287,7 +10287,7 @@ function renderAdminSiteContent() {
             <section class="admin-card admin-site-content-card">
                 <div class="admin-list-head">
                     <h2>Sobre a Stik</h2>
-                    <a class="blog-editor-btn blog-editor-btn-outline" href="institucional.html" target="_blank" rel="noopener">
+                    <a class="blog-editor-btn blog-editor-btn-outline" href="/institucional" target="_blank" rel="noopener">
                         <i class="fas fa-external-link-alt"></i>
                         Ver Sobre
                     </a>
@@ -10739,7 +10739,7 @@ function renderAdminSiteContentV2() {
                 <section class="admin-card admin-site-content-card">
                     <div class="admin-list-head">
                         <h2>Hero inicial</h2>
-                        <a class="blog-editor-btn blog-editor-btn-outline" href="index.html" target="_blank" rel="noopener">
+                        <a class="blog-editor-btn blog-editor-btn-outline" href="/" target="_blank" rel="noopener">
                             <i class="fas fa-external-link-alt"></i>
                             Ver Home
                         </a>
@@ -10802,7 +10802,7 @@ function renderAdminSiteContentV2() {
                 <section class="admin-card admin-site-content-card">
                     <div class="admin-list-head">
                         <h2>Sobre a Stik</h2>
-                        <a class="blog-editor-btn blog-editor-btn-outline" href="institucional.html" target="_blank" rel="noopener">
+                        <a class="blog-editor-btn blog-editor-btn-outline" href="/institucional" target="_blank" rel="noopener">
                             <i class="fas fa-external-link-alt"></i>
                             Ver Institucional
                         </a>
